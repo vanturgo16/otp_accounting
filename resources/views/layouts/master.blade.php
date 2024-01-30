@@ -160,13 +160,13 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('transdatakas.index') }}">
                                 <i class="mdi mdi-script-text"></i>
                                 <span>Kas Transaction</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('transdatabank.index') }}">
                                 <i class="mdi mdi-script-text"></i>
                                 <span>Bank Transaction</span>
                             </a>

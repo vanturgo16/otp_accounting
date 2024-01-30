@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MstAccountCodesController;
 use App\Http\Controllers\MstAccountTypesController;
+use App\Http\Controllers\TransDataBankController;
+use App\Http\Controllers\TransDataKasController;
 
 //Route Login
 Route::get('/', [AuthController::class, 'login'])->name('login');
@@ -32,5 +34,19 @@ Route::middleware(['auth'])->group(function () {
     Route::post('accountcode/update/{id}', [MstAccountCodesController::class, 'update'])->name('accountcode.update');
     Route::post('accountcode/activate/{id}', [MstAccountCodesController::class, 'activate'])->name('accountcode.activate');
     Route::post('accountcode/deactivate/{id}', [MstAccountCodesController::class, 'deactivate'])->name('accountcode.deactivate');
+
+    //TransDataKas
+    Route::get('/transdatakas', [TransDataKasController::class, 'index'])->name('transdatakas.index');
+    Route::post('/transdatakas', [TransDataKasController::class, 'index'])->name('transdatakas.index');
+    Route::post('transdatakas/create', [TransDataKasController::class, 'store'])->name('transdatakas.store');
+    Route::post('transdatakas/update/{id}', [TransDataKasController::class, 'update'])->name('transdatakas.update');
+    Route::post('transdatakas/delete/{id}', [TransDataKasController::class, 'delete'])->name('transdatakas.delete');
+
+    //TransDataBank
+    Route::get('/transdatabank', [TransDataBankController::class, 'index'])->name('transdatabank.index');
+    Route::post('/transdatabank', [TransDataBankController::class, 'index'])->name('transdatabank.index');
+    Route::post('transdatabank/create', [TransDataBankController::class, 'store'])->name('transdatabank.store');
+    Route::post('transdatabank/update/{id}', [TransDataBankController::class, 'update'])->name('transdatabank.update');
+    Route::post('transdatabank/delete/{id}', [TransDataBankController::class, 'delete'])->name('transdatabank.delete');
 
 });
