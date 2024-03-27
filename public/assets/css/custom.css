@@ -17,3 +17,89 @@
     padding-right: 0.1rem;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.586);
 }
+.select2-container .select2-selection--single {
+    height: 39px;
+    border: 1px solid #e9e9ef;
+    border-radius: 0.25rem;
+}
+
+.select2-container--default
+    .select2-selection--single
+    .select2-selection__rendered {
+    line-height: 32px;
+    color: #495057;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+}
+
+.select2-container--default
+    .select2-selection--single
+    .select2-selection__arrow {
+    height: 32px;
+}
+
+.truncate-text {
+    white-space: normal;
+}
+.left-align {
+    text-align: left;
+}
+.text-bold {
+    font-weight: bold;
+}
+
+input[id="checkboxdt"],
+input[id="checkAllRows"] {
+    /* Add if not using autoprefixer */
+    -webkit-appearance: none;
+    /* Remove most all native input styles */
+    appearance: none;
+    /* For iOS < 15 */
+    background-color: var(--form-background);
+    /* Not removed via appearance */
+    margin: 0;
+
+    font: inherit;
+    color: currentColor;
+    width: 1.15em;
+    height: 1.15em;
+    border: 0.15em solid currentColor;
+    border-radius: 0.15em;
+    transform: translateY(-0.075em);
+
+    display: grid;
+    place-content: center;
+}
+
+input[id="checkboxdt"]::before,
+input[id="checkAllRows"]:before {
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    transform: scale(0);
+    transform-origin: bottom left;
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em var(--form-control-color);
+    /* Windows High Contrast Mode */
+    background-color: CanvasText;
+}
+
+input[id="checkboxdt"]:checked::before,
+input[id="checkAllRows"]:checked::before {
+    transform: scale(1);
+}
+
+input[id="checkboxdt"]:focus,
+input[id="checkAllRows"]:focus {
+    outline: max(2px, 0.15em) solid currentColor;
+    outline-offset: max(2px, 0.15em);
+}
+
+input[id="checkboxdt"]:disabled,
+input[id="checkAllRows"]:disabled {
+    --form-control-color: var(--form-control-disabled);
+
+    color: var(--form-control-disabled);
+    cursor: not-allowed;
+}

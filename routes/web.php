@@ -49,4 +49,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('transdatabank/update/{id}', [TransDataBankController::class, 'update'])->name('transdatabank.update');
     Route::post('transdatabank/delete/{id}', [TransDataBankController::class, 'delete'])->name('transdatabank.delete');
 
+    //SalesInvoice
+    Route::get('/salesinvoice', [TransDataBankController::class, 'index'])->name('transdatabank.index');
+    Route::post('/salesinvoice', [TransDataBankController::class, 'index'])->name('transdatabank.index');
+    Route::post('salesinvoice/create', [TransDataBankController::class, 'store'])->name('transdatabank.store');
+    Route::post('salesinvoice/update/{id}', [TransDataBankController::class, 'update'])->name('transdatabank.update');
+    Route::post('salesinvoice/delete/{id}', [TransDataBankController::class, 'delete'])->name('transdatabank.delete');
+
 });

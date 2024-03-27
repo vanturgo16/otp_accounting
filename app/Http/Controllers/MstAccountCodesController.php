@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -25,6 +26,8 @@ class MstAccountCodesController extends Controller
         $startdate = $request->get('startdate');
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
+
+        $acctypes = MstAccountTypes::where('is_active', 1)->get();
 
         $datas = MstAccountCodes::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
@@ -53,17 +56,26 @@ class MstAccountCodesController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
-
-        $acctypes = MstAccountTypes::where('is_active', 1)->get();
+        // $datas = $datas->paginate(10);
+        
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($acctypes){
+                    return view('accountcode.action', compact('data', 'acctypes'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Account Code';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Account Code');
 
         return view('accountcode.index',compact('datas', 'acctypes',
             'account_code', 'account_name', 'id_master_account_types', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
