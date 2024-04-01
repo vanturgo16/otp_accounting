@@ -23,17 +23,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/accounttype', [MstAccountTypesController::class, 'index'])->name('accounttype.index');
     Route::post('/accounttype', [MstAccountTypesController::class, 'index'])->name('accounttype.index');
     Route::post('accounttype/create', [MstAccountTypesController::class, 'store'])->name('accounttype.store');
+    Route::get('accounttype/edit/{id}', [MstAccountTypesController::class, 'edit'])->name('accounttype.edit');
     Route::post('accounttype/update/{id}', [MstAccountTypesController::class, 'update'])->name('accounttype.update');
     Route::post('accounttype/activate/{id}', [MstAccountTypesController::class, 'activate'])->name('accounttype.activate');
     Route::post('accounttype/deactivate/{id}', [MstAccountTypesController::class, 'deactivate'])->name('accounttype.deactivate');
+    Route::post('accounttype/delete/{id}', [MstAccountTypesController::class, 'delete'])->name('accounttype.delete');
+    Route::post('accounttype/deleteselected', [MstAccountTypesController::class, 'deleteselected'])->name('accounttype.deleteselected');
     
     //AccountCode
     Route::get('/accountcode', [MstAccountCodesController::class, 'index'])->name('accountcode.index');
     Route::post('/accountcode', [MstAccountCodesController::class, 'index'])->name('accountcode.index');
     Route::post('accountcode/create', [MstAccountCodesController::class, 'store'])->name('accountcode.store');
+    Route::get('accountcode/edit/{id}', [MstAccountCodesController::class, 'edit'])->name('accountcode.edit');
     Route::post('accountcode/update/{id}', [MstAccountCodesController::class, 'update'])->name('accountcode.update');
     Route::post('accountcode/activate/{id}', [MstAccountCodesController::class, 'activate'])->name('accountcode.activate');
     Route::post('accountcode/deactivate/{id}', [MstAccountCodesController::class, 'deactivate'])->name('accountcode.deactivate');
+    Route::post('accountcode/delete/{id}', [MstAccountCodesController::class, 'delete'])->name('accountcode.delete');
+    Route::post('accountcode/deleteselected', [MstAccountCodesController::class, 'deleteselected'])->name('accountcode.deleteselected');
 
     //TransDataKas
     Route::get('/transdatakas', [TransDataKasController::class, 'index'])->name('transdatakas.index');

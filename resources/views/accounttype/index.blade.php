@@ -83,7 +83,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deleteselected" onclick="bulkDeleted('{{ route('accounttype.index') }}')"><i class="mdi mdi-delete label-icon"></i>Delete</button>
+                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deleteselected" onclick="bulkDeleted('{{ route('accounttype.deleteselected') }}')"><i class="mdi mdi-delete label-icon"></i>Delete</button>
                     </div>
                 </div>
             </div>
@@ -108,14 +108,14 @@
                                     <label class="form-label">Account Type Name</label>
                                     <input class="form-control" name="account_type_name" type="text" value="{{ $account_type_name }}" placeholder="Filter Account Type..">
                                 </div>
-                                <div class="col-6 mb-2">
+                                {{-- <div class="col-6 mb-2">
                                     <label class="form-label">Status</label>
                                     <select class="form-control" name="status">
                                         <option value="" selected>--All--</option>
                                         <option value="1" @if($status == '1') selected @endif>Active</option>
                                         <option value="0" @if($status == '0') selected @endif>Not Active</option>
                                     </select>
-                                </div>
+                                </div> --}}
                                 <hr class="mt-2">
                                 <div class="col-4 mb-2">
                                     <label class="form-label">Filter Date</label>
@@ -204,11 +204,13 @@
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
                             <thead>
                                 <tr>
-                                    <th class="align-middle text-center">#</th>
-                                    <th class="align-middle text-center">No</th>
+                                    <th class="align-middle text-center">
+                                        <input type="checkbox" id="checkAllRows">
+                                    </th>
+                                    <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Code</th>
                                     <th class="align-middle text-center">Account Type</th>
-                                    <th class="align-middle text-center">Status</th>
+                                    {{-- <th class="align-middle text-center">Status</th> --}}
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
@@ -338,20 +340,20 @@
                     searchable: true,
                     className: 'align-middle text-center'
                 },
-                {
-                    data: 'is_active',
-                    orderable: true,
-                    className: 'align-middle text-center',
-                    render: function(data, type, row) {
-                        var html
-                        if(row.is_active == 1){
-                            html = '<span class="badge bg-success text-white">Active</span>';
-                        } else {
-                            html = '<span class="badge bg-danger text-white">Inactive</span>';
-                        }
-                        return html;
-                    },
-                },
+                // {
+                //     data: 'is_active',
+                //     orderable: true,
+                //     className: 'align-middle text-center',
+                //     render: function(data, type, row) {
+                //         var html
+                //         if(row.is_active == 1){
+                //             html = '<span class="badge bg-success text-white">Active</span>';
+                //         } else {
+                //             html = '<span class="badge bg-danger text-white">Inactive</span>';
+                //         }
+                //         return html;
+                //     },
+                // },
                 {
                     data: 'action',
                     name: 'action',

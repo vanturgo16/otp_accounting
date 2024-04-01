@@ -24,7 +24,7 @@
                                                 <div class="col-lg-12">
                                                     <div class="mb-3">
                                                         <label class="form-label">Account Type</label><label style="color: darkred">*</label>
-                                                        <select class="form-control" name="id_master_account_types" required>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_account_types" required>
                                                             <option value="" selected>--Select Type--</option>
                                                             @foreach($acctypes as $item)
                                                                 <option value="{{ $item->id }}">{{ $item->account_type_code }} - {{ $item->account_type_name }}</option>
@@ -32,16 +32,22 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="col-lg-12">
+                                                <div class="col-lg-6">
                                                     <div class="mb-3">
                                                         <label class="form-label">Account Code</label><label style="color: darkred">*</label>
-                                                        <input class="form-control" name="account_code" type="text" value="" placeholder="Input Account Code Code.." required>
+                                                        <input class="form-control" name="account_code" type="text" value="" placeholder="Input Account Code.." required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Account Name</label><label style="color: darkred">*</label>
+                                                        <input class="form-control" name="account_name" type="text" value="" placeholder="Input Account Name.." required>
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-12">
                                                     <div class="mb-3">
-                                                        <label class="form-label">Account Name</label><label style="color: darkred">*</label>
-                                                        <input class="form-control" name="account_name" type="text" value="" placeholder="Input Account Code.." required>
+                                                        <label class="form-label">Opening Balance</label><label style="color: darkred">*</label>
+                                                        <input class="form-control rupiah-input" name="opening_balance" type="text" placeholder="Input Opening Balance.." required>
                                                     </div>
                                                 </div>
                                             </div>
@@ -94,7 +100,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deleteselected" onclick="bulkDeleted('{{ route('accounttype.index') }}')"><i class="mdi mdi-delete label-icon"></i>Delete</button>
+                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deleteselected" onclick="bulkDeleted('{{ route('accountcode.deleteselected') }}')"><i class="mdi mdi-delete label-icon"></i>Delete</button>
                     </div>
                 </div>
             </div>
@@ -113,7 +119,7 @@
                             <div class="row">
                                 <div class="col-6 mb-2">
                                     <label class="form-label">Account Type</label>
-                                    <select class="form-control" name="id_master_account_types">
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_account_types">
                                         <option value="" selected>--Select Type--</option>
                                         @foreach($acctypes as $item)
                                             <option value="{{ $item->id }}">{{ $item->account_type_code }} - {{ $item->account_type_name }}</option>
@@ -129,14 +135,14 @@
                                     <label class="form-label">Account Name</label>
                                     <input class="form-control" name="account_name" type="text" value="{{ $account_name }}" placeholder="Filter Account Code..">
                                 </div>
-                                <div class="col-6 mb-2">
+                                {{-- <div class="col-6 mb-2">
                                     <label class="form-label">Status</label>
                                     <select class="form-control" name="status">
                                         <option value="" selected>--All--</option>
                                         <option value="1" @if($status == '1') selected @endif>Active</option>
                                         <option value="0" @if($status == '0') selected @endif>Not Active</option>
                                     </select>
-                                </div>
+                                </div> --}}
                                 <hr class="mt-2">
                                 <div class="col-4 mb-2">
                                     <label class="form-label">Filter Date</label>
@@ -228,11 +234,14 @@
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
                             <thead>
                                 <tr>
-                                    <th class="align-middle text-center">No</th>
+                                    <th class="align-middle text-center">
+                                        <input type="checkbox" id="checkAllRows">
+                                    </th>
+                                    <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Account Code</th>
                                     <th class="align-middle text-center">Account Name</th>
                                     <th class="align-middle text-center">Type</th>
-                                    <th class="align-middle text-center">Status</th>
+                                    <th class="align-middle text-center">Opening Balance</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
@@ -371,19 +380,37 @@
                     className: 'align-middle text-center'
                 },
                 {
-                    data: 'is_active',
+                    data: 'opening_balance',
                     orderable: true,
                     className: 'align-middle text-center',
                     render: function(data, type, row) {
                         var html
-                        if(row.is_active == 1){
-                            html = '<span class="badge bg-success text-white">Active</span>';
+                        if(row.opening_balance == null){
+                            html = '<span class="badge bg-secondary text-white">Null</span>';
                         } else {
-                            html = '<span class="badge bg-danger text-white">Inactive</span>';
+                            // Convert the opening balance to the desired format
+                            html = parseFloat(row.opening_balance).toLocaleString('en-US', {
+                                minimumFractionDigits: 3,
+                                maximumFractionDigits: 3
+                            });
                         }
                         return html;
                     },
                 },
+                // {
+                //     data: 'is_active',
+                //     orderable: true,
+                //     className: 'align-middle text-center',
+                //     render: function(data, type, row) {
+                //         var html
+                //         if(row.is_active == 1){
+                //             html = '<span class="badge bg-success text-white">Active</span>';
+                //         } else {
+                //             html = '<span class="badge bg-danger text-white">Inactive</span>';
+                //         }
+                //         return html;
+                //     },
+                // },
                 {
                     data: 'action',
                     name: 'action',
