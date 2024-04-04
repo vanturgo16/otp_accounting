@@ -6,7 +6,6 @@ use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
-use Browser;
 
 // Model
 use App\Models\MstAccountTypes;
@@ -162,17 +161,12 @@ class MstAccountTypesController extends Controller
             $name = MstAccountTypes::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Account Type ('. $name->account_type_name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Account Type ('. $name->account_type_name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Account Type ' . $name->account_type_name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Account Type ' . $name->account_type_name .'!']);
         }
     }
@@ -190,17 +184,12 @@ class MstAccountTypesController extends Controller
             $name = MstAccountTypes::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Account Type ('. $name->account_type_name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Account Type ('. $name->account_type_name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Account Type ' . $name->account_type_name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Account Type ' . $name->account_type_name .'!']);
         }
     }
@@ -241,6 +230,29 @@ class MstAccountTypesController extends Controller
         } catch (Exception $e) {
             DB::rollback();
             return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
+        }
+    }
+
+    public function deactiveselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $account_type_code = MstAccountTypes::whereIn('id', $idselected)->pluck('account_type_code')->toArray();
+            $update = MstAccountTypes::whereIn('id', $idselected)
+                ->update([
+                    'is_active' => 0
+                ]);
+
+            //Audit Log
+            $this->auditLogsShort('Deactive Master Account Type Selected : ' . implode(', ', $account_type_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deactivate Data : ' . implode(', ', $account_type_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Deactive Data', 'type' => 'error'], 500);
         }
     }
 }

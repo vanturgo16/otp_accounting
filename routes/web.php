@@ -3,10 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GeneralLedgersController;
 use App\Http\Controllers\MstAccountCodesController;
 use App\Http\Controllers\MstAccountTypesController;
 use App\Http\Controllers\TransDataBankController;
 use App\Http\Controllers\TransDataKasController;
+use App\Http\Controllers\TransSalesController;
 
 //Route Login
 Route::get('/', [AuthController::class, 'login'])->name('login');
@@ -29,6 +31,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('accounttype/deactivate/{id}', [MstAccountTypesController::class, 'deactivate'])->name('accounttype.deactivate');
     Route::post('accounttype/delete/{id}', [MstAccountTypesController::class, 'delete'])->name('accounttype.delete');
     Route::post('accounttype/deleteselected', [MstAccountTypesController::class, 'deleteselected'])->name('accounttype.deleteselected');
+    Route::post('accounttype/deactiveselected', [MstAccountTypesController::class, 'deactiveselected'])->name('accounttype.deactiveselected');
     
     //AccountCode
     Route::get('/accountcode', [MstAccountCodesController::class, 'index'])->name('accountcode.index');
@@ -40,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('accountcode/deactivate/{id}', [MstAccountCodesController::class, 'deactivate'])->name('accountcode.deactivate');
     Route::post('accountcode/delete/{id}', [MstAccountCodesController::class, 'delete'])->name('accountcode.delete');
     Route::post('accountcode/deleteselected', [MstAccountCodesController::class, 'deleteselected'])->name('accountcode.deleteselected');
+    Route::post('accountcode/deactiveselected', [MstAccountCodesController::class, 'deactiveselected'])->name('accountcode.deactiveselected');
 
     //TransDataKas
     Route::get('/transdatakas', [TransDataKasController::class, 'index'])->name('transdatakas.index');
@@ -62,4 +66,20 @@ Route::middleware(['auth'])->group(function () {
     Route::post('salesinvoice/update/{id}', [TransDataBankController::class, 'update'])->name('transdatabank.update');
     Route::post('salesinvoice/delete/{id}', [TransDataBankController::class, 'delete'])->name('transdatabank.delete');
 
+    //TransSales
+    Route::get('transsales', [TransSalesController::class, 'index'])->name('transsales.index');
+    Route::post('transsales', [TransSalesController::class, 'index'])->name('transsales.index');
+    Route::get('transsales/create', [TransSalesController::class, 'create'])->name('transsales.create');
+    Route::get('transsales/getsalesinvoices/{id}', [TransSalesController::class, 'getsalesinvoices'])->name('transsales.getsalesinvoices');
+    Route::post('transsales/store', [TransSalesController::class, 'store'])->name('transsales.store');
+    Route::get('transsales/info/{id}', [TransSalesController::class, 'info'])->name('transsales.info');
+    Route::get('transsales/edit/{id}', [TransSalesController::class, 'edit'])->name('transsales.edit');
+    Route::post('transsales/update/{id}', [TransSalesController::class, 'update'])->name('transsales.update');
+    Route::post('transsales/delete/{id}', [TransSalesController::class, 'delete'])->name('transsales.delete');
+    Route::post('transsales/deleteselected', [TransSalesController::class, 'deleteselected'])->name('transsales.deleteselected');
+    Route::post('transsales/deactiveselected', [TransSalesController::class, 'deactiveselected'])->name('transsales.deactiveselected');
+
+    //GeneralLedger
+    Route::get('generalledger', [GeneralLedgersController::class, 'index'])->name('generalledger.index');
+    Route::post('generalledger', [GeneralLedgersController::class, 'index'])->name('generalledger.index');
 });

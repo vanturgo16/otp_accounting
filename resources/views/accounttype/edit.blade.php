@@ -8,7 +8,7 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('accounttype.index') }}" class="btn btn-secondary waves-effect btn-label waves-light">
+                        <a href="{{ route('accounttype.index') }}" class="btn btn-light waves-effect btn-label waves-light">
                             <i class="mdi mdi-arrow-left label-icon"></i> Back To List Master Account Type
                         </a>
                     </div>
@@ -51,6 +51,9 @@
                             <hr>
                             <div class="row">
                                 <div class="col-12 align-right">
+                                    <a href="{{ route('accounttype.index') }}" type="button" class="btn btn-light waves-effect btn-label waves-light">
+                                        <i class="mdi mdi-arrow-left-circle label-icon"></i>Back
+                                    </a>
                                     <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb">
                                         <i class="mdi mdi-update label-icon"></i>Update
                                     </button>

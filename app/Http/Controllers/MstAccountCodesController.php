@@ -6,7 +6,6 @@ use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
-use Browser;
 
 // Model
 use App\Models\MstAccountCodes;
@@ -55,8 +54,6 @@ class MstAccountCodesController extends Controller
             $datas = $datas->get()->makeHidden(['id']);
             return $datas;
         }
-
-        // $datas = $datas->paginate(10);
         
         $datas = $datas->get();
         
@@ -110,8 +107,8 @@ class MstAccountCodesController extends Controller
             DB::commit();
 
             return redirect()->back()->with(['success' => 'Success Create New Account Code']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Account Code!']);
         }
     }
@@ -129,7 +126,8 @@ class MstAccountCodesController extends Controller
         return view('accountcode.edit',compact('data', 'acctypes'));
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         // dd($request->all());
 
         $id = decrypt($id);
@@ -159,17 +157,12 @@ class MstAccountCodesController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Update Account Code ('. $request->account_name . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Update Account Code ('. $request->account_name . ')');
 
                 DB::commit();
                 return redirect()->route('accountcode.index')->with(['success' => 'Success Update Account Code']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Account Code!']);
             }
         } else {
@@ -177,7 +170,8 @@ class MstAccountCodesController extends Controller
         }
     }
 
-    public function activate($id){
+    public function activate($id)
+    {
         $id = decrypt($id);
 
         DB::beginTransaction();
@@ -189,22 +183,18 @@ class MstAccountCodesController extends Controller
             $name = MstAccountCodes::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Account Type ('. $name->account_name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Account Type ('. $name->account_name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Account Code ' . $name->account_name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Account Code ' . $name->account_name .'!']);
         }
     }
 
-    public function deactivate($id){
+    public function deactivate($id)
+    {
         $id = decrypt($id);
 
         DB::beginTransaction();
@@ -216,17 +206,12 @@ class MstAccountCodesController extends Controller
             $name = MstAccountCodes::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Account Code ('. $name->account_name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Account Code ('. $name->account_name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Account Code ' . $name->account_name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Account Code ' . $name->account_name .'!']);
         }
     }
@@ -267,6 +252,29 @@ class MstAccountCodesController extends Controller
         } catch (Exception $e) {
             DB::rollback();
             return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
+        }
+    }
+
+    public function deactiveselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $account_code = MstAccountCodes::whereIn('id', $idselected)->pluck('account_code')->toArray();
+            $update = MstAccountCodes::whereIn('id', $idselected)
+                ->update([
+                    'is_active' => 0
+                ]);
+
+            //Audit Log
+            $this->auditLogsShort('Deactive Master Account Code Selected : ' . implode(', ', $account_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deactivate Data : ' . implode(', ', $account_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Deactive Data', 'type' => 'error'], 500);
         }
     }
 }

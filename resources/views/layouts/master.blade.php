@@ -158,9 +158,21 @@
                         <li class="menu-title" data-key="t-menu">Accounting</li>
 
                         <li>
+                            <a href="{{ route('generalledger.index') }}">
+                                <i class="mdi mdi-file-cabinet"></i>
+                                <span>General Ledger</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('transsales.index') }}">
+                                <i class="mdi mdi-file-upload"></i>
+                                <span>Sales</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="#">
-                                <i class="mdi mdi-text-box-outline"></i>
-                                <span>Sales Invoice</span>
+                                <i class="mdi mdi-file-download"></i>
+                                <span>Purchase</span>
                             </a>
                         </li>
                         {{-- <li>

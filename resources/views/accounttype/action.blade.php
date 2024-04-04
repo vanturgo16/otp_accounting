@@ -6,12 +6,15 @@
     <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $data->id }}">
         <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
         <li><a class="dropdown-item drpdwn" href="{{ route('accounttype.edit', encrypt($data->id)) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
-        {{-- @if($data->is_active == 0)
+        @if($data->is_active == 0)
             <li><a class="dropdown-item drpdwn-scs" href="#" data-bs-toggle="modal" data-bs-target="#activate{{ $data->id }}"><span class="mdi mdi-check-circle"></span> | Activate</a></li>
         @else
             <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#deactivate{{ $data->id }}"><span class="mdi mdi-close-circle"></span> | Deactivate</a></li>
-        @endif --}}
-        <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#delete{{ $data->id }}"><span class="mdi mdi-delete-alert"></span> | Delete</a></li>
+        @endif
+        
+        @if(Auth::user()->role == 'Super Admin')
+            <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#delete{{ $data->id }}"><span class="mdi mdi-delete-alert"></span> | Delete</a></li>
+        @endif
     </ul>
 </div>
 
@@ -27,7 +30,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        {{-- <div class="col-lg-12 mb-2">
+                        <div class="col-lg-12 mb-2">
                             <div class="form-group">
                                 <div><span class="fw-bold">Status :</span></div>
                                 <span>
@@ -38,7 +41,7 @@
                                     @endif
                                 </span>
                             </div>
-                        </div> --}}
+                        </div>
                         <div class="col-lg-6 mb-2">
                             <div class="form-group">
                                 <div><span class="fw-bold">Account Type Code :</span></div>

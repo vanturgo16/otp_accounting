@@ -23,13 +23,13 @@
     </div>
 @endif
 
-<script>
+{{-- <script>
     $(document).ready(function(){
         setTimeout(function() {
             $("#success-alert, #fail-alert, #warning-alert, #info-alert").fadeOut('fast');
         }, 4000);
     });
-</script>
+</script> --}}
 
 <div class="alert alert-success alert-dismissible alert-label-icon label-arrow fade show d-none" role="alert"
     id="alertSuccess">
@@ -52,10 +52,23 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 
-<script>
+@if (count($errors)>0)
+    <div id="warning-alert" class="alert alert-warning alert-dismissible alert-label-icon label-arrow fade show" role="alert">
+        <i class="mdi mdi-alert-outline label-icon"></i>
+        <strong>Saved Data Failed !</strong></li>
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+{{-- <script>
     $(document).ready(function(){
         setTimeout(function() {
             $("#success-alert, #fail-alert, #warning-alert, #info-alert").fadeOut('fast');
         }, 4000);
     });
-</script>
+</script> --}}

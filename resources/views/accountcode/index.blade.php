@@ -105,6 +105,26 @@
                 </div>
             </div>
         </div>
+        <!-- Modal for bulk deactive confirmation -->
+        <div class="modal fade" id="deactivateselected" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-top" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Deactive</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row text-center">
+                            <p>Are you sure you want to deactive the selected items?</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deactivateselected" onclick="bulkDeactivate('{{ route('accountcode.deactiveselected') }}')"><i class="mdi mdi-close-circle label-icon"></i>Deactive</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Modal Search -->
         <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
@@ -135,14 +155,14 @@
                                     <label class="form-label">Account Name</label>
                                     <input class="form-control" name="account_name" type="text" value="{{ $account_name }}" placeholder="Filter Account Code..">
                                 </div>
-                                {{-- <div class="col-6 mb-2">
+                                <div class="col-6 mb-2">
                                     <label class="form-label">Status</label>
                                     <select class="form-control" name="status">
                                         <option value="" selected>--All--</option>
                                         <option value="1" @if($status == '1') selected @endif>Active</option>
                                         <option value="0" @if($status == '0') selected @endif>Not Active</option>
                                     </select>
-                                </div> --}}
+                                </div>
                                 <hr class="mt-2">
                                 <div class="col-4 mb-2">
                                     <label class="form-label">Filter Date</label>
@@ -242,6 +262,7 @@
                                     <th class="align-middle text-center">Account Name</th>
                                     <th class="align-middle text-center">Type</th>
                                     <th class="align-middle text-center">Opening Balance</th>
+                                    <th class="align-middle text-center">Status</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
@@ -272,6 +293,8 @@
         var requestData = Object.assign({}, data);
         requestData.flag = 1;
 
+        // <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteselected"><i class="mdi mdi-trash-can"></i> Delete Selected</button></li>
+
         var dataTable = $('#server-side-table').DataTable({
             dom: '<"top d-flex"<"position-absolute top-0 end-0 d-flex"fl><"pull-left col-sm-12 col-md-5"B>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>><"clear:both">',
             initComplete: function(settings, json) {
@@ -286,7 +309,7 @@
                                 <i class="mdi mdi-checkbox-multiple-marked-outline"></i> Bulk Actions <i class="fas fa-caret-down"></i>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteselected"><i class="mdi mdi-trash-can"></i> Delete Selected</button></li>
+                                <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deactivateselected"><i class="mdi mdi-close-circle"></i> Deactive Selected</button></li>
                             </ul>
                         </div>
                     </div>`
@@ -397,20 +420,20 @@
                         return html;
                     },
                 },
-                // {
-                //     data: 'is_active',
-                //     orderable: true,
-                //     className: 'align-middle text-center',
-                //     render: function(data, type, row) {
-                //         var html
-                //         if(row.is_active == 1){
-                //             html = '<span class="badge bg-success text-white">Active</span>';
-                //         } else {
-                //             html = '<span class="badge bg-danger text-white">Inactive</span>';
-                //         }
-                //         return html;
-                //     },
-                // },
+                {
+                    data: 'is_active',
+                    orderable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var html
+                        if(row.is_active == 1){
+                            html = '<span class="badge bg-success text-white">Active</span>';
+                        } else {
+                            html = '<span class="badge bg-danger text-white">Inactive</span>';
+                        }
+                        return html;
+                    },
+                },
                 {
                     data: 'action',
                     name: 'action',
