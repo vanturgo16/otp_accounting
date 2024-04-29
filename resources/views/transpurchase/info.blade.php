@@ -8,14 +8,14 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('transsales.index') }}" class="btn btn-light waves-effect btn-label waves-light">
-                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Sales Transaction
+                        <a href="{{ route('transpurchase.index') }}" class="btn btn-light waves-effect btn-label waves-light">
+                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Purchase Transaction
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Accounting</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('transsales.index') }}">Sales Transaction</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('transpurchase.index') }}">Purchase Transaction</a></li>
                             <li class="breadcrumb-item active">Info</li>
                         </ol>
                     </div>
@@ -31,39 +31,18 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-12 mb-3">
+                            <div class="col-lg-6 mb-3">
                                 <label class="form-label mb-0">Ref Number</label>
                                 <br><span class="badge bg-info">{{ $data->ref_number }}</span>
                             </div>
                             <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Sales Invoices</label>
-                                <br><span>{{ $data->invoice_number }}</span>
+                                <label class="form-label mb-0">Transaction Date</label>
+                                <br><span>{{ $transaction_date }}</span>
                             </div>
+                            <hr>
                             <div class="col-lg-6 mb-3">
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Customer Name</label>
-                                <br><span>{{ $data->customer_name }}</span>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Customer Address</label>
-                                <br><span>{{ $data->customer_address }}</span>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Date</label>
-                                <br><span>{{ $data->date }}</span>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Due Date</label>
-                                <br><span>{{ $data->due_date }}</span>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">PPN</label>
-                                <br><span>{{ $data->ppn }}</span>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Status</label>
-                                <br><span>{{ $data->status }}</span>
+                                <label class="form-label mb-0">Purchase Invoices</label>
+                                <br><span></span>
                             </div>
 
                             <div class="col-lg-12 mt-3">
@@ -82,23 +61,23 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach($general_ledgers as $gl)
+                                                    @foreach($general_ledgers as $item)
                                                     <tr>
                                                         <td>
-                                                            {{ $gl->account_code." - ".$gl->account_name }}
+                                                            {{ $item->account_code." - ".$item->account_name }}
                                                         </td>
                                                         <td>
-                                                            @if($gl->debit != null)
-                                                                {{ number_format($gl->debit, 3, '.', ',') }}
+                                                            @if($item->debit != null)
+                                                                {{ number_format($item->debit, 3, '.', ',') }}
                                                             @else
-                                                                {{ number_format($gl->kredit, 3, '.', ',') }}
+                                                                {{ number_format($item->kredit, 3, '.', ',') }}
                                                             @endif
                                                         </td>
                                                         <td>
-                                                            @if($gl->debit != null)
-                                                                Debit
+                                                            @if($item->debit != null)
+                                                                <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
                                                             @else
-                                                                Kredit
+                                                                <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>
                                                             @endif
                                                         </td>
                                                     </tr>

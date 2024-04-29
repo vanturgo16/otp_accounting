@@ -37,15 +37,13 @@
                             <div class="row">
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label mb-0">Ref Number</label>
-                                    <br><span class="badge bg-info">{{ $data->ref_number }}</span>
+                                    <br><h4><span class="badge bg-info">{{ $data->ref_number }}</span></h4>
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
-                                    <?php
-                                        $date_transaction_formatted = date('Y-m-d', strtotime($general_ledger->date_transaction));
-                                    ?>
-                                    <input type="date" class="form-control" name="transaction_date" value="{{ $date_transaction_formatted }}" required>
+                                    <input type="date" class="form-control" name="transaction_date" value="{{ $transaction_date }}" required>
                                 </div>
+                                <hr>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Sales Invoices</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_sales_invoices" required>

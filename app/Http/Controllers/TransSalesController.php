@@ -50,6 +50,11 @@ class TransSalesController extends Controller
         }
         
         $datas = $datas->get();
+
+        foreach($datas as $data){
+            $count = GeneralLedger::where('ref_number', $data->ref_number)->count();
+            $data->count = $count;
+        }
         
         // Datatables
         if ($request->ajax()) {
@@ -122,6 +127,7 @@ class TransSalesController extends Controller
         // dd($request->all());
         $request->validate([
             'id_sales_invoices' => 'required',
+            'date_transaction' => 'required',
         ]);
         
         $refNumber = $this->generateRefNumber();
@@ -187,11 +193,13 @@ class TransSalesController extends Controller
             ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
             ->where('general_ledgers.ref_number', $data->ref_number)
             ->get();
-        
+
+        $transaction_date = date('Y-m-d', strtotime($general_ledgers[0]->date_transaction));
+
         //Audit Log
         $this->auditLogsShort('View Info Sales Transaction Ref Number ('. $data->ref_number . ')');
 
-        return view('transsales.info',compact('data', 'general_ledgers'));
+        return view('transsales.info',compact('data', 'general_ledgers', 'transaction_date'));
     }
 
     public function edit($id)
@@ -212,7 +220,8 @@ class TransSalesController extends Controller
         } else {
             $general_ledgers = [];
         }
-        // dd($general_ledger);
+        
+        $transaction_date = date('Y-m-d', strtotime($general_ledger->date_transaction));
 
         $sales = SalesInvoice::select('id', 'invoice_number')->get();
         $accountcodes = MstAccountCodes::get();
@@ -220,7 +229,7 @@ class TransSalesController extends Controller
         //Audit Log
         $this->auditLogsShort('View Edit Sales Transaction Ref Number ('. $data->ref_number . ')');
 
-        return view('transsales.edit',compact('data', 'general_ledger', 'general_ledgers', 'sales', 'accountcodes'));
+        return view('transsales.edit',compact('data', 'general_ledger', 'general_ledgers', 'transaction_date', 'sales', 'accountcodes'));
     }
 
     public function update(Request $request, $id)
@@ -230,6 +239,7 @@ class TransSalesController extends Controller
 
         $request->validate([
             'id_sales_invoices' => 'required',
+            'transaction_date' => 'required',
         ]);
 
         $databefore = TransSales::where('id', $id)->first();
@@ -274,6 +284,12 @@ class TransSalesController extends Controller
             $updatetrans = true;
         } else {
             $updatetrans = false;
+        }
+
+        $date_transaction = GeneralLedger::where('ref_number', $databefore->ref_number)->first()->date_transaction;
+        $date_transaction = date('Y-m-d', strtotime($date_transaction));
+        if($date_transaction != $request->transaction_date){
+            $updatetrans = true;
         }
 
         if($databefore->isDirty() || $updatetrans == true){
@@ -344,13 +360,13 @@ class TransSalesController extends Controller
             TransSales::where('id', $id)->delete();
             
             //Audit Log
-            $this->auditLogsShort('Delete Transaksi Sales Ref. Number = '.$data->ref_number);
+            $this->auditLogsShort('Delete Sales Transaction Ref. Number = '.$data->ref_number);
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Delete Transaksi Sales']);
+            return redirect()->back()->with(['success' => 'Success Delete Sales Transaction']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Delete Transaksi Sales!']);
+            return redirect()->back()->with(['fail' => 'Failed to Delete Sales Transaction!']);
         }
     }
 }

@@ -8,14 +8,14 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('transsales.index') }}" class="btn btn-light waves-effect btn-label waves-light">
-                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Sales Transaction
+                        <a href="{{ route('transimport.index') }}" class="btn btn-light waves-effect btn-label waves-light">
+                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Import Transaction
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Accounting</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('transsales.index') }}">Sales Transaction</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('transimport.index') }}">Import Transaction</a></li>
                             <li class="breadcrumb-item active">Edit</li>
                         </ol>
                     </div>
@@ -25,7 +25,7 @@
         
         @include('layouts.alert')
 
-        <form action="{{ route('transsales.update', encrypt($data->id_trans)) }}" id="formupdate" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('transimport.update', encrypt($data->id_trans)) }}" id="formupdate" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="row">
                 <div class="col-12">
@@ -37,49 +37,28 @@
                             <div class="row">
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label mb-0">Ref Number</label>
-                                    <br><span class="badge bg-info">{{ $data->ref_number }}</span>
+                                    <br><h4><span class="badge bg-info">{{ $data->ref_number }}</span></h4>
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
-                                    <?php
-                                        $date_transaction_formatted = date('Y-m-d', strtotime($general_ledger->date_transaction));
-                                    ?>
-                                    <input type="date" class="form-control" name="transaction_date" value="{{ $date_transaction_formatted }}" required>
+                                    <input type="date" class="form-control" name="transaction_date" value="{{ $transaction_date }}" required>
+                                </div>
+                                <hr>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Tax Invoice Number</label>
+                                    <input type="text" class="form-control" placeholder="Input Tax..." name="tax_invoice_number" value="{{ $data->tax_invoice_number }}" required>
                                 </div>
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Sales Invoices</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_sales_invoices" required>
-                                        <option value="" selected>-- Select --</option>
-                                        @foreach($sales as $item)
-                                            <option value="{{ $item->id }}" @if($data->id_sales_invoices == $item->id) selected="selected" @endif>{{ $item->invoice_number }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label class="form-label">External Doc. Number</label>
+                                    <input type="text" class="form-control" placeholder="Input External Doc Number..." name="ext_doc_number" value="{{ $data->ext_doc_number }}" required>
                                 </div>
                                 <div class="col-lg-6 mb-3">
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Customer Name</label>
-                                    <input class="form-control" id="customer_name" type="text" value="{{ $data->customer_name }}" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Customer Address</label>
-                                    <input class="form-control" id="customer_address" type="text" value="{{ $data->customer_address }}" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Date</label>
-                                    <input class="form-control" id="date" type="text" value="{{ $data->date }}" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
+                                    <label class="form-label">Invoice Received Date</label>
+                                    <input type="date" class="form-control" name="inv_received_date" value="{{ $inv_received_date }}" required>
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Due Date</label>
-                                    <input class="form-control" id="due_date" type="text" value="{{ $data->due_date }}" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">PPN</label>
-                                    <input class="form-control" id="ppn" type="text" value="{{ $data->ppn }}" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Status</label>
-                                    <input class="form-control" id="statusinvoices" type="text" value="{{ $data->status }}" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
+                                    <input type="date" class="form-control" name="due_date" value="{{ $due_date }}" required>
                                 </div>
 
                                 <div class="col-lg-12 mt-3">
@@ -169,7 +148,7 @@
                             <hr>
                             <div class="row">
                                 <div class="col-12 align-right">
-                                    <a href="{{ route('transsales.index') }}" type="button" class="btn btn-light waves-effect btn-label waves-light">
+                                    <a href="{{ route('transimport.index') }}" type="button" class="btn btn-light waves-effect btn-label waves-light">
                                         <i class="mdi mdi-arrow-left-circle label-icon"></i>Back
                                     </a>
                                     <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb">
@@ -263,46 +242,6 @@
         rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
         return prefix == undefined ? rupiah : (rupiah ? '' + rupiah : '');
     }
-</script>
-
-{{-- Sales Invoices Choose --}}
-<script>
-    $('select[name="id_sales_invoices"]').on('change', function() {
-        $('#customer_name').val("");
-        $('#customer_address').val("");
-        $('#date').val("");
-        $('#due_date').val("");
-        $('#ppn').val("");
-        $('#statusinvoices').val("");
-
-        var id_sales_invoices = $(this).val();
-        if(id_sales_invoices == ""){
-            $('#customer_name').val("");
-            $('#customer_address').val("");
-            $('#date').val("");
-            $('#due_date').val("");
-            $('#ppn').val("");
-            $('#statusinvoices').val("");
-        } else {
-            var url = '{{ route("transsales.getsalesinvoices", ":id") }}';
-            url = url.replace(':id', id_sales_invoices);
-            if (id_sales_invoices) {
-                $.ajax({
-                    url: url,
-                    type: "GET",
-                    dataType: "json",
-                    success: function(data) {
-                        $('#customer_name').val(data.customer_name);
-                        $('#customer_address').val(data.customer_address);
-                        $('#date').val(data.date);
-                        $('#due_date').val(data.due_date);
-                        $('#ppn').val(data.ppn);
-                        $('#statusinvoices').val(data.status);
-                    }
-                });
-            }
-        }
-    });
 </script>
 
 @endsection

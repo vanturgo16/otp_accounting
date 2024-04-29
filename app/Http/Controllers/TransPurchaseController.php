@@ -10,8 +10,6 @@ use Yajra\DataTables\Facades\DataTables;
 // Model
 use App\Models\MstAccountCodes;
 use App\Models\GeneralLedger;
-use App\Models\SalesInvoice;
-use App\Models\TransSales;
 use App\Models\TransPurchase;
 
 class TransPurchaseController extends Controller
@@ -76,16 +74,13 @@ class TransPurchaseController extends Controller
         return view('transpurchase.create',compact('accountcodes'));
     }
 
-    public function getsalesinvoices($id)
-    {
-        $salesinvoices = SalesInvoice::select('invoices.*', 'master_customers.name as customer_name', 'master_customer_addresses.address as customer_address')
-            ->leftjoin('master_customers', 'invoices.id_master_customers', 'master_customers.id')
-            ->leftjoin('master_customer_addresses', 'invoices.id_master_customer_addresses', 'master_customer_addresses.id')
-            ->where('invoices.id', $id)
-            ->first();
+    // Get Purchase Invoice (Not Yet Initiate Where To Get)
+    // public function getpurchaseinvoice($id)
+    // {
+    //     $purchaseinvoice = 
 
-        return json_encode($salesinvoices);
-    }
+    //     return json_encode($purchaseinvoice);
+    // }
 
     function generateRefNumber()
     {
@@ -93,19 +88,19 @@ class TransPurchaseController extends Controller
         $year = date('y');
         $month = date('m');
         // Get the last reference number for the current year and month from the database
-        $lastRefNumber = TransSales::where('ref_number', 'like', "SLS-$year$month%")->orderBy('ref_number', 'desc')->first();
+        $lastRefNumber = TransPurchase::where('ref_number', 'like', "PRC-$year$month%")->orderBy('ref_number', 'desc')->first();
         // If there are no existing reference numbers for the current year and month, start from 1
         if (!$lastRefNumber) {
             $counter = 1;
         } else {
             // Extract the counter from the last reference number and increment it
-            $lastCounter = intval(substr($lastRefNumber->ref_number, 9)); // Assuming the format is fixed as "SLS-YYMMXXXXX"
+            $lastCounter = intval(substr($lastRefNumber->ref_number, 9)); // Assuming the format is fixed as "PRC-YYMMXXXXX"
             $counter = $lastCounter + 1;
         }
         // Format the counter with leading zeros
         $counterFormatted = str_pad($counter, 5, '0', STR_PAD_LEFT);
         // Generate the reference number
-        $refNumber = "SLS-$year$month$counterFormatted";
+        $refNumber = "PRC-$year$month$counterFormatted";
     
         return $refNumber;
     }
@@ -114,16 +109,15 @@ class TransPurchaseController extends Controller
     {
         // dd($request->all());
         $request->validate([
-            'id_sales_invoices' => 'required',
+            'date_transaction' => 'required',
         ]);
         
         $refNumber = $this->generateRefNumber();
 
         DB::beginTransaction();
         try{
-            TransSales::create([
+            TransPurchase::create([
                 'ref_number' => $refNumber,
-                'id_sales_invoices' => $request->id_sales_invoices,
                 'created_by' => auth()->user()->email
             ]);
 
@@ -147,20 +141,20 @@ class TransPurchaseController extends Controller
                             'id_account_code' => $item['account_code'],
                             'debit' => $debit,
                             'kredit' => $kredit,
-                            'source' => 'Sales Transaction',
+                            'source' => 'Purchase Transaction',
                         ]);
                     }
                 }
             }
 
             //Audit Log
-            $this->auditLogsShort('Create New Sales Transaction Ref. Number ('. $refNumber . ')');
+            $this->auditLogsShort('Create New Purchase Transaction Ref. Number ('. $refNumber . ')');
 
             DB::commit();
-            return redirect()->route('transsales.index')->with(['success' => 'Success Create New Sales Transaction']);
+            return redirect()->route('transpurchase.index')->with(['success' => 'Success Create New Purchase Transaction']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Create New Sales Transaction!']);
+            return redirect()->back()->with(['fail' => 'Failed to Create New Purchase Transaction!']);
         }
     }
 
@@ -169,22 +163,19 @@ class TransPurchaseController extends Controller
         $id = decrypt($id);
         // dd($id);
 
-        $data = TransSales::select('trans_sales.*', 'invoices.*', 'master_customers.name as customer_name', 'master_customer_addresses.address as customer_address')
-            ->leftjoin('invoices', 'trans_sales.id_sales_invoices', 'invoices.id')
-            ->leftjoin('master_customers', 'invoices.id_master_customers', 'master_customers.id')
-            ->leftjoin('master_customer_addresses', 'invoices.id_master_customer_addresses', 'master_customer_addresses.id')
-            ->where('trans_sales.id', $id)
-            ->first();
+        $data = TransPurchase::where('id', $id)->first();
         
         $general_ledgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
             ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
             ->where('general_ledgers.ref_number', $data->ref_number)
             ->get();
         
+        $transaction_date = date('Y-m-d', strtotime($general_ledgers[0]->date_transaction));
+        
         //Audit Log
-        $this->auditLogsShort('View Info Sales Transaction Ref Number ('. $data->ref_number . ')');
+        $this->auditLogsShort('View Info Purchase Transaction Ref Number ('. $data->ref_number . ')');
 
-        return view('transsales.info',compact('data', 'general_ledgers'));
+        return view('transpurchase.info',compact('data', 'general_ledgers', 'transaction_date'));
     }
 
     public function edit($id)
@@ -192,12 +183,7 @@ class TransPurchaseController extends Controller
         $id = decrypt($id);
         // dd($id);
 
-        $data = TransSales::select('trans_sales.id as id_trans', 'trans_sales.*', 'invoices.*', 'master_customers.name as customer_name', 'master_customer_addresses.address as customer_address')
-            ->leftjoin('invoices', 'trans_sales.id_sales_invoices', 'invoices.id')
-            ->leftjoin('master_customers', 'invoices.id_master_customers', 'master_customers.id')
-            ->leftjoin('master_customer_addresses', 'invoices.id_master_customer_addresses', 'master_customer_addresses.id')
-            ->where('trans_sales.id', $id)
-            ->first();
+        $data = TransPurchase::where('id', $id)->first();
 
         $general_ledger = GeneralLedger::where('ref_number', $data->ref_number)->first();
         if($general_ledger != []){
@@ -205,15 +191,15 @@ class TransPurchaseController extends Controller
         } else {
             $general_ledgers = [];
         }
-        // dd($general_ledger);
 
-        $sales = SalesInvoice::select('id', 'invoice_number')->get();
+        $transaction_date = date('Y-m-d', strtotime($general_ledger->date_transaction));
+
         $accountcodes = MstAccountCodes::get();
         
         //Audit Log
-        $this->auditLogsShort('View Edit Sales Transaction Ref Number ('. $data->ref_number . ')');
+        $this->auditLogsShort('View Edit Purchase Transaction Ref Number ('. $data->ref_number . ')');
 
-        return view('transsales.edit',compact('data', 'general_ledger', 'general_ledgers', 'sales', 'accountcodes'));
+        return view('transpurchase.edit',compact('data', 'general_ledger', 'general_ledgers', 'transaction_date', 'accountcodes'));
     }
 
     public function update(Request $request, $id)
@@ -222,11 +208,10 @@ class TransPurchaseController extends Controller
         $id = decrypt($id);
 
         $request->validate([
-            'id_sales_invoices' => 'required',
+            'transaction_date' => 'required',
         ]);
 
-        $databefore = TransSales::where('id', $id)->first();
-        $databefore->id_sales_invoices = $request->id_sales_invoices;
+        $databefore = TransPurchase::where('id', $id)->first();
 
         // Compare Transaction
         $transbefore = GeneralLedger::where('ref_number', $databefore->ref_number)->get();
@@ -269,19 +254,24 @@ class TransPurchaseController extends Controller
             $updatetrans = false;
         }
 
+        $date_transaction = GeneralLedger::where('ref_number', $databefore->ref_number)->first()->date_transaction;
+        $date_transaction = date('Y-m-d', strtotime($date_transaction));
+        if($date_transaction != $request->transaction_date){
+            $updatetrans = true;
+        }
+
         if($databefore->isDirty() || $updatetrans == true){
             DB::beginTransaction();
             try{
                 //Update Trans Sales
                 if($databefore->isDirty()){
-                    TransSales::where('id', $id)->update([
-                        'id_sales_invoices' => $request->id_sales_invoices,
+                    TransPurchase::where('id', $id)->update([
                         'updated_by' => auth()->user()->email
                     ]);
                 }
                 //Update General Ledgers
                 if($updatetrans == true){
-                    TransSales::where('id', $id)->update([
+                    TransPurchase::where('id', $id)->update([
                         'updated_by' => auth()->user()->email
                     ]);
                     //Delete Data Before
@@ -313,16 +303,16 @@ class TransPurchaseController extends Controller
                 }
 
                 //Audit Log
-                $this->auditLogsShort('Update Sales Transaction Ref. Number ('. $databefore->ref_number . ')');
+                $this->auditLogsShort('Update Purchase Transaction Ref. Number ('. $databefore->ref_number . ')');
 
                 DB::commit();
-                return redirect()->route('transsales.index')->with(['success' => 'Success Update Sales Transaction']);
+                return redirect()->route('transpurchase.index')->with(['success' => 'Success Update Purchase Transaction']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with(['fail' => 'Failed to Update Sales Transaction!']);
+                return redirect()->back()->with(['fail' => 'Failed to Update Purchase Transaction!']);
             }
         } else {
-            return redirect()->route('transsales.index')->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('transpurchase.index')->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -332,18 +322,18 @@ class TransPurchaseController extends Controller
 
         DB::beginTransaction();
         try{
-            $data = TransSales::where('id', $id)->first();
+            $data = TransPurchase::where('id', $id)->first();
             GeneralLedger::where('ref_number', $data->ref_number)->delete();
-            TransSales::where('id', $id)->delete();
+            TransPurchase::where('id', $id)->delete();
             
             //Audit Log
-            $this->auditLogsShort('Delete Transaksi Sales Ref. Number = '.$data->ref_number);
+            $this->auditLogsShort('Delete Purchase Transaction Ref. Number = '.$data->ref_number);
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Delete Transaksi Sales']);
+            return redirect()->back()->with(['success' => 'Success Delete Purchase Transaction']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Delete Transaksi Sales!']);
+            return redirect()->back()->with(['fail' => 'Failed to Delete Purchase Transaction!']);
         }
     }
 }

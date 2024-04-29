@@ -4,8 +4,8 @@
         Action <i class="mdi mdi-chevron-down"></i>
     </button>
     <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $data->id }}">
-        <li><a class="dropdown-item drpdwn" href="{{ route('transsales.info', encrypt($data->id)) }}"><span class="mdi mdi-information"></span> | Info</a></li>
-        <li><a class="dropdown-item drpdwn" href="{{ route('transsales.edit', encrypt($data->id)) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
+        <li><a class="dropdown-item drpdwn" href="{{ route('transpurchase.info', encrypt($data->id)) }}"><span class="mdi mdi-information"></span> | Info</a></li>
+        <li><a class="dropdown-item drpdwn" href="{{ route('transpurchase.edit', encrypt($data->id)) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
         
         @if(Auth::user()->role == 'Super Admin')
             <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#delete{{ $data->id }}"><span class="mdi mdi-delete-alert"></span> | Delete</a></li>
@@ -23,7 +23,7 @@
                     <h5 class="modal-title" id="staticBackdropLabel">Delete</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('transsales.delete', encrypt($data->id)) }}" id="formdelete{{ $data->id }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('transpurchase.delete', encrypt($data->id)) }}" id="formdelete{{ $data->id }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         <div class="row">

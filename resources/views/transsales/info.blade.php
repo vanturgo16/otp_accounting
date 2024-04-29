@@ -31,10 +31,15 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-12 mb-3">
+                            <div class="col-lg-6 mb-3">
                                 <label class="form-label mb-0">Ref Number</label>
                                 <br><span class="badge bg-info">{{ $data->ref_number }}</span>
                             </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Transaction Date</label>
+                                <br><span>{{ $transaction_date }}</span>
+                            </div>
+                            <hr>
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label mb-0">Sales Invoices</label>
                                 <br><span>{{ $data->invoice_number }}</span>
@@ -82,23 +87,23 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach($general_ledgers as $gl)
+                                                    @foreach($general_ledgers as $item)
                                                     <tr>
                                                         <td>
-                                                            {{ $gl->account_code." - ".$gl->account_name }}
+                                                            {{ $item->account_code." - ".$item->account_name }}
                                                         </td>
                                                         <td>
-                                                            @if($gl->debit != null)
-                                                                {{ number_format($gl->debit, 3, '.', ',') }}
+                                                            @if($item->debit != null)
+                                                                {{ number_format($item->debit, 3, '.', ',') }}
                                                             @else
-                                                                {{ number_format($gl->kredit, 3, '.', ',') }}
+                                                                {{ number_format($item->kredit, 3, '.', ',') }}
                                                             @endif
                                                         </td>
                                                         <td>
-                                                            @if($gl->debit != null)
-                                                                Debit
+                                                            @if($item->debit != null)
+                                                                <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
                                                             @else
-                                                                Kredit
+                                                                <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>
                                                             @endif
                                                         </td>
                                                     </tr>

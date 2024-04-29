@@ -44,9 +44,10 @@
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
                                     <input type="date" class="form-control" name="transaction_date" value="" required>
                                 </div>
+                                <hr>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Tax Invoice Number</label>
-                                    <input type="text" class="form-control" placeholder="Input Tax..." name="tax_invoice" value="" required>
+                                    <input type="text" class="form-control" placeholder="Input Tax..." name="tax_invoice_number" value="" required>
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">External Doc. Number</label>
@@ -54,7 +55,7 @@
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Invoice Received Date</label>
-                                    <input type="date" class="form-control" name="invoice_received_date" value="" required>
+                                    <input type="date" class="form-control" name="inv_received_date" value="" required>
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Due Date</label>

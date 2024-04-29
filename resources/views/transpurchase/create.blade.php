@@ -44,6 +44,7 @@
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
                                     <input type="date" class="form-control" name="transaction_date" value="" required>
                                 </div>
+                                <hr>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Purchase Source??</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="purchase_source" required>

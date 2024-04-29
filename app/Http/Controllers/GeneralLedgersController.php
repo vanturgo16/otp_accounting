@@ -82,7 +82,6 @@ class GeneralLedgersController extends Controller
 
         return view('generalledger.create',compact('source', 'accountcodes'));
     }
-
     
     public function store(Request $request)
     {

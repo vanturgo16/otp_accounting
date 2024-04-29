@@ -43,6 +43,7 @@
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
                                     <input type="date" class="form-control" name="transaction_date" value="" required>
                                 </div>
+                                <hr>
                                 <div class="col-12">
                                     <label class="form-label">Source</label><label style="color: darkred">*</label>
                                 </div>
