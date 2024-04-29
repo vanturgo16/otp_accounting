@@ -12,33 +12,27 @@ use App\Models\MstAccountCodes;
 use App\Models\GeneralLedger;
 use App\Models\SalesInvoice;
 use App\Models\TransSales;
+use App\Models\TransImport;
 
-class TransSalesController extends Controller
+class TransImportController extends Controller
 {
     use AuditLogsTrait;
 
     public function index(Request $request)
     {
         $ref_number = $request->get('ref_number');
-        $id_sales_invoices = $request->get('id_sales_invoices');
         $searchDate = $request->get('searchDate');
         $startdate = $request->get('startdate');
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
-        $sales = SalesInvoice::select('id', 'invoice_number')->get();
-
-        $datas = TransSales::select(
+        $datas = TransImport::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
-                'trans_sales.*', 'invoices.invoice_number'
-            )
-            ->leftjoin('invoices', 'trans_sales.id_sales_invoices', 'invoices.id');
+                'trans_import.*'
+            );
 
         if($ref_number != null){
             $datas = $datas->where('ref_number', 'like', '%'.$ref_number.'%');
-        }
-        if($id_sales_invoices != null){
-            $datas = $datas->where('id_sales_invoices', 'like', '%'.$id_sales_invoices.'%');
         }
         if($startdate != null && $enddate != null){
             $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
@@ -55,7 +49,7 @@ class TransSalesController extends Controller
         if ($request->ajax()) {
             return DataTables::of($datas)
                 ->addColumn('action', function ($data){
-                    return view('transsales.action', compact('data'));
+                    return view('transimport.action', compact('data'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -66,21 +60,20 @@ class TransSalesController extends Controller
         }
         
         //Audit Log
-        $this->auditLogsShort('View List Trans Sales');
+        $this->auditLogsShort('View List Trans Import');
 
-        return view('transsales.index',compact('datas', 'sales',
-            'ref_number', 'id_sales_invoices', 'searchDate', 'startdate', 'enddate', 'flag'));
+        return view('transimport.index',compact('datas',
+            'ref_number', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function create(Request $request)
     {
-        $sales = SalesInvoice::select('id', 'invoice_number')->get();
         $accountcodes = MstAccountCodes::get();
 
         //Audit Log
-        $this->auditLogsShort('View Create New Sales Transaction');
+        $this->auditLogsShort('View Create New Import Transaction');
 
-        return view('transsales.create',compact('sales', 'accountcodes'));
+        return view('transimport.create',compact('accountcodes'));
     }
 
     public function getsalesinvoices($id)

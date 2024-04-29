@@ -8,17 +8,19 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('generalledger.create') }}" type="button" class="btn btn-primary waves-effect btn-label waves-light"><i class="mdi mdi-plus-box label-icon"></i> Add New Transaction</a>
+                        <a href="{{ route('transimport.create') }}" type="button" class="btn btn-primary waves-effect btn-label waves-light"><i class="mdi mdi-plus-box label-icon"></i> Add New Import Transaction</a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Accounting</a></li>
-                            <li class="breadcrumb-item active">General Ledger</li>
+                            <li class="breadcrumb-item active">Import</li>
                         </ol>
                     </div>
                 </div>
             </div>
         </div>
+
+        @include('layouts.alert')
 
         <!-- Modal Search -->
         <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -28,30 +30,13 @@
                         <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="{{ route('generalledger.index') }}" id="formfilter" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('transimport.index') }}" id="formfilter" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
                             <div class="row">
                                 <div class="col-6 mb-2">
-                                    <label class="form-label">Ref. Number</label>
-                                    <input class="form-control" name="ref_number" type="text" value="{{ $ref_number }}" placeholder="Filter Ref. Number..">
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <label class="form-label">Account Code</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_account_code">
-                                        <option value="" selected>-- Select --</option>
-                                        @foreach($acccodes as $item)
-                                            <option value="{{ $item->id }}" @if($id_account_code == $item->id) selected="selected" @endif>{{ $item->account_code }} - {{ $item->account_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <label class="form-label">Source</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="source">
-                                        <option value="" selected>-- Select --</option>
-                                        <option value="Sales Transaction"  @if($source == "Sales Transaction") selected="selected" @endif>Sales Transaction</option>
-                                        <option value="Purchase Transaction"  @if($source == "Purchase Transaction") selected="selected" @endif>Purchase Transaction</option>
-                                    </select>
+                                    <label class="form-label">Ref Number</label>
+                                    <input class="form-control" name="ref_number" type="text" value="{{ $ref_number }}" placeholder="Filter Ref Number..">
                                 </div>
                                 <hr class="mt-2">
                                 <div class="col-4 mb-2">
@@ -120,16 +105,10 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header text-center py-3">
-                        <h5 class="mb-0"><b>General Ledgers</b></h5>
+                        <h5 class="mb-0"><b>Import Transaction</b></h5>
                         List of 
                         @if($ref_number != null)
                             (Ref. Number<b> - {{ $ref_number }}</b>)
-                        @endif
-                        @if($id_account_code != null)
-                            (Account Code<b> - {{ $id_account_code }}</b>)
-                        @endif
-                        @if($source != null)
-                            (Source<b> - {{ $source }}</b>)
                         @endif
                         @if($searchDate == 'Custom')
                             (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
@@ -144,13 +123,11 @@
                                     <th class="align-middle text-center">
                                         <input type="checkbox" id="checkAllRows">
                                     </th>
-                                    {{-- <th class="align-middle text-center">No.</th> --}}
+                                    <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Ref. Number</th>
-                                    <th class="align-middle text-center">Date</th>
-                                    <th class="align-middle text-center">Account Code</th>
-                                    <th class="align-middle text-center">Nominal</th>
-                                    <th class="align-middle text-center">Debit / Kredit</th>
-                                    <th class="align-middle text-center">Source</th>
+                                    <th class="align-middle text-center">Tax Number</th>
+                                    <th class="align-middle text-center">Created By</th>
+                                    <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
                         </table>
@@ -164,14 +141,12 @@
 <script>
     $(function() {
         var i = 1;
-        var url = '{!! route('generalledger.index') !!}';
+        var url = '{!! route('transimport.index') !!}';
         var currentDate = new Date();
         var formattedDate = currentDate.toISOString().split('T')[0];
-        var fileName = "General Ledgers Export - " + formattedDate + ".xlsx";
+        var fileName = "Sales Purchase Export - " + formattedDate + ".xlsx";
         var data = {
                 ref_number: '{{ $ref_number }}',
-                id_account_code: '{{ $id_account_code }}',
-                source: '{{ $source }}',
                 searchDate: '{{ $searchDate }}',
                 startdate: '{{ $startdate }}',
                 enddate: '{{ $enddate }}'
@@ -258,82 +233,44 @@
                     orderable: false,
                     searchable: false
                 },
-                // {
-                // data: null,
-                //     render: function(data, type, row, meta) {
-                //         return meta.row + meta.settings._iDisplayStart + 1;
-                //     },
-                //     orderable: false,
-                //     searchable: false,
-                //     className: 'align-middle text-center',
-                // },
+                {
+                data: null,
+                    render: function(data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    },
+                    orderable: false,
+                    searchable: false,
+                    className: 'align-middle text-center',
+                },
                 {
                     data: 'ref_number',
                     name: 'ref_number',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center text-bold'
+                    className: 'align-middle text-bold'
                 },
                 {
-                    data: 'created_at',
-                    searchable: true,
-                    orderable: true,
-                    className: 'align-middle text-center',
-                    render: function(data, type, row) {
-                        var created_at = new Date(row.created_at);
-                        return created_at.toLocaleDateString('es-CL').replace(/\//g, '-');
-                    },
-                },
-                {
-                    data: 'account_name',
-                    searchable: true,
-                    orderable: true,
-                    render: function(data, type, row) {
-                        return row.account_code + ' - <b>' + row.account_name + '</b>';
-                    },
-                },
-                {
-                    data: 'debit',
-                    orderable: true,
-                    className: 'align-middle text-center',
-                    render: function(data, type, row) {
-                        var html
-                        if(row.debit != null) {
-                            // Convert the opening balance to the desired format
-                            html = parseFloat(row.debit).toLocaleString('en-US', {
-                                minimumFractionDigits: 3,
-                                maximumFractionDigits: 3
-                            });
-                        } else {
-                            // Convert the opening balance to the desired format
-                            html = parseFloat(row.kredit).toLocaleString('en-US', {
-                                minimumFractionDigits: 3,
-                                maximumFractionDigits: 3
-                            });
-                        }
-                        return html;
-                    },
-                },
-                {
-                    data: 'debit',
-                    orderable: true,
-                    className: 'align-middle text-center',
-                    render: function(data, type, row) {
-                        var html
-                        if(row.debit != null){
-                            html = '<span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>';
-                        } else {
-                            html = '<span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>';
-                        } 
-                        return html;
-                    },
-                },
-                {
-                    data: 'source',
-                    name: 'source',
+                    data: 'ref_number',
+                    name: 'ref_number',
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center'
+                },
+                {
+                    data: 'created_by',
+                    searchable: true,
+                    orderable: true,
+                    render: function(data, type, row) {
+                        var created_at = new Date(row.created_at);
+                        return row.created_by + '<br><b>At. </b>' + created_at.toLocaleDateString('es-CL').replace(/\//g, '-');
+                    },
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    className: 'align-middle text-center',
                 },
             ],
             bAutoWidth: false,

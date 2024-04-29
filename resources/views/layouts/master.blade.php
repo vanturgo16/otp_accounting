@@ -170,9 +170,15 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('transpurchase.index') }}">
                                 <i class="mdi mdi-file-download"></i>
                                 <span>Purchase</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('transimport.index') }}">
+                                <i class="mdi mdi-import"></i>
+                                <span>Import</span>
                             </a>
                         </li>
                         {{-- <li>

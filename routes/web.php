@@ -9,6 +9,8 @@ use App\Http\Controllers\MstAccountTypesController;
 use App\Http\Controllers\TransDataBankController;
 use App\Http\Controllers\TransDataKasController;
 use App\Http\Controllers\TransSalesController;
+use App\Http\Controllers\TransPurchaseController;
+use App\Http\Controllers\TransImportController;
 
 //Route Login
 Route::get('/', [AuthController::class, 'login'])->name('login');
@@ -79,7 +81,33 @@ Route::middleware(['auth'])->group(function () {
     Route::post('transsales/deleteselected', [TransSalesController::class, 'deleteselected'])->name('transsales.deleteselected');
     Route::post('transsales/deactiveselected', [TransSalesController::class, 'deactiveselected'])->name('transsales.deactiveselected');
 
+    //TransPurchase
+    Route::get('transpurchase', [TransPurchaseController::class, 'index'])->name('transpurchase.index');
+    Route::post('transpurchase', [TransPurchaseController::class, 'index'])->name('transpurchase.index');
+    Route::get('transpurchase/create', [TransPurchaseController::class, 'create'])->name('transpurchase.create');
+    Route::post('transpurchase/store', [TransPurchaseController::class, 'store'])->name('transpurchase.store');
+    Route::get('transpurchase/info/{id}', [TransPurchaseController::class, 'info'])->name('transpurchase.info');
+    Route::get('transpurchase/edit/{id}', [TransPurchaseController::class, 'edit'])->name('transpurchase.edit');
+    Route::post('transpurchase/update/{id}', [TransPurchaseController::class, 'update'])->name('transpurchase.update');
+    Route::post('transpurchase/delete/{id}', [TransPurchaseController::class, 'delete'])->name('transpurchase.delete');
+    Route::post('transpurchase/deleteselected', [TransPurchaseController::class, 'deleteselected'])->name('transpurchase.deleteselected');
+    Route::post('transpurchase/deactiveselected', [TransPurchaseController::class, 'deactiveselected'])->name('transpurchase.deactiveselected');
+
+    //TransImport
+    Route::get('transimport', [TransImportController::class, 'index'])->name('transimport.index');
+    Route::post('transimport', [TransImportController::class, 'index'])->name('transimport.index');
+    Route::get('transimport/create', [TransImportController::class, 'create'])->name('transimport.create');
+    Route::post('transimport/store', [TransImportController::class, 'store'])->name('transimport.store');
+    Route::get('transimport/info/{id}', [TransImportController::class, 'info'])->name('transimport.info');
+    Route::get('transimport/edit/{id}', [TransImportController::class, 'edit'])->name('transimport.edit');
+    Route::post('transimport/update/{id}', [TransImportController::class, 'update'])->name('transimport.update');
+    Route::post('transimport/delete/{id}', [TransImportController::class, 'delete'])->name('transimport.delete');
+    Route::post('transimport/deleteselected', [TransImportController::class, 'deleteselected'])->name('transimport.deleteselected');
+    Route::post('transimport/deactiveselected', [TransImportController::class, 'deactiveselected'])->name('transimport.deactiveselected');
+
     //GeneralLedger
     Route::get('generalledger', [GeneralLedgersController::class, 'index'])->name('generalledger.index');
     Route::post('generalledger', [GeneralLedgersController::class, 'index'])->name('generalledger.index');
+    Route::get('generalledger/create', [GeneralLedgersController::class, 'create'])->name('generalledger.create');
+    Route::post('generalledger/store', [GeneralLedgersController::class, 'store'])->name('generalledger.store');
 });

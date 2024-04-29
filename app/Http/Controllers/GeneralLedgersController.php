@@ -10,6 +10,7 @@ use Yajra\DataTables\Facades\DataTables;
 // Model
 use App\Models\MstAccountCodes;
 use App\Models\GeneralLedger;
+use App\Models\MstDropdowns;
 
 class GeneralLedgersController extends Controller
 {
@@ -69,5 +70,72 @@ class GeneralLedgersController extends Controller
 
         return view('generalledger.index',compact('datas', 'acccodes',
             'ref_number', 'id_account_code', 'source', 'searchDate', 'startdate', 'enddate', 'flag'));
+    }
+
+    public function create(Request $request)
+    {
+        $source = MstDropdowns::where('category', 'Source Accounting')->get();
+        $accountcodes = MstAccountCodes::get();
+
+        //Audit Log
+        $this->auditLogsShort('View Create New Transaction General Ledger');
+
+        return view('generalledger.create',compact('source', 'accountcodes'));
+    }
+
+    
+    public function store(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'transaction_number' => 'required',
+            'transaction_date' => 'required',
+        ]);
+        
+        if($request->source == "AddNew"){
+            $source = $request->addsource;
+        }
+        else{
+            $source = $request->source;
+        }
+
+        DB::beginTransaction();
+        try{
+
+            if($request->addmore != null){
+                foreach($request->addmore as $item){
+                    if($item['account_code'] != null && $item['nominal'] != null){
+                        $nominal = str_replace(',', '', $item['nominal']);
+                        $nominal = number_format((float)$nominal, 3, '.', '');
+
+                        if($item['type'] == 'Debit'){
+                            $debit = $nominal;
+                            $kredit = null;
+                        } else {
+                            $debit = null;
+                            $kredit = $nominal;
+                        }
+    
+                        GeneralLedger::create([
+                            'ref_number' => $request->transaction_number,
+                            'date_transaction' => $request->transaction_date,
+                            'id_account_code' => $item['account_code'],
+                            'debit' => $debit,
+                            'kredit' => $kredit,
+                            'source' => $source,
+                        ]);
+                    }
+                }
+            }
+
+            //Audit Log
+            $this->auditLogsShort('Create New Transaction General Ledger ('. $request->transaction_number . ')');
+
+            DB::commit();
+            return redirect()->route('transsales.index')->with(['success' => 'Success Create New Transaction']);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Create New Transaction!']);
+        }
     }
 }
