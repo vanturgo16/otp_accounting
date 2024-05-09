@@ -72,3 +72,29 @@ function exportToExcel(route, filename, requestData) {
         return buf;
     }
 }
+
+function generateExcel(data, filename) {
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    var blobData = XLSX.write(wb, {
+        bookType: "xlsx",
+        mimeType:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        type: "binary",
+    });
+    var blob = new Blob([s2ab(blobData)], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    var link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+}
+
+function s2ab(s) {
+    var buf = new ArrayBuffer(s.length);
+    var view = new Uint8Array(buf);
+    for (var i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xff;
+    return buf;
+}

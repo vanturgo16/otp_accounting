@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <title>Accounting | PT. OTP</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/images/icon-otp.png') }}">
@@ -21,13 +22,16 @@
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- App Css-->
     <link href="{{ asset('assets/css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css" />
-    {{-- Custom --}}
-    <link href="{{ asset('assets/css/custom.css') }}" id="app-style" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/css/custom2.css') }}" id="app-style" rel="stylesheet" type="text/css" />
     {{-- Jquery --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    {{-- select 2 --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    {{-- Custom --}}
+    <link href="{{ asset('assets/css/custom.css') }}" id="app-style" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/css/custom2.css') }}" id="app-style" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
@@ -154,19 +158,37 @@
                         <li class="menu-title" data-key="t-menu">Accounting</li>
 
                         <li>
-                            <a href="#">
-                                <i class="mdi mdi-text-box-outline"></i>
-                                <span>Sales Invoice</span>
+                            <a href="{{ route('generalledger.index') }}">
+                                <i class="mdi mdi-file-cabinet"></i>
+                                <span>General Ledger</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('transsales.index') }}">
+                                <i class="mdi mdi-file-upload"></i>
+                                <span>Sales</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('transpurchase.index') }}">
+                                <i class="mdi mdi-file-download"></i>
+                                <span>Purchase</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('transimport.index') }}">
+                                <i class="mdi mdi-import"></i>
+                                <span>Import</span>
+                            </a>
+                        </li>
+                        {{-- <li>
+                            <a href="{{ route('transdatakas.index') }}">
                                 <i class="mdi mdi-script-text"></i>
                                 <span>Kas Transaction</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('transdatabank.index') }}">
                                 <i class="mdi mdi-script-text"></i>
                                 <span>Bank Transaction</span>
                             </a>
@@ -200,7 +222,7 @@
                                 <i class="mdi mdi-script-text"></i>
                                 <span>Nr Dr Transaction</span>
                             </a>
-                        </li>
+                        </li> --}}
 
                     </ul>
                 </div>
@@ -414,7 +436,7 @@
     <div class="rightbar-overlay"></div>
 
     <!-- JAVASCRIPT -->
-    <script src="{{ asset('assets/libs/jquery/jquery.min.js') }}"></script>
+    {{-- <script src="{{ asset('assets/libs/jquery/jquery.min.js') }}"></script> --}}
     <script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('assets/libs/metismenu/metisMenu.min.js') }}"></script>
     <script src="{{ asset('assets/libs/simplebar/simplebar.min.js') }}"></script>
@@ -449,6 +471,9 @@
     <!-- dashboard init -->
     <script src="{{ asset('assets/js/pages/dashboard.init.js') }}"></script>
     <script src="{{ asset('assets/js/app.js') }}"></script>
+    <!-- custom -->
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <script src="{{ asset('assets/js/bulkaction.js') }}"></script>
 
     <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
 </body>
