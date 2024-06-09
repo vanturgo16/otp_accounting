@@ -128,6 +128,7 @@
                                     <th class="align-middle text-center">Delivery Note Number</th>
                                     <th class="align-middle text-center">Invoice Number</th>
                                     <th class="align-middle text-center">Quantity</th>
+                                    <th class="align-middle text-center">Total Transaction</th>
                                     <th class="align-middle text-center">Created By</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -249,7 +250,7 @@
                     name: 'ref_number',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-bold'
+                    className: 'align-middle text-center text-bold'
                 },
                 {
                     data: 'delivery_note_number',
@@ -277,6 +278,16 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center'
+                },
+                {
+                    data: 'count',
+                    name: 'count',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        return '<h5><span class="badge bg-info">'+ row.count +'</span></h5>';
+                    },
                 },
                 {
                     data: 'created_by',

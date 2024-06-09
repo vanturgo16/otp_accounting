@@ -43,6 +43,11 @@ class TransImportController extends Controller
         }
         
         $datas = $datas->get();
+
+        foreach($datas as $data){
+            $count = GeneralLedger::where('ref_number', $data->ref_number)->count();
+            $data->count = $count;
+        }
         
         // Datatables
         if ($request->ajax()) {

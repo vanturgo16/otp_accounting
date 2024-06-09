@@ -126,6 +126,7 @@
                                     <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Ref. Number</th>
                                     <th class="align-middle text-center">Tax Number</th>
+                                    <th class="align-middle text-center">Total Transaction</th>
                                     <th class="align-middle text-center">Created By</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -247,7 +248,7 @@
                     name: 'ref_number',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-bold'
+                    className: 'align-middle text-center text-bold'
                 },
                 {
                     data: 'tax_invoice_number',
@@ -255,6 +256,16 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center'
+                },
+                {
+                    data: 'count',
+                    name: 'count',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        return '<h5><span class="badge bg-info">'+ row.count +'</span></h5>';
+                    },
                 },
                 {
                     data: 'created_by',
