@@ -40,9 +40,38 @@
                                 <br><span>{{ $transaction_date }}</span>
                             </div>
                             <hr>
-                            <div class="col-lg-6 mb-3">
+                            {{-- <div class="col-lg-6 mb-3">
                                 <label class="form-label mb-0">Purchase Invoices</label>
                                 <br><span></span>
+                            </div> --}}
+
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Delivery Note Date</label>
+                                <br><span>{{ $data->delivery_note_date }}</span>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Delivery Note Number</label>
+                                <br><span>{{ $data->delivery_note_number }}</span>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Invoice Date</label>
+                                <br><span>{{ $data->invoice_date }}</span>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Invoice Number</label>
+                                <br><span>{{ $data->invoice_number }}</span>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Tax Invoice Number</label>
+                                <br><span>{{ $data->tax_invoice_number }}</span>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Quantity</label>
+                                <br><span>{{ $data->quantity }}</span>
+                            </div>
+                            <div class="col-lg-12 mb-3">
+                                <label class="form-label mb-0">Description</label>
+                                <br><span>{{ $data->description }}</span>
                             </div>
 
                             <div class="col-lg-12 mt-3">
@@ -67,14 +96,10 @@
                                                             {{ $item->account_code." - ".$item->account_name }}
                                                         </td>
                                                         <td>
-                                                            @if($item->debit != null)
-                                                                {{ number_format($item->debit, 3, '.', ',') }}
-                                                            @else
-                                                                {{ number_format($item->kredit, 3, '.', ',') }}
-                                                            @endif
+                                                            {{ number_format($item->amount, 3, ',', '.') }}
                                                         </td>
                                                         <td>
-                                                            @if($item->debit != null)
+                                                            @if($item->transaction == 'D')
                                                                 <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
                                                             @else
                                                                 <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>

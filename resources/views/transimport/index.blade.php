@@ -250,8 +250,8 @@
                     className: 'align-middle text-bold'
                 },
                 {
-                    data: 'ref_number',
-                    name: 'ref_number',
+                    data: 'tax_invoice_number',
+                    name: 'tax_invoice_number',
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center'

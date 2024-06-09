@@ -45,11 +45,39 @@
                                     <input type="date" class="form-control" name="transaction_date" value="" required>
                                 </div>
                                 <hr>
-                                <div class="col-lg-6 mb-3">
+                                {{-- <div class="col-lg-6 mb-3">
                                     <label class="form-label">Purchase Source??</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="purchase_source" required>
                                         <option value="" selected>-- Select --</option>
                                     </select>
+                                </div> --}}
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Delivery Note Date</label><label style="color: darkred">*</label>
+                                    <input type="date" class="form-control" name="delivery_note_date" value="" required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Delivery Note Number</label><label style="color: darkred">*</label>
+                                    <input type="text" class="form-control" name="delivery_note_number" value="" placeholder="Input Delivery Note Number.." required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Invoice Date</label><label style="color: darkred">*</label>
+                                    <input type="date" class="form-control" name="invoice_date" value="" required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Invoice Number</label><label style="color: darkred">*</label>
+                                    <input type="text" class="form-control" name="invoice_number" value="" placeholder="Input Invoice Number.." required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Tax Invoice Number</label><label style="color: darkred">*</label>
+                                    <input type="text" class="form-control" name="tax_invoice_number" value="" placeholder="Input Tax Invoice Number.." required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Quantity</label><label style="color: darkred">*</label>
+                                    <input type="number" class="form-control" name="quantity" value="" placeholder="Input Quantity.." required>
+                                </div>
+                                <div class="col-lg-12 mb-3">
+                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
+                                    <textarea class="form-control" rows="3" type="text" name="description" placeholder="Input Description.." value="" required></textarea>
                                 </div>
 
                                 <div class="col-lg-12 mt-3">
@@ -125,7 +153,7 @@
         }
         var submitButton = this.querySelector('button[name="sb"]');
         submitButton.disabled = true;
-        submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+        submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
         return true;
     });
 </script>
@@ -160,40 +188,16 @@
                     <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>
                 </td>
             </tr>`);
+
         $(".js-example-basic-single").select2();
+
+        document.querySelectorAll(".rupiah-input").forEach((input) => {
+            input.addEventListener("input", formatCurrencyInput);
+        });
     });
     $(document).on('click', '.remove-tr', function() {
         $(this).parents('tr').remove();
     });
-
-    $("#dynamicTable").on('keyup', '.rupiah-input', function(e) {
-        this.value = formatCurrency(this.value, ' ');
-    });
-
-    $("#dynamicTable").on('change', '.addpayment', function() {
-        var $relatedInput = $(this).closest('tr').find('.rupiah-input');
-        if ($(this).val() != "") {
-            $relatedInput.attr('required', true);
-        } else {
-            $relatedInput.removeAttr('required');
-        }
-    });
-
-    function formatCurrency(number, prefix) {
-        var number_string = number.replace(/[^.\d]/g, '').toString(),
-            split = number_string.split('.'),
-            sisa = split[0].length % 3,
-            rupiah = split[0].substr(0, sisa),
-            ribuan = split[0].substr(sisa).match(/\d{1,3}/gi);
-
-        if (ribuan) {
-            separator = sisa ? ',' : '';
-            rupiah += separator + ribuan.join(',');
-        }
-
-        rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
-        return prefix == undefined ? rupiah : (rupiah ? '' + rupiah : '');
-    }
 </script>
 
 @endsection

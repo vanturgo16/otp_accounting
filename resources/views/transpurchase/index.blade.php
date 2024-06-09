@@ -125,7 +125,9 @@
                                     </th>
                                     <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Ref. Number</th>
-                                    <th class="align-middle text-center">Purchase Number</th>
+                                    <th class="align-middle text-center">Delivery Note Number</th>
+                                    <th class="align-middle text-center">Invoice Number</th>
+                                    <th class="align-middle text-center">Quantity</th>
                                     <th class="align-middle text-center">Created By</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -250,8 +252,28 @@
                     className: 'align-middle text-bold'
                 },
                 {
-                    data: 'ref_number',
-                    name: 'ref_number',
+                    data: 'delivery_note_number',
+                    searchable: true,
+                    orderable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var delivery_note_date = new Date(row.delivery_note_date);
+                        return '<b>( ' + row.delivery_note_number + ' )</b><br><b>Date. </b>' + delivery_note_date.toLocaleDateString('es-CL').replace(/\//g, '-');
+                    },
+                },
+                {
+                    data: 'invoice_number',
+                    searchable: true,
+                    orderable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var invoice_date = new Date(row.invoice_date);
+                        return '<b>( ' + row.invoice_number + ' )</b><br><b>Date. </b>' + invoice_date.toLocaleDateString('es-CL').replace(/\//g, '-');
+                    },
+                },
+                {
+                    data: 'quantity',
+                    name: 'quantity',
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center'

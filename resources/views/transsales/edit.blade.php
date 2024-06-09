@@ -35,13 +35,17 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-lg-4 mb-3">
                                     <label class="form-label mb-0">Ref Number</label>
                                     <br><h4><span class="badge bg-info">{{ $data->ref_number }}</span></h4>
                                 </div>
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-lg-4 mb-3">
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
                                     <input type="date" class="form-control" name="transaction_date" value="{{ $transaction_date }}" required>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label">No Delivery Note</label><label style="color: darkred">*</label>
+                                    <input type="text" class="form-control" name="no_delivery_note" value="{{ $data->no_delivery_note }}" placeholder="Input No Delivery Note.." required>
                                 </div>
                                 <hr>
                                 <div class="col-lg-6 mb-3">
@@ -107,17 +111,13 @@
                                                                 </select>
                                                             </td>
                                                             <td>
-                                                                @if($general_ledger->debit != null)
-                                                                    <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="{{ number_format($general_ledger->debit, 3, '.', ',') }}" required>
-                                                                @else
-                                                                    <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="{{ number_format($general_ledger->kredit, 3, '.', ',') }}" required>
-                                                                @endif
+                                                                <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="{{ number_format($general_ledger->amount, 3, ',', '.') }}" required>
                                                             </td>
                                                             <td>
                                                                 <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[0][type]" required>
                                                                     <option value="">- Select Type -</option>
-                                                                    <option value="Debit" @if($general_ledger->debit != null) selected="selected" @endif>Debit</option>
-                                                                    <option value="Kredit" @if($general_ledger->kredit != null) selected="selected" @endif>Kredit</option>
+                                                                    <option value="Debit" @if($general_ledger->transaction == "D") selected="selected" @endif>Debit</option>
+                                                                    <option value="Kredit" @if($general_ledger->transaction == "K") selected="selected" @endif>Kredit</option>
                                                                 </select>
                                                             </td>
                                                             <td style="text-align:center"><button type="button" name="add" id="adds" class="btn btn-success"><i class="fas fa-plus"></i></button></td>
@@ -137,17 +137,13 @@
                                                                     </select>
                                                                 </td>
                                                                 <td>
-                                                                    @if($gl->debit != null)
-                                                                        <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[{{ $index }}][nominal]" value="{{ number_format($gl->debit, 3, '.', ',') }}" required>
-                                                                    @else
-                                                                        <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[{{ $index }}][nominal]" value="{{ number_format($gl->kredit, 3, '.', ',') }}" required>
-                                                                    @endif
+                                                                    <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[{{ $index }}][nominal]" value="{{ number_format($gl->amount, 3, ',', '.') }}" required>
                                                                 </td>
                                                                 <td>
                                                                     <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[{{ $index }}][type]" required>
                                                                         <option value="">- Select Type -</option>
-                                                                        <option value="Debit" @if($gl->debit != null) selected="selected" @endif>Debit</option>
-                                                                        <option value="Kredit" @if($gl->kredit != null) selected="selected" @endif>Kredit</option>
+                                                                        <option value="Debit" @if($gl->transaction == "D") selected="selected" @endif>Debit</option>
+                                                                        <option value="Kredit" @if($gl->transaction == "K") selected="selected" @endif>Kredit</option>
                                                                     </select>
                                                                 </td>
                                                                 <td style="text-align:center">
@@ -192,7 +188,7 @@
         }
         var submitButton = this.querySelector('button[name="sb"]');
         submitButton.disabled = true;
-        submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+        submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
         return true;
     });
 </script>
@@ -227,40 +223,16 @@
                     <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>
                 </td>
             </tr>`);
+
         $(".js-example-basic-single").select2();
+
+        document.querySelectorAll(".rupiah-input").forEach((input) => {
+            input.addEventListener("input", formatCurrencyInput);
+        });
     });
     $(document).on('click', '.remove-tr', function() {
         $(this).parents('tr').remove();
     });
-
-    $("#dynamicTable").on('keyup', '.rupiah-input', function(e) {
-        this.value = formatCurrency(this.value, ' ');
-    });
-
-    $("#dynamicTable").on('change', '.addpayment', function() {
-        var $relatedInput = $(this).closest('tr').find('.rupiah-input');
-        if ($(this).val() != "") {
-            $relatedInput.attr('required', true);
-        } else {
-            $relatedInput.removeAttr('required');
-        }
-    });
-
-    function formatCurrency(number, prefix) {
-        var number_string = number.replace(/[^.\d]/g, '').toString(),
-            split = number_string.split('.'),
-            sisa = split[0].length % 3,
-            rupiah = split[0].substr(0, sisa),
-            ribuan = split[0].substr(sisa).match(/\d{1,3}/gi);
-
-        if (ribuan) {
-            separator = sisa ? ',' : '';
-            rupiah += separator + ribuan.join(',');
-        }
-
-        rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
-        return prefix == undefined ? rupiah : (rupiah ? '' + rupiah : '');
-    }
 </script>
 
 {{-- Sales Invoices Choose --}}

@@ -127,7 +127,11 @@ class TransSalesController extends Controller
         // dd($request->all());
         $request->validate([
             'id_sales_invoices' => 'required',
-            'date_transaction' => 'required',
+            'transaction_date' => 'required',
+            'no_delivery_note' => 'required',
+            'addmore.*.account_code' => 'required',
+            'addmore.*.nominal' => 'required',
+            'addmore.*.type' => 'required',
         ]);
         
         $refNumber = $this->generateRefNumber();
@@ -137,29 +141,28 @@ class TransSalesController extends Controller
             TransSales::create([
                 'ref_number' => $refNumber,
                 'id_sales_invoices' => $request->id_sales_invoices,
+                'no_delivery_note' => $request->no_delivery_note,
                 'created_by' => auth()->user()->email
             ]);
 
             if($request->addmore != null){
                 foreach($request->addmore as $item){
                     if($item['account_code'] != null && $item['nominal'] != null){
-                        $nominal = str_replace(',', '', $item['nominal']);
-                        $nominal = number_format((float)$nominal, 3, '.', '');
+                        $nominal = str_replace('.', '', $item['nominal']);
+                        $nominal = str_replace(',', '.', $nominal);
 
                         if($item['type'] == 'Debit'){
-                            $debit = $nominal;
-                            $kredit = null;
+                            $transaction = "D";
                         } else {
-                            $debit = null;
-                            $kredit = $nominal;
+                            $transaction = "K";
                         }
     
                         GeneralLedger::create([
                             'ref_number' => $refNumber,
                             'date_transaction' => $request->transaction_date,
                             'id_account_code' => $item['account_code'],
-                            'debit' => $debit,
-                            'kredit' => $kredit,
+                            'transaction' => $transaction,
+                            'amount' => $nominal,
                             'source' => 'Sales Transaction',
                         ]);
                     }
@@ -240,15 +243,21 @@ class TransSalesController extends Controller
         $request->validate([
             'id_sales_invoices' => 'required',
             'transaction_date' => 'required',
+            'no_delivery_note' => 'required',
+            'addmore.*.account_code' => 'required',
+            'addmore.*.nominal' => 'required',
+            'addmore.*.type' => 'required',
         ]);
 
         $databefore = TransSales::where('id', $id)->first();
         $databefore->id_sales_invoices = $request->id_sales_invoices;
+        $databefore->no_delivery_note = $request->no_delivery_note;
 
         // Compare Transaction
         $transbefore = GeneralLedger::where('ref_number', $databefore->ref_number)->get();
         $inputtrans = $request->addmore;
         $updatetrans = false;
+        
         if ($transbefore->isNotEmpty() && is_array($inputtrans)) {
             // Check if lengths are different
             if (count($transbefore) != count($inputtrans)) {
@@ -264,17 +273,10 @@ class TransSalesController extends Controller
                     }
                     $detail = $inputtrans[$index];
                     // Compare attributes (also remove formatting from amount_fee for accurate comparison)
-                    if($detail['type'] == 'Debit'){
-                        $debit = str_replace(',', '', $detail['nominal']);
-                        $debit = number_format((float)$debit, 3, '.', '');
-                        $kredit = null;
-                    } else {
-                        $debit = null;
-                        $kredit = str_replace(',', '', $detail['nominal']);
-                        $kredit = number_format((float)$kredit, 3, '.', '');
-                    }
-
-                    if ($trans->id_account_code != $detail['account_code'] || $trans->debit != $debit || $trans->kredit != $kredit) {
+                    $nominal = str_replace('.', '', $detail['nominal']);
+                    $nominal = str_replace(',', '.', $nominal);
+                    $type = ($detail['type'] == 'Debit') ? 'D' : 'K';
+                    if ($trans->id_account_code != $detail['account_code'] || $trans->amount != $nominal || $trans->transaction != $type) {
                         $updatetrans = true;
                         break;
                     }
@@ -299,6 +301,7 @@ class TransSalesController extends Controller
                 if($databefore->isDirty()){
                     TransSales::where('id', $id)->update([
                         'id_sales_invoices' => $request->id_sales_invoices,
+                        'no_delivery_note' => $request->no_delivery_note,
                         'updated_by' => auth()->user()->email
                     ]);
                 }
@@ -313,21 +316,21 @@ class TransSalesController extends Controller
                     if($request->addmore != null){
                         foreach($request->addmore as $item){
                             if($item['account_code'] != null && $item['nominal'] != null){
-                                $nominal = str_replace(',', '', $item['nominal']);
-                                $nominal = number_format((float)$nominal, 3, '.', '');
+                                $nominal = str_replace('.', '', $item['nominal']);
+                                $nominal = str_replace(',', '.', $nominal);
+
                                 if($item['type'] == 'Debit'){
-                                    $debit = $nominal;
-                                    $kredit = null;
+                                    $transaction = "D";
                                 } else {
-                                    $debit = null;
-                                    $kredit = $nominal;
+                                    $transaction = "K";
                                 }
+
                                 GeneralLedger::create([
                                     'ref_number' => $databefore->ref_number,
                                     'date_transaction' => $request->transaction_date,
                                     'id_account_code' => $item['account_code'],
-                                    'debit' => $debit,
-                                    'kredit' => $kredit,
+                                    'transaction' => $transaction,
+                                    'amount' => $nominal,
                                     'source' => 'Sales Transaction',
                                 ]);
                             }

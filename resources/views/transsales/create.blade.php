@@ -35,14 +35,18 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-lg-4 mb-3">
                                     <label class="form-label">Ref Number</label><label style="color: darkred">*</label>
                                     <br>
                                     <span class="badge bg-info text-white">Auto Generate</span>
                                 </div>
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-lg-4 mb-3">
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
                                     <input type="date" class="form-control" name="transaction_date" value="" required>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label">No Delivery Note</label><label style="color: darkred">*</label>
+                                    <input type="text" class="form-control" name="no_delivery_note" value="" placeholder="Input No Delivery Note.." required>
                                 </div>
                                 <hr>
                                 <div class="col-lg-6 mb-3">
@@ -154,7 +158,7 @@
         }
         var submitButton = this.querySelector('button[name="sb"]');
         submitButton.disabled = true;
-        submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+        submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
         return true;
     });
 </script>
@@ -189,40 +193,16 @@
                     <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>
                 </td>
             </tr>`);
+
         $(".js-example-basic-single").select2();
+
+        document.querySelectorAll(".rupiah-input").forEach((input) => {
+            input.addEventListener("input", formatCurrencyInput);
+        });
     });
     $(document).on('click', '.remove-tr', function() {
         $(this).parents('tr').remove();
     });
-
-    $("#dynamicTable").on('keyup', '.rupiah-input', function(e) {
-        this.value = formatCurrency(this.value, ' ');
-    });
-
-    $("#dynamicTable").on('change', '.addpayment', function() {
-        var $relatedInput = $(this).closest('tr').find('.rupiah-input');
-        if ($(this).val() != "") {
-            $relatedInput.attr('required', true);
-        } else {
-            $relatedInput.removeAttr('required');
-        }
-    });
-
-    function formatCurrency(number, prefix) {
-        var number_string = number.replace(/[^.\d]/g, '').toString(),
-            split = number_string.split('.'),
-            sisa = split[0].length % 3,
-            rupiah = split[0].substr(0, sisa),
-            ribuan = split[0].substr(sisa).match(/\d{1,3}/gi);
-
-        if (ribuan) {
-            separator = sisa ? ',' : '';
-            rupiah += separator + ribuan.join(',');
-        }
-
-        rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
-        return prefix == undefined ? rupiah : (rupiah ? '' + rupiah : '');
-    }
 </script>
 
 {{-- Sales Invoices Choose --}}

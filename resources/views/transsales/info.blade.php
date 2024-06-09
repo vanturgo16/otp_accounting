@@ -93,14 +93,10 @@
                                                             {{ $item->account_code." - ".$item->account_name }}
                                                         </td>
                                                         <td>
-                                                            @if($item->debit != null)
-                                                                {{ number_format($item->debit, 3, '.', ',') }}
-                                                            @else
-                                                                {{ number_format($item->kredit, 3, '.', ',') }}
-                                                            @endif
+                                                            {{ number_format($item->amount, 3, ',', '.') }}
                                                         </td>
                                                         <td>
-                                                            @if($item->debit != null)
+                                                            @if($item->transaction == 'D')
                                                                 <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
                                                             @else
                                                                 <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>

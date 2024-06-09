@@ -152,8 +152,50 @@
         }
         var submitButton = this.querySelector('button[name="sb"]');
         submitButton.disabled = true;
-        submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+        submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
         return true;
+    });
+</script>
+
+{{-- Dynamic Table --}}                                                    
+<script>
+    var i = 0;
+    $("#adds").click(function() {
+        $(".js-example-basic-single").select2();
+        ++i;
+        $("#dynamicTable").append(
+            `<tr>
+                <td>
+                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[`+i+`][account_code]" required>
+                        <option value="">- Select Account Code -</option>
+                        @foreach( $accountcodes as $item )
+                            <option value="{{ $item->id }}">{{ $item->account_code }} - {{ $item->account_name }}</option>
+                        @endforeach
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
+                </td>
+                <td>
+                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
+                        <option value="">- Select Type -</option>
+                        <option value="Debit">Debit</option>
+                        <option value="Kredit">Kredit</option>
+                    </select>
+                </td>
+                <td style="text-align:center">
+                    <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>
+                </td>
+            </tr>`);
+
+        $(".js-example-basic-single").select2();
+
+        document.querySelectorAll(".rupiah-input").forEach((input) => {
+            input.addEventListener("input", formatCurrencyInput);
+        });
+    });
+    $(document).on('click', '.remove-tr', function() {
+        $(this).parents('tr').remove();
     });
 </script>
 
