@@ -39,12 +39,100 @@
                                 <label class="form-label mb-0">Transaction Date</label>
                                 <br><span>{{ $transaction_date }}</span>
                             </div>
-                            <hr>
-                            {{-- <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Purchase Invoices</label>
-                                <br><span></span>
-                            </div> --}}
+                        </div>
+                        <hr>
+                        <div class="card p-2" style="background-color:#f0f2f7">
+                            <div class="row">
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Purchase Order Number</label>
+                                    <br><span>{{ $data->po_number }}</span>
+                                </div>
+                                <div class="col-6 mb-2"></div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">PO Date</label>
+                                    <br><span>{{ $data->date }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Supplier</label>
+                                    <br><span>{{ $data->supplier }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Reference Number</label>
+                                    <br><span>{{ $data->reference_number }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Status</label>
+                                    <br><span>{{ $data->status }}</span>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Own Remark</label>
+                                    <br><span>
+                                        @if($data->own_remarks == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->own_remarks }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Supplier Remark</label>
+                                    <br>
+                                    <span>
+                                        @if($data->supplier_remarks == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->supplier_remarks }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Sub Total</label>
+                                    <br>
+                                    <span>
+                                        @if($data->sub_total == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->sub_total }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Total Discount</label>
+                                    <br>
+                                    <span>
+                                        @if($data->total_discount == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->total_discount }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Total Tax</label>
+                                    <br>
+                                    <span>
+                                        @if($data->total_ppn == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->total_ppn }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Total Amount</label>
+                                    <br>
+                                    <span>
+                                        @if($data->total_amount == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->total_amount }}
+                                        @endif
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label mb-0">Delivery Note Date</label>
                                 <br><span>{{ $data->delivery_note_date }}</span>

@@ -50,11 +50,11 @@
                                 </div>
                                 <hr>
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Sales Invoices</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_sales_invoices" required>
+                                    <label class="form-label">Sales Order</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_sales_order" required>
                                         <option value="" selected>-- Select --</option>
                                         @foreach($sales as $item)
-                                            <option value="{{ $item->id }}">{{ $item->invoice_number }}</option>
+                                            <option value="{{ $item->id }}">{{ $item->so_number." - ". $item->status }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -62,27 +62,60 @@
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Customer Name</label>
-                                    <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
+                                    <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Customer Address</label>
-                                    <input class="form-control" id="customer_address" type="text" value="" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
+                                    <input class="form-control" id="customer_address" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
                                 </div>
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-lg-3 mb-3">
                                     <label class="form-label">Date</label>
-                                    <input class="form-control" id="date" type="text" value="" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
+                                    <input class="form-control" id="date" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
                                 </div>
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-lg-3 mb-3">
                                     <label class="form-label">Due Date</label>
-                                    <input class="form-control" id="due_date" type="text" value="" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
+                                    <input class="form-control" id="due_date" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
                                 </div>
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-lg-3 mb-3">
                                     <label class="form-label">PPN</label>
-                                    <input class="form-control" id="ppn" type="text" value="" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
+                                    <input class="form-control" id="ppn" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
                                 </div>
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-lg-3 mb-3">
                                     <label class="form-label">Status</label>
-                                    <input class="form-control" id="statusinvoices" type="text" value="" placeholder="Select Sales Invoices.." style="background-color:#EAECF4" readonly>
+                                    <input class="form-control" id="statusorder" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">SO Type</label>
+                                    <input class="form-control" id="so_type" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">SO Category</label>
+                                    <input class="form-control" id="so_category" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Product</label>
+                                    <input class="form-control" id="product" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Type Product</label>
+                                    <input class="form-control" id="type_product" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Quantity</label>
+                                    <input class="form-control" id="qty" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Unit</label>
+                                    <input class="form-control" id="unit" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Price</label>
+                                    <input class="form-control" id="price" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Total Price</label>
+                                    <input class="form-control" id="total_price" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
                                 </div>
 
                                 <div class="col-lg-12 mt-3">
@@ -205,28 +238,46 @@
     });
 </script>
 
-{{-- Sales Invoices Choose --}}
+{{-- Sales Order Choose --}}
 <script>
-    $('select[name="id_sales_invoices"]').on('change', function() {
+    $('select[name="id_sales_order"]').on('change', function() {
         $('#customer_name').val("");
         $('#customer_address').val("");
         $('#date').val("");
         $('#due_date').val("");
         $('#ppn').val("");
-        $('#statusinvoices').val("");
+        $('#statusorder').val("");
 
-        var id_sales_invoices = $(this).val();
-        if(id_sales_invoices == ""){
+        $('#so_type').val("");
+        $('#so_category').val("");
+        $('#product').val("");
+        $('#type_product').val("");
+        $('#qty').val("");
+        $('#unit').val("");
+        $('#price').val("");
+        $('#total_price').val("");
+
+        var id_sales_order = $(this).val();
+        if(id_sales_order == ""){
             $('#customer_name').val("");
             $('#customer_address').val("");
             $('#date').val("");
             $('#due_date').val("");
             $('#ppn').val("");
-            $('#statusinvoices').val("");
+            $('#statusorder').val("");
+
+            $('#so_type').val("");
+            $('#so_category').val("");
+            $('#product').val("");
+            $('#type_product').val("");
+            $('#qty').val("");
+            $('#unit').val("");
+            $('#price').val("");
+            $('#total_price').val("");
         } else {
-            var url = '{{ route("transsales.getsalesinvoices", ":id") }}';
-            url = url.replace(':id', id_sales_invoices);
-            if (id_sales_invoices) {
+            var url = '{{ route("transsales.getsalesorder", ":id") }}';
+            url = url.replace(':id', id_sales_order);
+            if (id_sales_order) {
                 $.ajax({
                     url: url,
                     type: "GET",
@@ -237,7 +288,16 @@
                         $('#date').val(data.date);
                         $('#due_date').val(data.due_date);
                         $('#ppn').val(data.ppn);
-                        $('#statusinvoices').val(data.status);
+                        $('#statusorder').val(data.status);
+
+                        $('#so_type').val(data.so_type);
+                        $('#so_category').val(data.so_category);
+                        $('#product').val(data.product);
+                        $('#type_product').val(data.type_product);
+                        $('#qty').val(data.qty);
+                        $('#unit').val(data.unit);
+                        $('#price').val(data.price);
+                        $('#total_price').val(data.total_price);
                     }
                 });
             }

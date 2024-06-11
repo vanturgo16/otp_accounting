@@ -45,12 +45,59 @@
                                     <input type="date" class="form-control" name="transaction_date" value="" required>
                                 </div>
                                 <hr>
-                                {{-- <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Purchase Source??</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="purchase_source" required>
-                                        <option value="" selected>-- Select --</option>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Purchase Order</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_purchase_order">
+                                        <option value="" selected>--Select Type--</option>
+                                        @foreach($purchase as $item)
+                                            <option value="{{ $item->id }}">{{ $item->po_number." - ". $item->status }}</option>
+                                        @endforeach
                                     </select>
-                                </div> --}}
+                                </div>
+                                <div class="col-6 mb-2"></div>
+                                
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">PO Date</label>
+                                    <input class="form-control" id="po_date" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Supplier</label>
+                                    <input class="form-control" id="supplier" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Reference Number</label>
+                                    <input class="form-control" id="reference_number" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Status</label>
+                                    <input class="form-control" id="po_status" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Own Remark</label>
+                                    <textarea class="form-control" rows="2" type="text" id="own_remarks" placeholder="Select Purchase Orders.." value="" style="background-color:#EAECF4" readonly></textarea>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Supplier Remark</label>
+                                    <textarea class="form-control" rows="2" type="text" id="supplier_remarks" placeholder="Select Purchase Orders.." value="" style="background-color:#EAECF4" readonly></textarea>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Sub Total</label>
+                                    <input class="form-control" id="sub_total" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Total Discount</label>
+                                    <input class="form-control" id="total_discount" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Total Tax</label>
+                                    <input class="form-control" id="total_ppn" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Total Amount</label>
+                                    <input class="form-control" id="total_amount" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <br>
+
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Delivery Note Date</label><label style="color: darkred">*</label>
                                     <input type="date" class="form-control" name="delivery_note_date" value="" required>
@@ -197,6 +244,59 @@
     });
     $(document).on('click', '.remove-tr', function() {
         $(this).parents('tr').remove();
+    });
+</script>
+
+{{-- Purchase Order Choose --}}
+<script>
+    $('select[name="id_purchase_order"]').on('change', function() {
+        $('#po_date').val("");
+        $('#supplier').val("");
+        $('#reference_number').val("");
+        $('#po_status').val("");
+        $('#own_remarks').val("");
+        $('#supplier_remarks').val("");
+        $('#sub_total').val("");
+        $('#total_discount').val("");
+        $('#total_ppn').val("");
+        $('#total_amount').val("");
+
+        var id_purchase_order = $(this).val();
+        console.log(id_purchase_order);
+        if(id_purchase_order == ""){
+            $('#po_date').val("");
+            $('#supplier').val("");
+            $('#reference_number').val("");
+            $('#po_status').val("");
+            $('#own_remarks').val("");
+            $('#supplier_remarks').val("");
+            $('#sub_total').val("");
+            $('#total_discount').val("");
+            $('#total_ppn').val("");
+            $('#total_amount').val("");
+        } else {
+            var url = '{{ route("transpurchase.getpurchaseorder", ":id") }}';
+            url = url.replace(':id', id_purchase_order);
+            if (id_purchase_order) {
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#po_date').val(data.date ? data.date : 'Not set');
+                        $('#supplier').val(data.supplier ? data.supplier : 'Not set');
+                        $('#reference_number').val(data.reference_number ? data.reference_number : 'Not set');
+                        $('#po_status').val(data.status ? data.status : 'Not set');
+                        $('#own_remarks').val(data.own_remarks ? data.own_remarks : 'Not set');
+                        $('#supplier_remarks').val(data.supplier_remarks ? data.supplier_remarks : 'Not set');
+                        $('#sub_total').val(data.sub_total ? data.sub_total : 'Not set');
+                        $('#total_discount').val(data.total_discount ? data.total_discount : 'Not set');
+                        $('#total_ppn').val(data.total_ppn ? data.total_ppn : 'Not set');
+                        $('#total_amount').val(data.total_amount ? data.total_amount : 'Not set');
+                    }
+                });
+            }
+        }
     });
 </script>
 

@@ -10,7 +10,7 @@ use Yajra\DataTables\Facades\DataTables;
 // Model
 use App\Models\MstAccountCodes;
 use App\Models\GeneralLedger;
-use App\Models\SalesInvoice;
+use App\Models\SalesOrder;
 use App\Models\TransSales;
 
 class TransSalesController extends Controller
@@ -20,25 +20,25 @@ class TransSalesController extends Controller
     public function index(Request $request)
     {
         $ref_number = $request->get('ref_number');
-        $id_sales_invoices = $request->get('id_sales_invoices');
+        $id_sales_order = $request->get('id_sales_order');
         $searchDate = $request->get('searchDate');
         $startdate = $request->get('startdate');
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
-        $sales = SalesInvoice::select('id', 'invoice_number')->get();
+        $sales = SalesOrder::select('id', 'so_number', 'status')->get();
 
         $datas = TransSales::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
-                'trans_sales.*', 'invoices.invoice_number'
+                'trans_sales.*', 'sales_orders.so_number'
             )
-            ->leftjoin('invoices', 'trans_sales.id_sales_invoices', 'invoices.id');
+            ->leftjoin('sales_orders', 'trans_sales.id_sales_order', 'sales_orders.id');
 
         if($ref_number != null){
             $datas = $datas->where('ref_number', 'like', '%'.$ref_number.'%');
         }
-        if($id_sales_invoices != null){
-            $datas = $datas->where('id_sales_invoices', 'like', '%'.$id_sales_invoices.'%');
+        if($id_sales_order != null){
+            $datas = $datas->where('id_sales_order', $id_sales_order);
         }
         if($startdate != null && $enddate != null){
             $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
@@ -74,12 +74,12 @@ class TransSalesController extends Controller
         $this->auditLogsShort('View List Trans Sales');
 
         return view('transsales.index',compact('datas', 'sales',
-            'ref_number', 'id_sales_invoices', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'ref_number', 'id_sales_order', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function create(Request $request)
     {
-        $sales = SalesInvoice::select('id', 'invoice_number')->get();
+        $sales = SalesOrder::select('id', 'so_number', 'status')->get();
         $accountcodes = MstAccountCodes::get();
 
         //Audit Log
@@ -88,15 +88,18 @@ class TransSalesController extends Controller
         return view('transsales.create',compact('sales', 'accountcodes'));
     }
 
-    public function getsalesinvoices($id)
+    public function getsalesorder($id)
     {
-        $salesinvoices = SalesInvoice::select('invoices.*', 'master_customers.name as customer_name', 'master_customer_addresses.address as customer_address')
-            ->leftjoin('master_customers', 'invoices.id_master_customers', 'master_customers.id')
-            ->leftjoin('master_customer_addresses', 'invoices.id_master_customer_addresses', 'master_customer_addresses.id')
-            ->where('invoices.id', $id)
+        $salesorder = SalesOrder::select('sales_orders.*', 'master_customers.name as customer_name', 'master_customer_addresses.address as customer_address',
+                'master_product_fgs.description as product', 'master_units.unit as unit')
+            ->leftjoin('master_customers', 'sales_orders.id_master_customers', 'master_customers.id')
+            ->leftjoin('master_customer_addresses', 'sales_orders.id_master_customer_addresses', 'master_customer_addresses.id')
+            ->leftjoin('master_product_fgs', 'sales_orders.id_master_products', 'master_product_fgs.id')
+            ->leftjoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
+            ->where('sales_orders.id', $id)
             ->first();
 
-        return json_encode($salesinvoices);
+        return json_encode($salesorder);
     }
 
     function generateRefNumber()
@@ -126,7 +129,7 @@ class TransSalesController extends Controller
     {
         // dd($request->all());
         $request->validate([
-            'id_sales_invoices' => 'required',
+            'id_sales_order' => 'required',
             'transaction_date' => 'required',
             'no_delivery_note' => 'required',
             'addmore.*.account_code' => 'required',
@@ -140,7 +143,7 @@ class TransSalesController extends Controller
         try{
             TransSales::create([
                 'ref_number' => $refNumber,
-                'id_sales_invoices' => $request->id_sales_invoices,
+                'id_sales_order' => $request->id_sales_order,
                 'no_delivery_note' => $request->no_delivery_note,
                 'created_by' => auth()->user()->email
             ]);
@@ -185,10 +188,13 @@ class TransSalesController extends Controller
         $id = decrypt($id);
         // dd($id);
 
-        $data = TransSales::select('trans_sales.*', 'invoices.*', 'master_customers.name as customer_name', 'master_customer_addresses.address as customer_address')
-            ->leftjoin('invoices', 'trans_sales.id_sales_invoices', 'invoices.id')
-            ->leftjoin('master_customers', 'invoices.id_master_customers', 'master_customers.id')
-            ->leftjoin('master_customer_addresses', 'invoices.id_master_customer_addresses', 'master_customer_addresses.id')
+        $data = TransSales::select('trans_sales.*', 'sales_orders.*', 'master_customers.name as customer_name', 'master_customer_addresses.address as customer_address',
+                'master_product_fgs.description as product', 'master_units.unit as unit')
+            ->leftjoin('sales_orders', 'trans_sales.id_sales_order', 'sales_orders.id')
+            ->leftjoin('master_customers', 'sales_orders.id_master_customers', 'master_customers.id')
+            ->leftjoin('master_customer_addresses', 'sales_orders.id_master_customer_addresses', 'master_customer_addresses.id')
+            ->leftjoin('master_product_fgs', 'sales_orders.id_master_products', 'master_product_fgs.id')
+            ->leftjoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
             ->where('trans_sales.id', $id)
             ->first();
         
@@ -209,11 +215,14 @@ class TransSalesController extends Controller
     {
         $id = decrypt($id);
         // dd($id);
-
-        $data = TransSales::select('trans_sales.id as id_trans', 'trans_sales.*', 'invoices.*', 'master_customers.name as customer_name', 'master_customer_addresses.address as customer_address')
-            ->leftjoin('invoices', 'trans_sales.id_sales_invoices', 'invoices.id')
-            ->leftjoin('master_customers', 'invoices.id_master_customers', 'master_customers.id')
-            ->leftjoin('master_customer_addresses', 'invoices.id_master_customer_addresses', 'master_customer_addresses.id')
+        
+        $data = TransSales::select('trans_sales.*', 'sales_orders.*', 'master_customers.name as customer_name', 'master_customer_addresses.address as customer_address',
+                'master_product_fgs.description as product', 'master_units.unit as unit')
+            ->leftjoin('sales_orders', 'trans_sales.id_sales_order', 'sales_orders.id')
+            ->leftjoin('master_customers', 'sales_orders.id_master_customers', 'master_customers.id')
+            ->leftjoin('master_customer_addresses', 'sales_orders.id_master_customer_addresses', 'master_customer_addresses.id')
+            ->leftjoin('master_product_fgs', 'sales_orders.id_master_products', 'master_product_fgs.id')
+            ->leftjoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
             ->where('trans_sales.id', $id)
             ->first();
 
@@ -226,7 +235,7 @@ class TransSalesController extends Controller
         
         $transaction_date = date('Y-m-d', strtotime($general_ledger->date_transaction));
 
-        $sales = SalesInvoice::select('id', 'invoice_number')->get();
+        $sales = SalesOrder::select('id', 'so_number', 'status')->get();
         $accountcodes = MstAccountCodes::get();
         
         //Audit Log
@@ -241,7 +250,7 @@ class TransSalesController extends Controller
         $id = decrypt($id);
 
         $request->validate([
-            'id_sales_invoices' => 'required',
+            'id_sales_order' => 'required',
             'transaction_date' => 'required',
             'no_delivery_note' => 'required',
             'addmore.*.account_code' => 'required',
@@ -250,7 +259,7 @@ class TransSalesController extends Controller
         ]);
 
         $databefore = TransSales::where('id', $id)->first();
-        $databefore->id_sales_invoices = $request->id_sales_invoices;
+        $databefore->id_sales_order = $request->id_sales_order;
         $databefore->no_delivery_note = $request->no_delivery_note;
 
         // Compare Transaction
@@ -300,7 +309,7 @@ class TransSalesController extends Controller
                 //Update Trans Sales
                 if($databefore->isDirty()){
                     TransSales::where('id', $id)->update([
-                        'id_sales_invoices' => $request->id_sales_invoices,
+                        'id_sales_order' => $request->id_sales_order,
                         'no_delivery_note' => $request->no_delivery_note,
                         'updated_by' => auth()->user()->email
                     ]);

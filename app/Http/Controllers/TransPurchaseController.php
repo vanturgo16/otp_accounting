@@ -10,6 +10,7 @@ use Yajra\DataTables\Facades\DataTables;
 // Model
 use App\Models\MstAccountCodes;
 use App\Models\GeneralLedger;
+use App\Models\PurchaseOrder;
 use App\Models\TransPurchase;
 
 class TransPurchaseController extends Controller
@@ -19,18 +20,25 @@ class TransPurchaseController extends Controller
     public function index(Request $request)
     {
         $ref_number = $request->get('ref_number');
+        $id_purchase_order = $request->get('id_purchase_order');
         $searchDate = $request->get('searchDate');
         $startdate = $request->get('startdate');
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $purchase = PurchaseOrder::select('id', 'po_number', 'status')->get();
+
         $datas = TransPurchase::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
-                'trans_purchase.*'
-            );
+                'trans_purchase.*', 'purchase_orders.po_number'
+            )
+            ->leftjoin('purchase_orders', 'trans_purchase.id_purchase_order', 'purchase_orders.id');
 
         if($ref_number != null){
             $datas = $datas->where('ref_number', 'like', '%'.$ref_number.'%');
+        }
+        if($id_purchase_order != null){
+            $datas = $datas->where('id_purchase_order', $id_purchase_order);
         }
         if($startdate != null && $enddate != null){
             $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
@@ -65,27 +73,31 @@ class TransPurchaseController extends Controller
         //Audit Log
         $this->auditLogsShort('View List Trans Purchase');
 
-        return view('transpurchase.index',compact('datas',
-            'ref_number', 'searchDate', 'startdate', 'enddate', 'flag'));
+        return view('transpurchase.index',compact('datas', 'purchase',
+            'ref_number', 'id_purchase_order', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function create(Request $request)
     {
+        $purchase = PurchaseOrder::select('id', 'po_number', 'status')->get();
         $accountcodes = MstAccountCodes::get();
 
         //Audit Log
         $this->auditLogsShort('View Create New Purchase Transaction');
 
-        return view('transpurchase.create',compact('accountcodes'));
+        return view('transpurchase.create',compact('accountcodes', 'purchase'));
     }
 
-    // Get Purchase Invoice (Not Yet Initiate Where To Get)
-    // public function getpurchaseinvoice($id)
-    // {
-    //     $purchaseinvoice = 
+    // Get Purchase Order
+    public function getpurchaseorder($id)
+    {
+        $purchaseorder = PurchaseOrder::select('purchase_orders.*', 'master_suppliers.name as supplier')
+            ->leftjoin('master_suppliers', 'purchase_orders.id_master_suppliers', 'master_suppliers.id')
+            ->where('purchase_orders.id', $id)
+            ->first();
 
-    //     return json_encode($purchaseinvoice);
-    // }
+        return json_encode($purchaseorder);
+    }
 
     function generateRefNumber()
     {
@@ -115,6 +127,7 @@ class TransPurchaseController extends Controller
         // dd($request->all());
         $request->validate([
             'transaction_date' => 'required',
+            'id_purchase_order' => 'required',
             'delivery_note_date' => 'required',
             'delivery_note_number' => 'required',
             'invoice_date' => 'required',
@@ -133,6 +146,7 @@ class TransPurchaseController extends Controller
         try{
             TransPurchase::create([
                 'ref_number' => $refNumber,
+                'id_purchase_order' => $request->id_purchase_order,
                 'delivery_note_date' => $request->delivery_note_date,
                 'delivery_note_number' => $request->delivery_note_number,
                 'invoice_date' => $request->invoice_date,
@@ -183,7 +197,11 @@ class TransPurchaseController extends Controller
         $id = decrypt($id);
         // dd($id);
 
-        $data = TransPurchase::where('id', $id)->first();
+        $data = TransPurchase::select('trans_purchase.*', 'purchase_orders.*', 'master_suppliers.name as supplier')
+            ->leftjoin('purchase_orders', 'trans_purchase.id_purchase_order', 'purchase_orders.id')
+            ->leftjoin('master_suppliers', 'purchase_orders.id_master_suppliers', 'master_suppliers.id')
+            ->where('trans_purchase.id', $id)
+            ->first();
         
         $general_ledgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
             ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
@@ -203,7 +221,13 @@ class TransPurchaseController extends Controller
         $id = decrypt($id);
         // dd($id);
 
-        $data = TransPurchase::where('id', $id)->first();
+        $purchase = PurchaseOrder::select('id', 'po_number', 'status')->get();
+
+        $data = TransPurchase::select('trans_purchase.*', 'purchase_orders.*', 'master_suppliers.name as supplier')
+            ->leftjoin('purchase_orders', 'trans_purchase.id_purchase_order', 'purchase_orders.id')
+            ->leftjoin('master_suppliers', 'purchase_orders.id_master_suppliers', 'master_suppliers.id')
+            ->where('trans_purchase.id', $id)
+            ->first();
 
         $general_ledger = GeneralLedger::where('ref_number', $data->ref_number)->first();
         if($general_ledger != []){
@@ -219,7 +243,7 @@ class TransPurchaseController extends Controller
         //Audit Log
         $this->auditLogsShort('View Edit Purchase Transaction Ref Number ('. $data->ref_number . ')');
 
-        return view('transpurchase.edit',compact('data', 'general_ledger', 'general_ledgers', 'transaction_date', 'accountcodes'));
+        return view('transpurchase.edit',compact('data', 'purchase', 'general_ledger', 'general_ledgers', 'transaction_date', 'accountcodes'));
     }
 
     public function update(Request $request, $id)
@@ -229,6 +253,7 @@ class TransPurchaseController extends Controller
 
         $request->validate([
             'transaction_date' => 'required',
+            'id_purchase_order' => 'required',
             'delivery_note_date' => 'required',
             'delivery_note_number' => 'required',
             'invoice_date' => 'required',
@@ -290,6 +315,7 @@ class TransPurchaseController extends Controller
                 //Update Trans Sales
                 if($databefore->isDirty()){
                     TransPurchase::where('id', $id)->update([
+                        'id_purchase_order' => $request->id_purchase_order,
                         'delivery_note_date' => $request->delivery_note_date,
                         'delivery_note_number' => $request->delivery_note_number,
                         'invoice_date' => $request->invoice_date,

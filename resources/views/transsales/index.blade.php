@@ -39,11 +39,11 @@
                                     <input class="form-control" name="ref_number" type="text" value="{{ $ref_number }}" placeholder="Filter Ref Number..">
                                 </div>
                                 <div class="col-6 mb-2">
-                                    <label class="form-label">Sales Invoices</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_sales_invoices">
+                                    <label class="form-label">Sales Order</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_sales_order">
                                         <option value="" selected>--Select Type--</option>
                                         @foreach($sales as $item)
-                                            <option value="{{ $item->id }}" @if($id_sales_invoices == $item->id) selected="selected" @endif>{{ $item->invoice_number }}</option>
+                                            <option value="{{ $item->id }}" @if($id_sales_order == $item->id) selected="selected" @endif>{{ $item->so_number." - ". $item->status }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -134,7 +134,7 @@
                                     </th>
                                     <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Ref. Number</th>
-                                    <th class="align-middle text-center">Invoices Number</th>
+                                    <th class="align-middle text-center">SO Number</th>
                                     <th class="align-middle text-center">Total Transaction</th>
                                     <th class="align-middle text-center">Created By</th>
                                     <th class="align-middle text-center">Action</th>
@@ -157,7 +157,7 @@
         var fileName = "Sales Transaction Export - " + formattedDate + ".xlsx";
         var data = {
                 ref_number: '{{ $ref_number }}',
-                id_sales_invoices: '{{ $id_sales_invoices }}',
+                id_sales_order: '{{ $id_sales_order }}',
                 searchDate: '{{ $searchDate }}',
                 startdate: '{{ $startdate }}',
                 enddate: '{{ $enddate }}'
@@ -261,8 +261,8 @@
                     className: 'align-middle text-center text-bold'
                 },
                 {
-                    data: 'invoice_number',
-                    name: 'invoice_number',
+                    data: 'so_number',
+                    name: 'so_number',
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center'
