@@ -39,10 +39,127 @@
                                 <label class="form-label mb-0">Transaction Date</label>
                                 <br><span>{{ $transaction_date }}</span>
                             </div>
-                            <hr>
+                        </div>
+                        <hr>
+                        <div class="card p-2" style="background-color:#f0f2f7">
+                            <div class="row">
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Purchase Order Number</label>
+                                    <br><span>{{ $data->po_number }}</span>
+                                </div>
+                                <div class="col-6 mb-2"></div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">PO Date</label>
+                                    <br><span>{{ $data->date }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Supplier</label>
+                                    <br><span>{{ $data->supplier }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Reference Number</label>
+                                    <br><span>{{ $data->reference_number }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Status</label>
+                                    <br><span>{{ $data->status }}</span>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Own Remark</label>
+                                    <br><span>
+                                        @if($data->own_remarks == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->own_remarks }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Supplier Remark</label>
+                                    <br>
+                                    <span>
+                                        @if($data->supplier_remarks == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->supplier_remarks }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Sub Total</label>
+                                    <br>
+                                    <span>
+                                        @if($data->sub_total == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->sub_total }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Total Discount</label>
+                                    <br>
+                                    <span>
+                                        @if($data->total_discount == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->total_discount }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Total Tax</label>
+                                    <br>
+                                    <span>
+                                        @if($data->total_ppn == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->total_ppn }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Total Amount</label>
+                                    <br>
+                                    <span>
+                                        @if($data->total_amount == null)
+                                            <span class="badge bg-secondary">Null</span>
+                                        @else
+                                            {{ $data->total_amount }}
+                                        @endif
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Purchase Invoices</label>
-                                <br><span></span>
+                                <label class="form-label mb-0">Delivery Note Date</label>
+                                <br><span>{{ $data->delivery_note_date }}</span>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Delivery Note Number</label>
+                                <br><span>{{ $data->delivery_note_number }}</span>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Invoice Date</label>
+                                <br><span>{{ $data->invoice_date }}</span>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Invoice Number</label>
+                                <br><span>{{ $data->invoice_number }}</span>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Tax Invoice Number</label>
+                                <br><span>{{ $data->tax_invoice_number }}</span>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label mb-0">Quantity</label>
+                                <br><span>{{ $data->quantity }}</span>
+                            </div>
+                            <div class="col-lg-12 mb-3">
+                                <label class="form-label mb-0">Description</label>
+                                <br><span>{{ $data->description }}</span>
                             </div>
 
                             <div class="col-lg-12 mt-3">
@@ -67,14 +184,10 @@
                                                             {{ $item->account_code." - ".$item->account_name }}
                                                         </td>
                                                         <td>
-                                                            @if($item->debit != null)
-                                                                {{ number_format($item->debit, 3, '.', ',') }}
-                                                            @else
-                                                                {{ number_format($item->kredit, 3, '.', ',') }}
-                                                            @endif
+                                                            {{ number_format($item->amount, 3, ',', '.') }}
                                                         </td>
                                                         <td>
-                                                            @if($item->debit != null)
+                                                            @if($item->transaction == 'D')
                                                                 <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
                                                             @else
                                                                 <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>

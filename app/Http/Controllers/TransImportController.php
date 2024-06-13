@@ -6,6 +6,7 @@ use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use DateTime;
 
 // Model
 use App\Models\MstAccountCodes;
@@ -42,6 +43,11 @@ class TransImportController extends Controller
         }
         
         $datas = $datas->get();
+
+        foreach($datas as $data){
+            $count = GeneralLedger::where('ref_number', $data->ref_number)->count();
+            $data->count = $count;
+        }
         
         // Datatables
         if ($request->ajax()) {
@@ -101,7 +107,10 @@ class TransImportController extends Controller
     {
         // dd($request->all());
         $request->validate([
-            'date_transaction' => 'required',
+            'transaction_date' => 'required',
+            'addmore.*.account_code' => 'required',
+            'addmore.*.nominal' => 'required',
+            'addmore.*.type' => 'required',
         ]);
         
         $refNumber = $this->generateRefNumber();
@@ -110,29 +119,31 @@ class TransImportController extends Controller
         try{
             TransImport::create([
                 'ref_number' => $refNumber,
+                'tax_invoice_number' => $request->tax_invoice_number,
+                'ext_doc_number' => $request->ext_doc_number,
+                'inv_received_date' => $request->inv_received_date,
+                'due_date' => $request->due_date,
                 'created_by' => auth()->user()->email
             ]);
 
             if($request->addmore != null){
                 foreach($request->addmore as $item){
                     if($item['account_code'] != null && $item['nominal'] != null){
-                        $nominal = str_replace(',', '', $item['nominal']);
-                        $nominal = number_format((float)$nominal, 3, '.', '');
+                        $nominal = str_replace('.', '', $item['nominal']);
+                        $nominal = str_replace(',', '.', $nominal);
 
                         if($item['type'] == 'Debit'){
-                            $debit = $nominal;
-                            $kredit = null;
+                            $transaction = "D";
                         } else {
-                            $debit = null;
-                            $kredit = $nominal;
+                            $transaction = "K";
                         }
     
                         GeneralLedger::create([
                             'ref_number' => $refNumber,
                             'date_transaction' => $request->transaction_date,
                             'id_account_code' => $item['account_code'],
-                            'debit' => $debit,
-                            'kredit' => $kredit,
+                            'transaction' => $transaction,
+                            'amount' => $nominal,
                             'source' => 'Import Transaction',
                         ]);
                     }
@@ -205,14 +216,25 @@ class TransImportController extends Controller
 
         $request->validate([
             'transaction_date' => 'required',
+            'addmore.*.account_code' => 'required',
+            'addmore.*.nominal' => 'required',
+            'addmore.*.type' => 'required',
         ]);
 
+        $inv_received_date = (new DateTime($request->inv_received_date))->format('Y-m-d H:i:s');
+        $due_date = (new DateTime($request->due_date))->format('Y-m-d H:i:s');
+        
         $databefore = TransImport::where('id', $id)->first();
+        $databefore->tax_invoice_number = $request->tax_invoice_number;
+        $databefore->ext_doc_number = $request->ext_doc_number;
+        $databefore->inv_received_date = $inv_received_date;
+        $databefore->due_date = $due_date;
 
         // Compare Transaction
         $transbefore = GeneralLedger::where('ref_number', $databefore->ref_number)->get();
         $inputtrans = $request->addmore;
         $updatetrans = false;
+        
         if ($transbefore->isNotEmpty() && is_array($inputtrans)) {
             // Check if lengths are different
             if (count($transbefore) != count($inputtrans)) {
@@ -228,17 +250,10 @@ class TransImportController extends Controller
                     }
                     $detail = $inputtrans[$index];
                     // Compare attributes (also remove formatting from amount_fee for accurate comparison)
-                    if($detail['type'] == 'Debit'){
-                        $debit = str_replace(',', '', $detail['nominal']);
-                        $debit = number_format((float)$debit, 3, '.', '');
-                        $kredit = null;
-                    } else {
-                        $debit = null;
-                        $kredit = str_replace(',', '', $detail['nominal']);
-                        $kredit = number_format((float)$kredit, 3, '.', '');
-                    }
-
-                    if ($trans->id_account_code != $detail['account_code'] || $trans->debit != $debit || $trans->kredit != $kredit) {
+                    $nominal = str_replace('.', '', $detail['nominal']);
+                    $nominal = str_replace(',', '.', $nominal);
+                    $type = ($detail['type'] == 'Debit') ? 'D' : 'K';
+                    if ($trans->id_account_code != $detail['account_code'] || $trans->amount != $nominal || $trans->transaction != $type) {
                         $updatetrans = true;
                         break;
                     }
@@ -262,6 +277,10 @@ class TransImportController extends Controller
                 //Update Trans Sales
                 if($databefore->isDirty()){
                     TransImport::where('id', $id)->update([
+                        'tax_invoice_number' => $request->tax_invoice_number,
+                        'ext_doc_number' => $request->ext_doc_number,
+                        'inv_received_date' => $request->inv_received_date,
+                        'due_date' => $request->due_date,
                         'updated_by' => auth()->user()->email
                     ]);
                 }
@@ -276,21 +295,21 @@ class TransImportController extends Controller
                     if($request->addmore != null){
                         foreach($request->addmore as $item){
                             if($item['account_code'] != null && $item['nominal'] != null){
-                                $nominal = str_replace(',', '', $item['nominal']);
-                                $nominal = number_format((float)$nominal, 3, '.', '');
+                                $nominal = str_replace('.', '', $item['nominal']);
+                                $nominal = str_replace(',', '.', $nominal);
+
                                 if($item['type'] == 'Debit'){
-                                    $debit = $nominal;
-                                    $kredit = null;
+                                    $transaction = "D";
                                 } else {
-                                    $debit = null;
-                                    $kredit = $nominal;
+                                    $transaction = "K";
                                 }
+
                                 GeneralLedger::create([
                                     'ref_number' => $databefore->ref_number,
                                     'date_transaction' => $request->transaction_date,
                                     'id_account_code' => $item['account_code'],
-                                    'debit' => $debit,
-                                    'kredit' => $kredit,
+                                    'transaction' => $transaction,
+                                    'amount' => $nominal,
                                     'source' => 'Import Transaction',
                                 ]);
                             }

@@ -45,11 +45,86 @@
                                     <input type="date" class="form-control" name="transaction_date" value="" required>
                                 </div>
                                 <hr>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Purchase Source??</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="purchase_source" required>
-                                        <option value="" selected>-- Select --</option>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Purchase Order</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_purchase_order">
+                                        <option value="" selected>--Select Type--</option>
+                                        @foreach($purchase as $item)
+                                            <option value="{{ $item->id }}">{{ $item->po_number." - ". $item->status }}</option>
+                                        @endforeach
                                     </select>
+                                </div>
+                                <div class="col-6 mb-2"></div>
+                                
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">PO Date</label>
+                                    <input class="form-control" id="po_date" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Supplier</label>
+                                    <input class="form-control" id="supplier" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Reference Number</label>
+                                    <input class="form-control" id="reference_number" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Status</label>
+                                    <input class="form-control" id="po_status" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Own Remark</label>
+                                    <textarea class="form-control" rows="2" type="text" id="own_remarks" placeholder="Select Purchase Orders.." value="" style="background-color:#EAECF4" readonly></textarea>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Supplier Remark</label>
+                                    <textarea class="form-control" rows="2" type="text" id="supplier_remarks" placeholder="Select Purchase Orders.." value="" style="background-color:#EAECF4" readonly></textarea>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Sub Total</label>
+                                    <input class="form-control" id="sub_total" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Total Discount</label>
+                                    <input class="form-control" id="total_discount" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Total Tax</label>
+                                    <input class="form-control" id="total_ppn" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label">Total Amount</label>
+                                    <input class="form-control" id="total_amount" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                </div>
+                                <br>
+
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Delivery Note Date</label><label style="color: darkred">*</label>
+                                    <input type="date" class="form-control" name="delivery_note_date" value="" required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Delivery Note Number</label><label style="color: darkred">*</label>
+                                    <input type="text" class="form-control" name="delivery_note_number" value="" placeholder="Input Delivery Note Number.." required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Invoice Date</label><label style="color: darkred">*</label>
+                                    <input type="date" class="form-control" name="invoice_date" value="" required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Invoice Number</label><label style="color: darkred">*</label>
+                                    <input type="text" class="form-control" name="invoice_number" value="" placeholder="Input Invoice Number.." required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Tax Invoice Number</label><label style="color: darkred">*</label>
+                                    <input type="text" class="form-control" name="tax_invoice_number" value="" placeholder="Input Tax Invoice Number.." required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Quantity</label><label style="color: darkred">*</label>
+                                    <input type="number" class="form-control" name="quantity" value="" placeholder="Input Quantity.." required>
+                                </div>
+                                <div class="col-lg-12 mb-3">
+                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
+                                    <textarea class="form-control" rows="3" type="text" name="description" placeholder="Input Description.." value="" required></textarea>
                                 </div>
 
                                 <div class="col-lg-12 mt-3">
@@ -125,7 +200,7 @@
         }
         var submitButton = this.querySelector('button[name="sb"]');
         submitButton.disabled = true;
-        submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+        submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
         return true;
     });
 </script>
@@ -160,40 +235,69 @@
                     <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>
                 </td>
             </tr>`);
+
         $(".js-example-basic-single").select2();
+
+        document.querySelectorAll(".rupiah-input").forEach((input) => {
+            input.addEventListener("input", formatCurrencyInput);
+        });
     });
     $(document).on('click', '.remove-tr', function() {
         $(this).parents('tr').remove();
     });
+</script>
 
-    $("#dynamicTable").on('keyup', '.rupiah-input', function(e) {
-        this.value = formatCurrency(this.value, ' ');
-    });
+{{-- Purchase Order Choose --}}
+<script>
+    $('select[name="id_purchase_order"]').on('change', function() {
+        $('#po_date').val("");
+        $('#supplier').val("");
+        $('#reference_number').val("");
+        $('#po_status').val("");
+        $('#own_remarks').val("");
+        $('#supplier_remarks').val("");
+        $('#sub_total').val("");
+        $('#total_discount').val("");
+        $('#total_ppn').val("");
+        $('#total_amount').val("");
 
-    $("#dynamicTable").on('change', '.addpayment', function() {
-        var $relatedInput = $(this).closest('tr').find('.rupiah-input');
-        if ($(this).val() != "") {
-            $relatedInput.attr('required', true);
+        var id_purchase_order = $(this).val();
+        console.log(id_purchase_order);
+        if(id_purchase_order == ""){
+            $('#po_date').val("");
+            $('#supplier').val("");
+            $('#reference_number').val("");
+            $('#po_status').val("");
+            $('#own_remarks').val("");
+            $('#supplier_remarks').val("");
+            $('#sub_total').val("");
+            $('#total_discount').val("");
+            $('#total_ppn').val("");
+            $('#total_amount').val("");
         } else {
-            $relatedInput.removeAttr('required');
+            var url = '{{ route("transpurchase.getpurchaseorder", ":id") }}';
+            url = url.replace(':id', id_purchase_order);
+            if (id_purchase_order) {
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#po_date').val(data.date ? data.date : 'Not set');
+                        $('#supplier').val(data.supplier ? data.supplier : 'Not set');
+                        $('#reference_number').val(data.reference_number ? data.reference_number : 'Not set');
+                        $('#po_status').val(data.status ? data.status : 'Not set');
+                        $('#own_remarks').val(data.own_remarks ? data.own_remarks : 'Not set');
+                        $('#supplier_remarks').val(data.supplier_remarks ? data.supplier_remarks : 'Not set');
+                        $('#sub_total').val(data.sub_total ? data.sub_total : 'Not set');
+                        $('#total_discount').val(data.total_discount ? data.total_discount : 'Not set');
+                        $('#total_ppn').val(data.total_ppn ? data.total_ppn : 'Not set');
+                        $('#total_amount').val(data.total_amount ? data.total_amount : 'Not set');
+                    }
+                });
+            }
         }
     });
-
-    function formatCurrency(number, prefix) {
-        var number_string = number.replace(/[^.\d]/g, '').toString(),
-            split = number_string.split('.'),
-            sisa = split[0].length % 3,
-            rupiah = split[0].substr(0, sisa),
-            ribuan = split[0].substr(sisa).match(/\d{1,3}/gi);
-
-        if (ribuan) {
-            separator = sisa ? ',' : '';
-            rupiah += separator + ribuan.join(',');
-        }
-
-        rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
-        return prefix == undefined ? rupiah : (rupiah ? '' + rupiah : '');
-    }
 </script>
 
 @endsection

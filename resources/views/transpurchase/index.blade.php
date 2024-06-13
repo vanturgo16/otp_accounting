@@ -38,6 +38,15 @@
                                     <label class="form-label">Ref Number</label>
                                     <input class="form-control" name="ref_number" type="text" value="{{ $ref_number }}" placeholder="Filter Ref Number..">
                                 </div>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Purchase Order</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_purchase_order">
+                                        <option value="" selected>--Select Type--</option>
+                                        @foreach($purchase as $item)
+                                            <option value="{{ $item->id }}" @if($id_purchase_order == $item->id) selected="selected" @endif>{{ $item->po_number." - ". $item->status }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <hr class="mt-2">
                                 <div class="col-4 mb-2">
                                     <label class="form-label">Filter Date</label>
@@ -125,7 +134,11 @@
                                     </th>
                                     <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Ref. Number</th>
-                                    <th class="align-middle text-center">Purchase Number</th>
+                                    <th class="align-middle text-center">PO Number</th>
+                                    <th class="align-middle text-center">Delivery Note Number</th>
+                                    <th class="align-middle text-center">Invoice Number</th>
+                                    <th class="align-middle text-center">Quantity</th>
+                                    <th class="align-middle text-center">Total Transaction</th>
                                     <th class="align-middle text-center">Created By</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -147,6 +160,7 @@
         var fileName = "Sales Purchase Export - " + formattedDate + ".xlsx";
         var data = {
                 ref_number: '{{ $ref_number }}',
+                id_purchase_order: '{{ $id_purchase_order }}',
                 searchDate: '{{ $searchDate }}',
                 startdate: '{{ $startdate }}',
                 enddate: '{{ $enddate }}'
@@ -247,14 +261,51 @@
                     name: 'ref_number',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-bold'
+                    className: 'align-middle text-center text-bold'
                 },
                 {
-                    data: 'ref_number',
-                    name: 'ref_number',
+                    data: 'po_number',
+                    name: 'po_number',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center text-bold'
+                },
+                {
+                    data: 'delivery_note_number',
+                    searchable: true,
+                    orderable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var delivery_note_date = new Date(row.delivery_note_date);
+                        return '<b>( ' + row.delivery_note_number + ' )</b><br><b>Date. </b>' + delivery_note_date.toLocaleDateString('es-CL').replace(/\//g, '-');
+                    },
+                },
+                {
+                    data: 'invoice_number',
+                    searchable: true,
+                    orderable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var invoice_date = new Date(row.invoice_date);
+                        return '<b>( ' + row.invoice_number + ' )</b><br><b>Date. </b>' + invoice_date.toLocaleDateString('es-CL').replace(/\//g, '-');
+                    },
+                },
+                {
+                    data: 'quantity',
+                    name: 'quantity',
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center'
+                },
+                {
+                    data: 'count',
+                    name: 'count',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        return '<h5><span class="badge bg-info">'+ row.count +'</span></h5>';
+                    },
                 },
                 {
                     data: 'created_by',

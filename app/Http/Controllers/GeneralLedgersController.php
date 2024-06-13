@@ -89,38 +89,42 @@ class GeneralLedgersController extends Controller
         $request->validate([
             'transaction_number' => 'required',
             'transaction_date' => 'required',
+            'source' => 'required',
+            'addmore.*.account_code' => 'required',
+            'addmore.*.nominal' => 'required',
+            'addmore.*.type' => 'required',
         ]);
         
-        if($request->source == "AddNew"){
-            $source = $request->addsource;
-        }
-        else{
-            $source = $request->source;
-        }
+        $source = ($request->source == "AddNew") ? $request->addsource : $request->source;
 
         DB::beginTransaction();
         try{
+            if($request->source == "AddNew"){
+                MstDropdowns::create([
+                    'category' => 'Source Accounting',
+                    'name_value' => $request->addsource,
+                    'code_format' => 'SA',
+                ]);
+            }
 
             if($request->addmore != null){
                 foreach($request->addmore as $item){
                     if($item['account_code'] != null && $item['nominal'] != null){
-                        $nominal = str_replace(',', '', $item['nominal']);
-                        $nominal = number_format((float)$nominal, 3, '.', '');
+                        $nominal = str_replace('.', '', $item['nominal']);
+                        $nominal = str_replace(',', '.', $nominal);
 
                         if($item['type'] == 'Debit'){
-                            $debit = $nominal;
-                            $kredit = null;
+                            $transaction = "D";
                         } else {
-                            $debit = null;
-                            $kredit = $nominal;
+                            $transaction = "K";
                         }
     
                         GeneralLedger::create([
                             'ref_number' => $request->transaction_number,
                             'date_transaction' => $request->transaction_date,
                             'id_account_code' => $item['account_code'],
-                            'debit' => $debit,
-                            'kredit' => $kredit,
+                            'transaction' => $transaction,
+                            'amount' => $nominal,
                             'source' => $source,
                         ]);
                     }
@@ -131,7 +135,7 @@ class GeneralLedgersController extends Controller
             $this->auditLogsShort('Create New Transaction General Ledger ('. $request->transaction_number . ')');
 
             DB::commit();
-            return redirect()->route('transsales.index')->with(['success' => 'Success Create New Transaction']);
+            return redirect()->route('generalledger.index')->with(['success' => 'Success Create New Transaction']);
         } catch (Exception $e) {
             DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Transaction!']);

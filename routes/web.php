@@ -72,7 +72,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('transsales', [TransSalesController::class, 'index'])->name('transsales.index');
     Route::post('transsales', [TransSalesController::class, 'index'])->name('transsales.index');
     Route::get('transsales/create', [TransSalesController::class, 'create'])->name('transsales.create');
-    Route::get('transsales/getsalesinvoices/{id}', [TransSalesController::class, 'getsalesinvoices'])->name('transsales.getsalesinvoices');
+    Route::get('transsales/getsalesorder/{id}', [TransSalesController::class, 'getsalesorder'])->name('transsales.getsalesorder');
     Route::post('transsales/store', [TransSalesController::class, 'store'])->name('transsales.store');
     Route::get('transsales/info/{id}', [TransSalesController::class, 'info'])->name('transsales.info');
     Route::get('transsales/edit/{id}', [TransSalesController::class, 'edit'])->name('transsales.edit');
@@ -85,6 +85,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('transpurchase', [TransPurchaseController::class, 'index'])->name('transpurchase.index');
     Route::post('transpurchase', [TransPurchaseController::class, 'index'])->name('transpurchase.index');
     Route::get('transpurchase/create', [TransPurchaseController::class, 'create'])->name('transpurchase.create');
+    Route::get('transpurchase/getpurchaseorder/{id}', [TransPurchaseController::class, 'getpurchaseorder'])->name('transpurchase.getpurchaseorder');
     Route::post('transpurchase/store', [TransPurchaseController::class, 'store'])->name('transpurchase.store');
     Route::get('transpurchase/info/{id}', [TransPurchaseController::class, 'info'])->name('transpurchase.info');
     Route::get('transpurchase/edit/{id}', [TransPurchaseController::class, 'edit'])->name('transpurchase.edit');

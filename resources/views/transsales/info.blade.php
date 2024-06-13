@@ -35,42 +35,91 @@
                                 <label class="form-label mb-0">Ref Number</label>
                                 <br><span class="badge bg-info">{{ $data->ref_number }}</span>
                             </div>
-                            <div class="col-lg-6 mb-3">
+                            <div class="col-lg-3 mb-3">
                                 <label class="form-label mb-0">Transaction Date</label>
                                 <br><span>{{ $transaction_date }}</span>
                             </div>
+                            <div class="col-lg-3 mb-3">
+                                <label class="form-label mb-0">No. Delivery Note</label>
+                                <br><span>
+                                    @if($data->no_delivery_note == null)
+                                        <span class="badge bg-secondary">Null</span>
+                                    @else
+                                        {{ $data->no_delivery_note }}
+                                    @endif
+                                </span>
+                            </div>
                             <hr>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Sales Invoices</label>
-                                <br><span>{{ $data->invoice_number }}</span>
+                        </div>
+                        <div class="card p-2" style="background-color:#f0f2f7">
+                            <div class="row">
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Sales Order Number</label>
+                                    <br><span>{{ $data->so_number }}</span>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Customer Name</label>
+                                    <br><span>{{ $data->customer_name }}</span>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Customer Address</label>
+                                    <br><span>{{ $data->customer_address }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Date</label>
+                                    <br><span>{{ $data->date }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Due Date</label>
+                                    <br><span>{{ $data->due_date }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">PPN</label>
+                                    <br><span>{{ $data->ppn }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Status</label>
+                                    <br><span>{{ $data->status }}</span>
+                                </div>
+    
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">SO Type</label>
+                                    <br><span>{{ $data->so_type }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">SO Category</label>
+                                    <br><span>{{ $data->so_category }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Product</label>
+                                    <br><span>{{ $data->product }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Type Product</label>
+                                    <br><span>{{ $data->type_product }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Quantity</label>
+                                    <br><span>{{ $data->qty }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Unit</label>
+                                    <br><span>{{ $data->unit }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Price</label>
+                                    <br><span>{{ $data->price }}</span>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label mb-0">Total Price</label>
+                                    <br><span>{{ $data->total_price }}</span>
+                                </div>    
                             </div>
-                            <div class="col-lg-6 mb-3">
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Customer Name</label>
-                                <br><span>{{ $data->customer_name }}</span>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Customer Address</label>
-                                <br><span>{{ $data->customer_address }}</span>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Date</label>
-                                <br><span>{{ $data->date }}</span>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Due Date</label>
-                                <br><span>{{ $data->due_date }}</span>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">PPN</label>
-                                <br><span>{{ $data->ppn }}</span>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Status</label>
-                                <br><span>{{ $data->status }}</span>
-                            </div>
+                        </div>
 
+                        <div class="row">
                             <div class="col-lg-12 mt-3">
                                 <div class="card">
                                     <div class="card-header text-center">
@@ -93,14 +142,10 @@
                                                             {{ $item->account_code." - ".$item->account_name }}
                                                         </td>
                                                         <td>
-                                                            @if($item->debit != null)
-                                                                {{ number_format($item->debit, 3, '.', ',') }}
-                                                            @else
-                                                                {{ number_format($item->kredit, 3, '.', ',') }}
-                                                            @endif
+                                                            {{ number_format($item->amount, 3, ',', '.') }}
                                                         </td>
                                                         <td>
-                                                            @if($item->debit != null)
+                                                            @if($item->transaction == 'D')
                                                                 <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
                                                             @else
                                                                 <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>

@@ -293,34 +293,21 @@
                     },
                 },
                 {
-                    data: 'debit',
+                    data: 'amount',
                     orderable: true,
                     className: 'align-middle text-center',
                     render: function(data, type, row) {
-                        var html
-                        if(row.debit != null) {
-                            // Convert the opening balance to the desired format
-                            html = parseFloat(row.debit).toLocaleString('en-US', {
-                                minimumFractionDigits: 3,
-                                maximumFractionDigits: 3
-                            });
-                        } else {
-                            // Convert the opening balance to the desired format
-                            html = parseFloat(row.kredit).toLocaleString('en-US', {
-                                minimumFractionDigits: 3,
-                                maximumFractionDigits: 3
-                            });
-                        }
-                        return html;
+                        var formattedAmount = numberFormat(row.amount, 3, ',', '.');
+                        return formattedAmount;
                     },
                 },
                 {
-                    data: 'debit',
+                    data: 'transaction',
                     orderable: true,
                     className: 'align-middle text-center',
                     render: function(data, type, row) {
                         var html
-                        if(row.debit != null){
+                        if(row.transaction == 'D'){
                             html = '<span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>';
                         } else {
                             html = '<span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>';
