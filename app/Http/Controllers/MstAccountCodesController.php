@@ -88,8 +88,8 @@ class MstAccountCodesController extends Controller
             'id_master_account_types' => 'required'
         ]);
 
-        $opening_balance = str_replace(',', '', $request->opening_balance);
-        $opening_balance = number_format((float)$opening_balance, 3, '.', '');
+        $opening_balance = str_replace('.', '', $request->opening_balance);
+        $opening_balance = str_replace(',', '.', $opening_balance);
 
         DB::beginTransaction();
         try{
@@ -137,8 +137,8 @@ class MstAccountCodesController extends Controller
             'account_name' => 'required',
             'id_master_account_types' => 'required'
         ]);
-        $opening_balance = str_replace(',', '', $request->opening_balance);
-        $opening_balance = number_format((float)$opening_balance, 3, '.', '');
+        $opening_balance = str_replace('.', '', $request->opening_balance);
+        $opening_balance = str_replace(',', '.', $opening_balance);
 
         $databefore = MstAccountCodes::where('id', $id)->first();
         $databefore->account_code = $request->account_code;

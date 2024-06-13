@@ -59,26 +59,13 @@
                                 <div class="col-lg-12">
                                     <div class="mb-3">
                                         <label class="form-label">Opening Balance</label><label style="color: darkred">*</label>
-                                        <input class="form-control rupiah-input" name="opening_balance" value="{{ $data->opening_balance }}" type="text" placeholder="Input Opening Balance.." required>
+                                        <input class="form-control rupiah-input" name="opening_balance" value="{{ number_format($data->opening_balance, 3, ',', '.') }}" type="text" placeholder="Input Opening Balance.." required>
                                     </div>
                                 </div>
                                 <script>
-                                    // Format opening balance value inside input field
-                                    var openingBalanceInput = document.querySelector('[name="opening_balance"]');
-                                    if (openingBalanceInput) {
-                                        openingBalanceInput.value = formatOpeningBalance(openingBalanceInput.value);
-                                    }
-                                
-                                    // Function to format opening balance
-                                    function formatOpeningBalance(value) {
-                                        if (!value) return value; // If value is empty, return it as it is
-                                
-                                        // Convert value to floating-point number and format it
-                                        return parseFloat(value).toLocaleString('en-US', {
-                                            minimumFractionDigits: 3,
-                                            maximumFractionDigits: 3
-                                        });
-                                    }
+                                    document.querySelectorAll(".rupiah-input").forEach((input) => {
+                                        input.addEventListener("input", formatCurrencyInput);
+                                    });
                                 </script>
                             </div>
                             <hr>

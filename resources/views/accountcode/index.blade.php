@@ -407,17 +407,8 @@
                     orderable: true,
                     className: 'align-middle text-center',
                     render: function(data, type, row) {
-                        var html
-                        if(row.opening_balance == null){
-                            html = '<span class="badge bg-secondary text-white">Null</span>';
-                        } else {
-                            // Convert the opening balance to the desired format
-                            html = parseFloat(row.opening_balance).toLocaleString('en-US', {
-                                minimumFractionDigits: 3,
-                                maximumFractionDigits: 3
-                            });
-                        }
-                        return html;
+                        var formattedAmount = numberFormat(row.opening_balance, 3, ',', '.');
+                        return formattedAmount;
                     },
                 },
                 {
