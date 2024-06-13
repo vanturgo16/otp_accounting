@@ -68,6 +68,14 @@
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
+                                <div><span class="fw-bold">Opening Balance :</span></div>
+                                <span>
+                                    <span>{{ number_format($data->opening_balance, 3, ',', '.') }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
                                 <div><span class="fw-bold">Created At :</span></div>
                                 <span>
                                     <span>{{ $data->created_at }}</span>
