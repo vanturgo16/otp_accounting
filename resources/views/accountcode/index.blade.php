@@ -411,16 +411,30 @@
                         return formattedAmount;
                     },
                 },
+                // {
+                //     data: 'is_active',
+                //     orderable: true,
+                //     className: 'align-middle text-center',
+                //     render: function(data, type, row) {
+                //         var html
+                //         if(row.is_active == 1){
+                //             html = '<span class="badge bg-success text-white">Active</span>';
+                //         } else {
+                //             html = '<span class="badge bg-danger text-white">Inactive</span>';
+                //         }
+                //         return html;
+                //     },
+                // },
                 {
-                    data: 'is_active',
+                    data: 'is_used',
                     orderable: true,
                     className: 'align-middle text-center',
                     render: function(data, type, row) {
                         var html
-                        if(row.is_active == 1){
-                            html = '<span class="badge bg-success text-white">Active</span>';
+                        if(row.is_used == 1){
+                            html = '<span class="badge bg-success text-white">Running</span>';
                         } else {
-                            html = '<span class="badge bg-danger text-white">Inactive</span>';
+                            html = '<span class="badge bg-secondary text-white">Initiate</span>';
                         }
                         return html;
                     },

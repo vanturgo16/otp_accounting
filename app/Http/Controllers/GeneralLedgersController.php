@@ -85,7 +85,7 @@ class GeneralLedgersController extends Controller
     
     public function store(Request $request)
     {
-        // dd($request->all());
+        dd($request->all());
         $request->validate([
             'transaction_number' => 'required',
             'transaction_date' => 'required',

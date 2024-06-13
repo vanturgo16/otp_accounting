@@ -26,7 +26,8 @@ class MstAccountCodesController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
-        $acctypes = MstAccountTypes::where('is_active', 1)->get();
+        // $acctypes = MstAccountTypes::where('is_active', 1)->get();
+        $acctypes = MstAccountTypes::get();
 
         $datas = MstAccountCodes::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
@@ -118,7 +119,8 @@ class MstAccountCodesController extends Controller
         $id = decrypt($id);
 
         $data = MstAccountCodes::where('id', $id)->first();
-        $acctypes = MstAccountTypes::where('is_active', 1)->get();
+        // $acctypes = MstAccountTypes::where('is_active', 1)->get();
+        $acctypes = MstAccountTypes::get();
 
         //Audit Log
         $this->auditLogsShort('View Edit Account Code ID ='. $id);
