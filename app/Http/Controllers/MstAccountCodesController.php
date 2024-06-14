@@ -33,7 +33,8 @@ class MstAccountCodesController extends Controller
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'master_account_codes.*', 'master_account_types.account_type_code', 'master_account_types.account_type_name'
             )
-            ->leftjoin('master_account_types', 'master_account_codes.id_master_account_types', 'master_account_types.id');
+            ->leftjoin('master_account_types', 'master_account_codes.id_master_account_types', 'master_account_types.id')
+            ->orderBy('master_account_codes.created_at','desc');
 
         if($account_code != null){
             $datas = $datas->where('account_code', 'like', '%'.$account_code.'%');
@@ -86,7 +87,8 @@ class MstAccountCodesController extends Controller
         $request->validate([
             'account_code' => 'required',
             'account_name' => 'required',
-            'id_master_account_types' => 'required'
+            'id_master_account_types' => 'required',
+            'opening_balance' => 'required'
         ]);
 
         $opening_balance = str_replace('.', '', $request->opening_balance);
@@ -99,6 +101,7 @@ class MstAccountCodesController extends Controller
                 'account_name' => $request->account_name,
                 'id_master_account_types' => $request->id_master_account_types,
                 'opening_balance' => $opening_balance,
+                'balance' => $opening_balance,
                 'is_active' => '1'
             ]);
 
@@ -155,7 +158,8 @@ class MstAccountCodesController extends Controller
                     'account_code' => $request->account_code,
                     'account_name' => $request->account_name,
                     'id_master_account_types' => $request->id_master_account_types,
-                    'opening_balance' => $opening_balance
+                    'opening_balance' => $opening_balance,
+                    'balance' => $opening_balance
                 ]);
 
                 //Audit Log

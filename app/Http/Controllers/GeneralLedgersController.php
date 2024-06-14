@@ -32,7 +32,8 @@ class GeneralLedgersController extends Controller
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name'
             )
-            ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id');
+            ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
+            ->orderBy('general_ledgers.created_at','desc');
 
         if($ref_number != null){
             $datas = $datas->where('ref_number', 'like', '%'.$ref_number.'%');
@@ -85,7 +86,7 @@ class GeneralLedgersController extends Controller
     
     public function store(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
         $request->validate([
             'transaction_number' => 'required',
             'transaction_date' => 'required',
@@ -127,6 +128,16 @@ class GeneralLedgersController extends Controller
                             'amount' => $nominal,
                             'source' => $source,
                         ]);
+
+                        //Update & Calculate Account Code
+                        MstAccountCodes::where('id', $item['account_code'])->whereNull('is_used')->update(['is_used' => 1]);
+                        $nominalbefore = MstAccountCodes::where('id', $item['account_code'])->first()->balance;
+                        if ($transaction == 'D') {
+                            $balance = bcadd($nominalbefore, $nominal, 3);
+                        } else {
+                            $balance = bcsub($nominalbefore, $nominal, 3);
+                        }
+                        MstAccountCodes::where('id', $item['account_code'])->update(['balance' => $balance]);
                     }
                 }
             }

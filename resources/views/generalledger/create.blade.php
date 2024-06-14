@@ -220,16 +220,12 @@
             var myModal = new bootstrap.Modal(document.getElementById('alert'));
             myModal.show();
         } else {
-            // this.submit();
+            var submitButton = this.querySelector('button[name="sb"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
+            this.submit();
+            return true;
         }
-        // if (!this.checkValidity()) {
-        //     event.preventDefault();
-        //     return false;
-        // }
-        // var submitButton = this.querySelector('button[name="sb"]');
-        // submitButton.disabled = true;
-        // submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
-        // return true;
     });
 </script>
 

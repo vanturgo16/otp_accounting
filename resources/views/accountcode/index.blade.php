@@ -262,6 +262,7 @@
                                     <th class="align-middle text-center">Account Name</th>
                                     <th class="align-middle text-center">Type</th>
                                     <th class="align-middle text-center">Opening Balance</th>
+                                    <th class="align-middle text-center">Balance</th>
                                     <th class="align-middle text-center">Status</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -408,6 +409,15 @@
                     className: 'align-middle text-center',
                     render: function(data, type, row) {
                         var formattedAmount = numberFormat(row.opening_balance, 3, ',', '.');
+                        return formattedAmount;
+                    },
+                },
+                {
+                    data: 'balance',
+                    orderable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var formattedAmount = numberFormat(row.balance, 3, ',', '.');
                         return formattedAmount;
                     },
                 },

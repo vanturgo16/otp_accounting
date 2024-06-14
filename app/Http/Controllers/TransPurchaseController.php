@@ -32,7 +32,8 @@ class TransPurchaseController extends Controller
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'trans_purchase.*', 'purchase_orders.po_number'
             )
-            ->leftjoin('purchase_orders', 'trans_purchase.id_purchase_order', 'purchase_orders.id');
+            ->leftjoin('purchase_orders', 'trans_purchase.id_purchase_order', 'purchase_orders.id')
+            ->orderBy('trans_purchase.created_at','desc');
 
         if($ref_number != null){
             $datas = $datas->where('ref_number', 'like', '%'.$ref_number.'%');
@@ -177,6 +178,16 @@ class TransPurchaseController extends Controller
                             'amount' => $nominal,
                             'source' => 'Purchase Transaction',
                         ]);
+
+                        //Update & Calculate Account Code
+                        MstAccountCodes::where('id', $item['account_code'])->whereNull('is_used')->update(['is_used' => 1]);
+                        $nominalbefore = MstAccountCodes::where('id', $item['account_code'])->first()->balance;
+                        if ($transaction == 'D') {
+                            $balance = bcadd($nominalbefore, $nominal, 3);
+                        } else {
+                            $balance = bcsub($nominalbefore, $nominal, 3);
+                        }
+                        MstAccountCodes::where('id', $item['account_code'])->update(['balance' => $balance]);
                     }
                 }
             }

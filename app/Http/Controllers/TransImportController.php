@@ -28,7 +28,8 @@ class TransImportController extends Controller
         $datas = TransImport::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'trans_import.*'
-            );
+            )
+            ->orderBy('trans_import.created_at','desc');
 
         if($ref_number != null){
             $datas = $datas->where('ref_number', 'like', '%'.$ref_number.'%');
@@ -146,6 +147,16 @@ class TransImportController extends Controller
                             'amount' => $nominal,
                             'source' => 'Import Transaction',
                         ]);
+
+                        //Update & Calculate Account Code
+                        MstAccountCodes::where('id', $item['account_code'])->whereNull('is_used')->update(['is_used' => 1]);
+                        $nominalbefore = MstAccountCodes::where('id', $item['account_code'])->first()->balance;
+                        if ($transaction == 'D') {
+                            $balance = bcadd($nominalbefore, $nominal, 3);
+                        } else {
+                            $balance = bcsub($nominalbefore, $nominal, 3);
+                        }
+                        MstAccountCodes::where('id', $item['account_code'])->update(['balance' => $balance]);
                     }
                 }
             }
