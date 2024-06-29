@@ -182,11 +182,14 @@ class TransPurchaseController extends Controller
                         //Update & Calculate Account Code
                         MstAccountCodes::where('id', $item['account_code'])->whereNull('is_used')->update(['is_used' => 1]);
                         $nominalbefore = MstAccountCodes::where('id', $item['account_code'])->first()->balance;
-                        if ($transaction == 'D') {
-                            $balance = bcadd($nominalbefore, $nominal, 3);
-                        } else {
-                            $balance = bcsub($nominalbefore, $nominal, 3);
-                        }
+                        // IF IGNORE Debit Credit
+                        $balance = bcadd($nominalbefore, $nominal, 3);
+                        // ELSE USE Debit Credit 
+                        // if ($transaction == 'D') {
+                        //     $balance = bcadd($nominalbefore, $nominal, 3);
+                        // } else {
+                        //     $balance = bcsub($nominalbefore, $nominal, 3);
+                        // }
                         MstAccountCodes::where('id', $item['account_code'])->update(['balance' => $balance]);
                     }
                 }
