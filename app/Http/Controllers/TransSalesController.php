@@ -32,7 +32,8 @@ class TransSalesController extends Controller
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'trans_sales.*', 'sales_orders.so_number'
             )
-            ->leftjoin('sales_orders', 'trans_sales.id_sales_order', 'sales_orders.id');
+            ->leftjoin('sales_orders', 'trans_sales.id_sales_order', 'sales_orders.id')
+            ->orderBy('trans_sales.created_at','desc');
 
         if($ref_number != null){
             $datas = $datas->where('ref_number', 'like', '%'.$ref_number.'%');
@@ -168,6 +169,16 @@ class TransSalesController extends Controller
                             'amount' => $nominal,
                             'source' => 'Sales Transaction',
                         ]);
+
+                        //Update & Calculate Account Code
+                        MstAccountCodes::where('id', $item['account_code'])->whereNull('is_used')->update(['is_used' => 1]);
+                        $nominalbefore = MstAccountCodes::where('id', $item['account_code'])->first()->balance;
+                        if ($transaction == 'D') {
+                            $balance = bcadd($nominalbefore, $nominal, 3);
+                        } else {
+                            $balance = bcsub($nominalbefore, $nominal, 3);
+                        }
+                        MstAccountCodes::where('id', $item['account_code'])->update(['balance' => $balance]);
                     }
                 }
             }

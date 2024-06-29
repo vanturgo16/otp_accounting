@@ -27,7 +27,8 @@ class MstAccountTypesController extends Controller
         $datas = MstAccountTypes::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_account_types.*'
-        );
+        )
+        ->orderBy('master_account_types.created_at','desc');
 
         if($account_type_code != null){
             $datas = $datas->where('account_type_code', 'like', '%'.$account_type_code.'%');
