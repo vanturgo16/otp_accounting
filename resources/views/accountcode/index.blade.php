@@ -44,10 +44,20 @@
                                                         <input class="form-control" name="account_name" type="text" value="" placeholder="Input Account Name.." required>
                                                     </div>
                                                 </div>
-                                                <div class="col-lg-12">
+                                                <div class="col-lg-8">
                                                     <div class="mb-3">
                                                         <label class="form-label">Opening Balance</label><label style="color: darkred">*</label>
                                                         <input class="form-control rupiah-input" name="opening_balance" type="text" placeholder="Input Opening Balance.." required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Type</label><label style="color: darkred">*</label>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
+                                                            <option value="">- Select Type -</option>
+                                                            <option value="D">Debit</option>
+                                                            <option value="K">Kredit</option>
+                                                        </select>
                                                     </div>
                                                 </div>
                                             </div>
@@ -263,6 +273,7 @@
                                     <th class="align-middle text-center">Type</th>
                                     <th class="align-middle text-center">Opening Balance</th>
                                     <th class="align-middle text-center">Balance</th>
+                                    <th class="align-middle text-center">Debit / Kredit</th>
                                     <th class="align-middle text-center">Status</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -415,26 +426,26 @@
                 {
                     data: 'balance',
                     orderable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-middle text-center text-bold',
                     render: function(data, type, row) {
                         var formattedAmount = numberFormat(row.balance, 3, ',', '.');
                         return formattedAmount;
                     },
                 },
-                // {
-                //     data: 'is_active',
-                //     orderable: true,
-                //     className: 'align-middle text-center',
-                //     render: function(data, type, row) {
-                //         var html
-                //         if(row.is_active == 1){
-                //             html = '<span class="badge bg-success text-white">Active</span>';
-                //         } else {
-                //             html = '<span class="badge bg-danger text-white">Inactive</span>';
-                //         }
-                //         return html;
-                //     },
-                // },
+                {
+                    data: 'balance_type',
+                    orderable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var html
+                        if(row.balance_type == 'D'){
+                            html = '<span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>';
+                        } else {
+                            html = '<span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>';
+                        } 
+                        return html;
+                    },
+                },
                 {
                     data: 'is_used',
                     orderable: true,
@@ -442,7 +453,7 @@
                     render: function(data, type, row) {
                         var html
                         if(row.is_used == 1){
-                            html = '<span class="badge bg-success text-white">Running</span>';
+                            html = '<span class="badge bg-warning text-white">Running</span>';
                         } else {
                             html = '<span class="badge bg-secondary text-white">Initiate</span>';
                         }

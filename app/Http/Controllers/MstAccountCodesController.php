@@ -88,7 +88,8 @@ class MstAccountCodesController extends Controller
             'account_code' => 'required',
             'account_name' => 'required',
             'id_master_account_types' => 'required',
-            'opening_balance' => 'required'
+            'opening_balance' => 'required',
+            'type' => 'required'
         ]);
 
         $opening_balance = str_replace('.', '', $request->opening_balance);
@@ -101,7 +102,9 @@ class MstAccountCodesController extends Controller
                 'account_name' => $request->account_name,
                 'id_master_account_types' => $request->id_master_account_types,
                 'opening_balance' => $opening_balance,
+                'opening_balance_type' => $request->type,
                 'balance' => $opening_balance,
+                'balance_type' => $request->type,
                 'is_active' => '1'
             ]);
 
@@ -140,7 +143,9 @@ class MstAccountCodesController extends Controller
         $request->validate([
             'account_code' => 'required',
             'account_name' => 'required',
-            'id_master_account_types' => 'required'
+            'id_master_account_types' => 'required',
+            'opening_balance' => 'required',
+            'type' => 'required'
         ]);
         $opening_balance = str_replace('.', '', $request->opening_balance);
         $opening_balance = str_replace(',', '.', $opening_balance);
@@ -150,6 +155,7 @@ class MstAccountCodesController extends Controller
         $databefore->account_name = $request->account_name;
         $databefore->id_master_account_types = $request->id_master_account_types;
         $databefore->opening_balance = $opening_balance;
+        $databefore->balance_type = $request->type;
 
         if($databefore->isDirty()){
             DB::beginTransaction();
@@ -159,7 +165,9 @@ class MstAccountCodesController extends Controller
                     'account_name' => $request->account_name,
                     'id_master_account_types' => $request->id_master_account_types,
                     'opening_balance' => $opening_balance,
-                    'balance' => $opening_balance
+                    'opening_balance_type' => $request->type,
+                    'balance' => $opening_balance,
+                    'balance_type' => $request->type,
                 ]);
 
                 //Audit Log

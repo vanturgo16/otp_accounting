@@ -26,6 +26,9 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    {{-- SummerNote --}}
+    <link href="{{ asset('assets/css/summernote-bs4.min.css') }}" rel="stylesheet">
+    <script src="{{ asset('assets/js/summernote-bs4.min.js') }}"></script>
     {{-- select 2 --}}
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -164,10 +167,25 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('transsales.index') }}">
+                            <a href="javascript: void(0);" class="has-arrow">
                                 <i class="mdi mdi-file-upload"></i>
                                 <span>Sales</span>
                             </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li>
+                                    <a href="{{ route('transsales.local.index') }}">
+                                        <i class="mdi mdi-ballot-outline"></i>
+                                        <span>Local</span>
+                                    </a>
+                                </li>
+    
+                                <li>
+                                    <a href="{{ route('transsales.export.index') }}">
+                                        <i class="mdi mdi-ballot"></i>
+                                        <span>Export</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                         <li>
                             <a href="{{ route('transpurchase.index') }}">
@@ -476,6 +494,11 @@
     <script src="{{ asset('assets/js/bulkaction.js') }}"></script>
 
     <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#summernote-editor').summernote();
+        });
+    </script>
 </body>
 
 </html>

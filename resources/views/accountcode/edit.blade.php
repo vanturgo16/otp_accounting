@@ -28,7 +28,7 @@
         <form action="{{ route('accountcode.update', encrypt($data->id)) }}" id="formedit" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="row">
-                <div class="col-12">
+                <div class="col-lg-6">
                     <div class="card">
                         <div class="card-header text-center py-3">
                             <h5 class="mb-0">Edit</h5>
@@ -56,10 +56,20 @@
                                         <input class="form-control" name="account_name" type="text" value="{{ $data->account_name }}" placeholder="Input Account Code Name.." required>
                                     </div>
                                 </div>
-                                <div class="col-lg-12">
+                                <div class="col-lg-8">
                                     <div class="mb-3">
                                         <label class="form-label">Opening Balance</label><label style="color: darkred">*</label>
                                         <input class="form-control rupiah-input" name="opening_balance" value="{{ number_format($data->opening_balance, 3, ',', '.') }}" type="text" placeholder="Input Opening Balance.." required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Type</label><label style="color: darkred">*</label>
+                                        <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
+                                            <option value="">- Select Type -</option>
+                                            <option @if($data->balance_type == "D") selected @endif value="D">Debit</option>
+                                            <option @if($data->balance_type == "K") selected @endif value="K">Kredit</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <script>
