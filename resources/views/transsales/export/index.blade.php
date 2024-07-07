@@ -8,58 +8,12 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Account Type</button>
-                        {{-- Modal Add --}}
-                        <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-top" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Add New Account Type</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ route('accounttype.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="modal-body">
-                                            <div class="row">
-                                                <div class="col-lg-12">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Account Type Code</label><label style="color: darkred">*</label>
-                                                        <input class="form-control" name="account_type_code" type="text" value="" placeholder="Input Account Type Code.." required>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-12">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Account Type Name</label><label style="color: darkred">*</label>
-                                                        <input class="form-control" name="account_type_name" type="text" value="" placeholder="Input Account Type.." required>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-plus-box label-icon"></i>Add</button>
-                                        </div>
-                                    </form>
-                                    <script>
-                                        document.getElementById('formadd').addEventListener('submit', function(event) {
-                                            if (!this.checkValidity()) {
-                                                event.preventDefault(); // Prevent form submission if it's not valid
-                                                return false;
-                                            }
-                                            var submitButton = this.querySelector('button[name="sb"]');
-                                            submitButton.disabled = true;
-                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
-                                            return true; // Allow form submission
-                                        });
-                                    </script>
-                                </div>
-                            </div>
-                        </div>
+                        <a href="{{ route('transsales.export.create') }}" type="button" class="btn btn-primary waves-effect btn-label waves-light"><i class="mdi mdi-plus-box label-icon"></i> Add New Sales Transaction (Export)</a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master</a></li>
-                            <li class="breadcrumb-item active">Account Type</li>
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Accounting</a></li>
+                            <li class="breadcrumb-item active">Sales (Export)</li>
                         </ol>
                     </div>
                 </div>
@@ -68,46 +22,6 @@
 
         @include('layouts.alert')
 
-        <!-- Modal for bulk delete confirmation -->
-        <div class="modal fade" id="deleteselected" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-top" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">Delete</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row text-center">
-                            <p>Are you sure you want to delete the selected items?</p>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deleteselected" onclick="bulkDeleted('{{ route('accounttype.deleteselected') }}')"><i class="mdi mdi-delete label-icon"></i>Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Modal for bulk deactive confirmation -->
-        <div class="modal fade" id="deactivateselected" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-top" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">Deactive</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row text-center">
-                            <p>Are you sure you want to deactive the selected items?</p>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deactivateselected" onclick="bulkDeactivate('{{ route('accounttype.deactiveselected') }}')"><i class="mdi mdi-close-circle label-icon"></i>Deactive</button>
-                    </div>
-                </div>
-            </div>
-        </div>
         <!-- Modal Search -->
         <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
@@ -116,24 +30,21 @@
                         <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="{{ route('accounttype.index') }}" id="formfilter" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('transsales.export.index') }}" id="formfilter" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
                             <div class="row">
                                 <div class="col-6 mb-2">
-                                    <label class="form-label">Code</label>
-                                    <input class="form-control" name="account_type_code" type="text" value="{{ $account_type_code }}" placeholder="Filter Code..">
+                                    <label class="form-label">Ref Number</label>
+                                    <input class="form-control" name="ref_number" type="text" value="{{ $ref_number }}" placeholder="Filter Ref Number..">
                                 </div>
                                 <div class="col-6 mb-2">
-                                    <label class="form-label">Account Type Name</label>
-                                    <input class="form-control" name="account_type_name" type="text" value="{{ $account_type_name }}" placeholder="Filter Account Type..">
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <label class="form-label">Status</label>
-                                    <select class="form-control" name="status">
-                                        <option value="" selected>--All--</option>
-                                        <option value="1" @if($status == '1') selected @endif>Active</option>
-                                        <option value="0" @if($status == '0') selected @endif>Not Active</option>
+                                    <label class="form-label">Delivery Note</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes">
+                                        <option value="" selected>--Select Type--</option>
+                                        @foreach($deliveryNotes as $item)
+                                            <option value="{{ $item->id }}" @if($id_delivery_notes == $item->id) selected="selected" @endif>{{ $item->dn_number." - ". $item->status }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <hr class="mt-2">
@@ -203,16 +114,10 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header text-center py-3">
-                        <h5 class="mb-0"><b>Master Account Type</b></h5>
+                        <h5 class="mb-0"><b>Sales Transaction (Export)</b></h5>
                         List of 
-                        @if($account_type_code != null)
-                            (Code<b> - {{ $account_type_code }}</b>)
-                        @endif
-                        @if($account_type_name != null)
-                            (Account Type<b> - {{ $account_type_name }}</b>)
-                        @endif
-                        @if($status != null)
-                            (Status<b> - {{ $status }}</b>)
+                        @if($ref_number != null)
+                            (Ref. Number<b> - {{ $ref_number }}</b>)
                         @endif
                         @if($searchDate == 'Custom')
                             (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
@@ -228,9 +133,11 @@
                                         <input type="checkbox" id="checkAllRows">
                                     </th>
                                     <th class="align-middle text-center">No.</th>
-                                    <th class="align-middle text-center">Code</th>
-                                    <th class="align-middle text-center">Account Type</th>
-                                    <th class="align-middle text-center">Status</th>
+                                    <th class="align-middle text-center">Ref. Number</th>
+                                    <th class="align-middle text-center">Transaction Date</th>
+                                    <th class="align-middle text-center">DN Number</th>
+                                    <th class="align-middle text-center">Total Transaction</th>
+                                    <th class="align-middle text-center">Created By</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
@@ -239,27 +146,27 @@
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 
 <script>
     $(function() {
         var i = 1;
-        var url = '{!! route('accounttype.index') !!}';
+        var url = '{!! route('transsales.export.index') !!}';
         var currentDate = new Date();
         var formattedDate = currentDate.toISOString().split('T')[0];
-        var fileName = "Master Account Type Export - " + formattedDate + ".xlsx";
+        var fileName = "Sales Transaction Export - " + formattedDate + ".xlsx";
         var data = {
-                account_type_code: '{{ $account_type_code }}',
-                account_type_name: '{{ $account_type_name }}',
-                status: '{{ $status }}',
+                ref_number: '{{ $ref_number }}',
+                id_delivery_notes: '{{ $id_delivery_notes }}',
                 searchDate: '{{ $searchDate }}',
                 startdate: '{{ $startdate }}',
                 enddate: '{{ $enddate }}'
             };
         var requestData = Object.assign({}, data);
         requestData.flag = 1;
-        
+
         // <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteselected"><i class="mdi mdi-trash-can"></i> Delete Selected</button></li>
 
         var dataTable = $('#server-side-table').DataTable({
@@ -276,7 +183,7 @@
                                 <i class="mdi mdi-checkbox-multiple-marked-outline"></i> Bulk Actions <i class="fas fa-caret-down"></i>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deactivateselected"><i class="mdi mdi-close-circle"></i> Deactive Selected</button></li>
+                                <li><button class="dropdown-item">No Action</button></li>
                             </ul>
                         </div>
                     </div>`
@@ -335,7 +242,7 @@
             columns: [{
                     data: 'bulk-action',
                     name: 'bulk-action',
-                    className: 'align-middle text-center',
+                    className: 'text-center',
                     orderable: false,
                     searchable: false
                 },
@@ -346,34 +253,49 @@
                     },
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'text-center',
                 },
                 {
-                    data: 'account_type_code',
-                    name: 'account_type_code',
+                    data: 'ref_number',
+                    name: 'ref_number',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center'
+                    className: 'text-center text-bold'
                 },
                 {
-                    data: 'account_type_name',
-                    name: 'account_type_name',
-                    orderable: true,
+                    data: 'date_transaction',
                     searchable: true,
-                    className: 'align-middle text-center'
-                },
-                {
-                    data: 'is_active',
                     orderable: true,
-                    className: 'align-middle text-center',
+                    className: 'text-center',
                     render: function(data, type, row) {
-                        var html
-                        if(row.is_active == 1){
-                            html = '<span class="badge bg-success text-white">Active</span>';
-                        } else {
-                            html = '<span class="badge bg-danger text-white">Inactive</span>';
-                        }
-                        return html;
+                        var date_transaction = new Date(row.date_transaction);
+                        return date_transaction.toLocaleDateString('es-CL').replace(/\//g, '-');
+                    },
+                },
+                {
+                    data: 'dn_number',
+                    name: 'dn_number',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-center'
+                },
+                {
+                    data: 'count',
+                    name: 'count',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        return '<h5><span class="badge bg-info">'+ row.count +'</span></h5>';
+                    },
+                },
+                {
+                    data: 'created_by',
+                    searchable: true,
+                    orderable: true,
+                    render: function(data, type, row) {
+                        var created_at = new Date(row.created_at);
+                        return row.created_by + '<br><b>At. </b>' + created_at.toLocaleDateString('es-CL').replace(/\//g, '-');
                     },
                 },
                 {
