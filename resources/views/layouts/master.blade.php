@@ -157,6 +157,12 @@
                                 <span>Manage Account Code</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('mstneraca.index') }}">
+                                <i class="mdi mdi-format-list-bulleted-type"></i>
+                                <span>Manage Report Neraca</span>
+                            </a>
+                        </li>
 
                         <li class="menu-title" data-key="t-menu">Accounting</li>
 

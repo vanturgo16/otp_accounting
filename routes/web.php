@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GeneralLedgersController;
+use App\Http\Controllers\MasterNeracaController;
 use App\Http\Controllers\MstAccountCodesController;
 use App\Http\Controllers\MstAccountTypesController;
 use App\Http\Controllers\TransDataBankController;
