@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GeneralLedgersController;
+use App\Http\Controllers\MasterNeracaController;
 use App\Http\Controllers\MstAccountCodesController;
 use App\Http\Controllers\MstAccountTypesController;
 use App\Http\Controllers\TransDataBankController;
@@ -111,4 +112,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('generalledger', [GeneralLedgersController::class, 'index'])->name('generalledger.index');
     Route::get('generalledger/create', [GeneralLedgersController::class, 'create'])->name('generalledger.create');
     Route::post('generalledger/store', [GeneralLedgersController::class, 'store'])->name('generalledger.store');
+
+    //Laporan Neraca
+    Route::get('mst-neraca', [MasterNeracaController::class, 'index'])->name('mstneraca.index');
 });
