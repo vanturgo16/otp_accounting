@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Traits\AuditLogsTrait;
+use App\Traits\GeneralLedgerTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
@@ -15,6 +16,7 @@ use App\Models\MstDropdowns;
 class GeneralLedgersController extends Controller
 {
     use AuditLogsTrait;
+    use GeneralLedgerTrait;
 
     public function index(Request $request)
     {
@@ -88,7 +90,7 @@ class GeneralLedgersController extends Controller
     {
         // dd($request->all());
         $request->validate([
-            'transaction_number' => 'required',
+            'transaction_number' => 'unique:general_ledgers,ref_number|required',
             'transaction_date' => 'required',
             'source' => 'required',
             'addmore.*.account_code' => 'required',
@@ -113,31 +115,11 @@ class GeneralLedgersController extends Controller
                     if($item['account_code'] != null && $item['nominal'] != null){
                         $nominal = str_replace('.', '', $item['nominal']);
                         $nominal = str_replace(',', '.', $nominal);
-
-                        if($item['type'] == 'Debit'){
-                            $transaction = "D";
-                        } else {
-                            $transaction = "K";
-                        }
     
-                        GeneralLedger::create([
-                            'ref_number' => $request->transaction_number,
-                            'date_transaction' => $request->transaction_date,
-                            'id_account_code' => $item['account_code'],
-                            'transaction' => $transaction,
-                            'amount' => $nominal,
-                            'source' => $source,
-                        ]);
-
-                        //Update & Calculate Account Code
-                        MstAccountCodes::where('id', $item['account_code'])->whereNull('is_used')->update(['is_used' => 1]);
-                        $nominalbefore = MstAccountCodes::where('id', $item['account_code'])->first()->balance;
-                        if ($transaction == 'D') {
-                            $balance = bcadd($nominalbefore, $nominal, 3);
-                        } else {
-                            $balance = bcsub($nominalbefore, $nominal, 3);
-                        }
-                        MstAccountCodes::where('id', $item['account_code'])->update(['balance' => $balance]);
+                        // Create General Ledger
+                        $this->storeGeneralLedger($request->transaction_number, $request->transaction_date,$item['account_code'], $item['type'], $nominal, $source);
+                        // Update & Calculate Balance Account Code
+                        $this->updateBalanceAccount($item['account_code'], $nominal, $item['type']);
                     }
                 }
             }

@@ -8,12 +8,12 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('transsales.create') }}" type="button" class="btn btn-primary waves-effect btn-label waves-light"><i class="mdi mdi-plus-box label-icon"></i> Add New Sales Transaction</a>
+                        <a href="{{ route('transsales.local.create') }}" type="button" class="btn btn-primary waves-effect btn-label waves-light"><i class="mdi mdi-plus-box label-icon"></i> Add New Sales Transaction (Local)</a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Accounting</a></li>
-                            <li class="breadcrumb-item active">Sales</li>
+                            <li class="breadcrumb-item active">Sales (Local)</li>
                         </ol>
                     </div>
                 </div>
@@ -30,7 +30,7 @@
                         <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="{{ route('transsales.index') }}" id="formfilter" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('transsales.local.index') }}" id="formfilter" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
                             <div class="row">
@@ -39,11 +39,11 @@
                                     <input class="form-control" name="ref_number" type="text" value="{{ $ref_number }}" placeholder="Filter Ref Number..">
                                 </div>
                                 <div class="col-6 mb-2">
-                                    <label class="form-label">Sales Order</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_sales_order">
+                                    <label class="form-label">Delivery Note</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes">
                                         <option value="" selected>--Select Type--</option>
-                                        @foreach($sales as $item)
-                                            <option value="{{ $item->id }}" @if($id_sales_order == $item->id) selected="selected" @endif>{{ $item->so_number." - ". $item->status }}</option>
+                                        @foreach($deliveryNotes as $item)
+                                            <option value="{{ $item->id }}" @if($id_delivery_notes == $item->id) selected="selected" @endif>{{ $item->dn_number." - ". $item->status }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -114,7 +114,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header text-center py-3">
-                        <h5 class="mb-0"><b>Sales Transaction</b></h5>
+                        <h5 class="mb-0"><b>Sales Transaction (Local)</b></h5>
                         List of 
                         @if($ref_number != null)
                             (Ref. Number<b> - {{ $ref_number }}</b>)
@@ -134,7 +134,8 @@
                                     </th>
                                     <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Ref. Number</th>
-                                    <th class="align-middle text-center">SO Number</th>
+                                    <th class="align-middle text-center">Transaction Date</th>
+                                    <th class="align-middle text-center">DN Number</th>
                                     <th class="align-middle text-center">Total Transaction</th>
                                     <th class="align-middle text-center">Created By</th>
                                     <th class="align-middle text-center">Action</th>
@@ -151,13 +152,13 @@
 <script>
     $(function() {
         var i = 1;
-        var url = '{!! route('transsales.index') !!}';
+        var url = '{!! route('transsales.local.index') !!}';
         var currentDate = new Date();
         var formattedDate = currentDate.toISOString().split('T')[0];
         var fileName = "Sales Transaction Export - " + formattedDate + ".xlsx";
         var data = {
                 ref_number: '{{ $ref_number }}',
-                id_sales_order: '{{ $id_sales_order }}',
+                id_delivery_notes: '{{ $id_delivery_notes }}',
                 searchDate: '{{ $searchDate }}',
                 startdate: '{{ $startdate }}',
                 enddate: '{{ $enddate }}'
@@ -240,7 +241,7 @@
             columns: [{
                     data: 'bulk-action',
                     name: 'bulk-action',
-                    className: 'align-middle text-center',
+                    className: 'text-center',
                     orderable: false,
                     searchable: false
                 },
@@ -251,28 +252,38 @@
                     },
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'text-center',
                 },
                 {
                     data: 'ref_number',
                     name: 'ref_number',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center text-bold'
+                    className: 'text-center text-bold'
                 },
                 {
-                    data: 'so_number',
-                    name: 'so_number',
+                    data: 'date_transaction',
+                    searchable: true,
+                    orderable: true,
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        var date_transaction = new Date(row.date_transaction);
+                        return date_transaction.toLocaleDateString('es-CL').replace(/\//g, '-');
+                    },
+                },
+                {
+                    data: 'dn_number',
+                    name: 'dn_number',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center'
+                    className: 'text-center'
                 },
                 {
                     data: 'count',
                     name: 'count',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'text-center',
                     render: function(data, type, row) {
                         return '<h5><span class="badge bg-info">'+ row.count +'</span></h5>';
                     },

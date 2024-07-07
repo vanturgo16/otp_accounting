@@ -36,10 +36,10 @@
                             <div class="form-group">
                                 <div><span class="fw-bold">Status :</span></div>
                                 <span>
-                                    @if($data->is_active == 1)
-                                        <span class="badge bg-success text-white">Active</span>
+                                    @if($data->is_used == 1)
+                                        <span class="badge bg-warning text-white">Running</span>
                                     @else
-                                        <span class="badge bg-danger text-white">Inactive</span>
+                                        <span class="badge bg-secondary text-white">Initiate</span>
                                     @endif
                                 </span>
                             </div>
@@ -60,7 +60,7 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-6 mb-2">
                             <div class="form-group">
                                 <div><span class="fw-bold">Account Name :</span></div>
                                 <span>
@@ -68,11 +68,33 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-6 mb-2">
                             <div class="form-group">
                                 <div><span class="fw-bold">Opening Balance :</span></div>
                                 <span>
-                                    <span>{{ number_format($data->opening_balance, 3, ',', '.') }}</span>
+                                    <span>
+                                        {{ number_format($data->opening_balance, 3, ',', '.') }}
+                                        @if($data->opening_balance_type == "D")
+                                            <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
+                                        @else
+                                            <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>
+                                        @endif
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-2">
+                            <div class="form-group">
+                                <div><span class="fw-bold">Balance :</span></div>
+                                <span>
+                                    <span>
+                                        {{ number_format($data->balance, 3, ',', '.') }}
+                                        @if($data->balance_type == "D")
+                                            <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
+                                        @else
+                                            <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>
+                                        @endif
+                                    </span>
                                 </span>
                             </div>
                         </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Traits\AuditLogsTrait;
+use App\Traits\GeneralLedgerTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
@@ -16,6 +17,30 @@ use App\Models\TransImport;
 class TransImportController extends Controller
 {
     use AuditLogsTrait;
+    use GeneralLedgerTrait;
+
+    function generateRefNumber()
+    {
+        // Get current year and month
+        $year = date('y');
+        $month = date('m');
+        // Get the last reference number for the current year and month from the database
+        $lastRefNumber = TransImport::where('ref_number', 'like', "IMP-$year$month%")->orderBy('ref_number', 'desc')->first();
+        // If there are no existing reference numbers for the current year and month, start from 1
+        if (!$lastRefNumber) {
+            $counter = 1;
+        } else {
+            // Extract the counter from the last reference number and increment it
+            $lastCounter = intval(substr($lastRefNumber->ref_number, 9)); // Assuming the format is fixed as "IMP-YYMMXXXXX"
+            $counter = $lastCounter + 1;
+        }
+        // Format the counter with leading zeros
+        $counterFormatted = str_pad($counter, 5, '0', STR_PAD_LEFT);
+        // Generate the reference number
+        $refNumber = "IMP-$year$month$counterFormatted";
+    
+        return $refNumber;
+    }
 
     public function index(Request $request)
     {
@@ -81,34 +106,11 @@ class TransImportController extends Controller
         return view('transimport.create',compact('accountcodes'));
     }
 
-    function generateRefNumber()
-    {
-        // Get current year and month
-        $year = date('y');
-        $month = date('m');
-        // Get the last reference number for the current year and month from the database
-        $lastRefNumber = TransImport::where('ref_number', 'like', "IMP-$year$month%")->orderBy('ref_number', 'desc')->first();
-        // If there are no existing reference numbers for the current year and month, start from 1
-        if (!$lastRefNumber) {
-            $counter = 1;
-        } else {
-            // Extract the counter from the last reference number and increment it
-            $lastCounter = intval(substr($lastRefNumber->ref_number, 9)); // Assuming the format is fixed as "IMP-YYMMXXXXX"
-            $counter = $lastCounter + 1;
-        }
-        // Format the counter with leading zeros
-        $counterFormatted = str_pad($counter, 5, '0', STR_PAD_LEFT);
-        // Generate the reference number
-        $refNumber = "IMP-$year$month$counterFormatted";
-    
-        return $refNumber;
-    }
-
     public function store(Request $request)
     {
         // dd($request->all());
         $request->validate([
-            'transaction_date' => 'required',
+            'date_transaction' => 'required',
             'addmore.*.account_code' => 'required',
             'addmore.*.nominal' => 'required',
             'addmore.*.type' => 'required',
@@ -133,30 +135,10 @@ class TransImportController extends Controller
                         $nominal = str_replace('.', '', $item['nominal']);
                         $nominal = str_replace(',', '.', $nominal);
 
-                        if($item['type'] == 'Debit'){
-                            $transaction = "D";
-                        } else {
-                            $transaction = "K";
-                        }
-    
-                        GeneralLedger::create([
-                            'ref_number' => $refNumber,
-                            'date_transaction' => $request->transaction_date,
-                            'id_account_code' => $item['account_code'],
-                            'transaction' => $transaction,
-                            'amount' => $nominal,
-                            'source' => 'Import Transaction',
-                        ]);
-
-                        //Update & Calculate Account Code
-                        MstAccountCodes::where('id', $item['account_code'])->whereNull('is_used')->update(['is_used' => 1]);
-                        $nominalbefore = MstAccountCodes::where('id', $item['account_code'])->first()->balance;
-                        if ($transaction == 'D') {
-                            $balance = bcadd($nominalbefore, $nominal, 3);
-                        } else {
-                            $balance = bcsub($nominalbefore, $nominal, 3);
-                        }
-                        MstAccountCodes::where('id', $item['account_code'])->update(['balance' => $balance]);
+                        // Create General Ledger
+                        $this->storeGeneralLedger($refNumber, $request->date_transaction, $item['account_code'], $item['type'], $nominal, 'Import Transaction');
+                        // Update & Calculate Balance Account Code
+                        $this->updateBalanceAccount($item['account_code'], $nominal, $item['type']);
                     }
                 }
             }

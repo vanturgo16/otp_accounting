@@ -8,14 +8,14 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('transsales.index') }}" class="btn btn-light waves-effect btn-label waves-light">
-                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Sales Transaction
+                        <a href="{{ route('transsales.local.index') }}" class="btn btn-light waves-effect btn-label waves-light">
+                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Sales Transaction (Local)
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Accounting</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('transsales.index') }}">Sales Transaction</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('transsales.local.index') }}">Sales (Local)</a></li>
                             <li class="breadcrumb-item active">Create</li>
                         </ol>
                     </div>
@@ -25,7 +25,7 @@
         
         @include('layouts.alert')
 
-        <form action="{{ route('transsales.store') }}" id="formstore" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('transsales.local.store') }}" id="formstore" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="row">
                 <div class="col-12">
@@ -42,82 +42,58 @@
                                 </div>
                                 <div class="col-lg-4 mb-3">
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="transaction_date" value="" required>
+                                    <input type="date" class="form-control" name="date_transaction" value="" required>
                                 </div>
                                 <div class="col-lg-4 mb-3">
-                                    <label class="form-label">No Delivery Note</label><label style="color: darkred">*</label>
-                                    <input type="text" class="form-control" name="no_delivery_note" value="" placeholder="Input No Delivery Note.." required>
+                                    <label class="form-label">Due Date</label><label style="color: darkred">*</label>
+                                    <input type="date" class="form-control" name="due_date" value="" required min="<?= date('Y-m-d'); ?>">
                                 </div>
                                 <hr>
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Sales Order</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_sales_order" required>
+                                    <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
                                         <option value="" selected>-- Select --</option>
-                                        @foreach($sales as $item)
-                                            <option value="{{ $item->id }}">{{ $item->so_number." - ". $item->status }}</option>
+                                        @foreach($deliveryNotes as $item)
+                                            <option value="{{ $item->id }}">{{ $item->dn_number." - ". $item->status }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                 </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Customer Name</label>
-                                    <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Customer Address</label>
-                                    <input class="form-control" id="customer_address" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Date</label>
-                                    <input class="form-control" id="date" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Due Date</label>
-                                    <input class="form-control" id="due_date" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">PPN</label>
-                                    <input class="form-control" id="ppn" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Status</label>
-                                    <input class="form-control" id="statusorder" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">SO Type</label>
-                                    <input class="form-control" id="so_type" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">SO Category</label>
-                                    <input class="form-control" id="so_category" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Product</label>
-                                    <input class="form-control" id="product" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Type Product</label>
-                                    <input class="form-control" id="type_product" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Quantity</label>
-                                    <input class="form-control" id="qty" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Unit</label>
-                                    <input class="form-control" id="unit" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Price</label>
-                                    <input class="form-control" id="price" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Total Price</label>
-                                    <input class="form-control" id="total_price" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
+                            </div>
 
+                            <div class="card">
+                                <div class="card-body" style="background-color:ghostwhite">
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">Customer Name</label>
+                                            <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">Sales Name</label>
+                                            <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                        </div>
+                                        
+                                        <div class="col-12">
+                                            <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="align-middle text-center">No.</th>
+                                                        <th class="align-middle text-center">SO Number</th>
+                                                        <th class="align-middle text-center">Product</th>
+                                                        <th class="align-middle text-center">Qty</th>
+                                                        <th class="align-middle text-center">Unit</th>
+                                                        <th class="align-middle text-center">Price</th>
+                                                        <th class="align-middle text-center">Total Price</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
                                 <div class="col-lg-12 mt-3">
                                     <div class="card">
                                         <div class="card-header text-center">
@@ -150,8 +126,8 @@
                                                             <td>
                                                                 <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[0][type]" required>
                                                                     <option value="">- Select Type -</option>
-                                                                    <option value="Debit">Debit</option>
-                                                                    <option value="Kredit">Kredit</option>
+                                                                    <option value="D">Debit</option>
+                                                                    <option value="K">Kredit</option>
                                                                 </select>
                                                             </td>
                                                             <td style="text-align:center"><button type="button" name="add" id="adds" class="btn btn-success"><i class="fas fa-plus"></i></button></td>
@@ -166,7 +142,7 @@
                             <hr>
                             <div class="row">
                                 <div class="col-12 align-right">
-                                    <a href="{{ route('transsales.index') }}" type="button" class="btn btn-light waves-effect btn-label waves-light">
+                                    <a href="{{ route('transsales.local.index') }}" type="button" class="btn btn-light waves-effect btn-label waves-light">
                                         <i class="mdi mdi-arrow-left-circle label-icon"></i>Back
                                     </a>
                                     <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb">
@@ -215,9 +191,9 @@
             let nominal = parseCurrency($(this).find('input[name*="[nominal]"]').val());
             let type = $(this).find('select[name*="[type]"]').val();
 
-            if (type === "Debit") {
+            if (type === "D") {
                 debitTotal += nominal;
-            } else if (type === "Kredit") {
+            } else if (type === "K") {
                 kreditTotal += nominal;
             }
         });
@@ -290,8 +266,8 @@
                 <td>
                     <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
                         <option value="">- Select Type -</option>
-                        <option value="Debit">Debit</option>
-                        <option value="Kredit">Kredit</option>
+                        <option value="D">Debit</option>
+                        <option value="K">Kredit</option>
                     </select>
                 </td>
                 <td style="text-align:center">
@@ -310,70 +286,173 @@
     });
 </script>
 
-{{-- Sales Order Choose --}}
+{{-- Delivery Notes Choose --}}
+<style>
+    /* Hide DataTable header and footer */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        display: none;
+    }
+</style>
+
 <script>
-    $('select[name="id_sales_order"]').on('change', function() {
-        $('#customer_name').val("");
-        $('#customer_address').val("");
-        $('#date').val("");
-        $('#due_date').val("");
-        $('#ppn').val("");
-        $('#statusorder').val("");
+    $(function() {
+        var data = {id_delivery_notes: ''};
+        var dataTable = $('#server-side-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{!! route('transsales.getsalesorder') !!}',
+                type: 'GET',
+                data: function(d) {
+                    d.id_delivery_notes = data.id_delivery_notes;
+                }
+            },
+            "columns": [
+                {
+                data: null,
+                    render: function(data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    },
+                    orderable: false,
+                    searchable: false,
+                    className: 'text-center',
+                },
+                {
+                    data: 'so_number',
+                    name: 'so_number',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        var html;
+                        if (row.so_number == null) {
+                            html = '<span class="badge bg-secondary">Null</span>';
+                        } else {
+                            html = '<span class="text-bold">' + row.so_number + '</span>';
+                        }
+                        return html;
+                    },
+                },
+                {
+                    data: 'product',
+                    name: 'product',
+                    orderable: true,
+                    searchable: true,
+                    render: function(data, type, row) {
+                        var html;
+                        if (row.product == null) {
+                            html = '<div class="text-center"><span class="badge bg-secondary">Null</span></div>';
+                        } else {
+                            html = row.product + '<br><b>(' + row.type_product + ')</b>';
+                        }
+                        return html;
+                    },
+                },
+                {
+                    data: 'qty',
+                    name: 'qty',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        var html;
+                        if (row.qty == null) {
+                            html = '<span class="badge bg-secondary">Null</span>';
+                        } else {
+                            html = row.qty;
+                        }
+                        return html;
+                    },
+                },
+                {
+                    data: 'unit',
+                    name: 'unit',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        var html;
+                        if (row.unit == null) {
+                            html = '<span class="badge bg-secondary">Null</span>';
+                        } else {
+                            html = row.unit;
+                        }
+                        return html;
+                    },
+                },
+                {
+                    data: 'price',
+                    name: 'price',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        var html;
+                        if (row.price == null) {
+                            html = '<span class="badge bg-secondary">Null</span>';
+                        } else {
+                            html = row.price;
+                        }
+                        return html;
+                    },
+                },
+                {
+                    data: 'total_price',
+                    name: 'total_price',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        var html;
+                        if (row.total_price == null) {
+                            html = '<span class="badge bg-secondary">Null</span>';
+                        } else {
+                            html = row.total_price;
+                        }
+                        return html;
+                    },
+                },
+            ]
+        });
 
-        $('#so_type').val("");
-        $('#so_category').val("");
-        $('#product').val("");
-        $('#type_product').val("");
-        $('#qty').val("");
-        $('#unit').val("");
-        $('#price').val("");
-        $('#total_price').val("");
+        $('select[name="id_delivery_notes"]').on('change', function() {
+            data.id_delivery_notes = $(this).val();
+            dataTable.ajax.reload();
 
-        var id_sales_order = $(this).val();
-        if(id_sales_order == ""){
             $('#customer_name').val("");
-            $('#customer_address').val("");
-            $('#date').val("");
-            $('#due_date').val("");
-            $('#ppn').val("");
-            $('#statusorder').val("");
+            $('#sales_name').val("");
+            var id_delivery_notes = $(this).val();
+            if(id_delivery_notes == ""){
+                $('#customer_name').val("");
+                $('#sales_name').val("");
+            } else {
+                var url = '{{ route("transsales.getdeliverynote", ":id") }}';
+                url = url.replace(':id', id_delivery_notes);
+                if (id_delivery_notes) {
+                    $.ajax({
+                        url: url,
+                        type: "GET",
+                        dataType: "json",
+                        success: function(data) {
+                            if(data.customer_name == null){
+                                $('#customer_name').val('-');
+                            } else {
+                                $('#customer_name').val(data.customer_name);
+                            }
 
-            $('#so_type').val("");
-            $('#so_category').val("");
-            $('#product').val("");
-            $('#type_product').val("");
-            $('#qty').val("");
-            $('#unit').val("");
-            $('#price').val("");
-            $('#total_price').val("");
-        } else {
-            var url = '{{ route("transsales.getsalesorder", ":id") }}';
-            url = url.replace(':id', id_sales_order);
-            if (id_sales_order) {
-                $.ajax({
-                    url: url,
-                    type: "GET",
-                    dataType: "json",
-                    success: function(data) {
-                        $('#customer_name').val(data.customer_name);
-                        $('#customer_address').val(data.customer_address);
-                        $('#date').val(data.date);
-                        $('#due_date').val(data.due_date);
-                        $('#ppn').val(data.ppn);
-                        $('#statusorder').val(data.status);
-
-                        $('#so_type').val(data.so_type);
-                        $('#so_category').val(data.so_category);
-                        $('#product').val(data.product);
-                        $('#type_product').val(data.type_product);
-                        $('#qty').val(data.qty);
-                        $('#unit').val(data.unit);
-                        $('#price').val(data.price);
-                        $('#total_price').val(data.total_price);
-                    }
-                });
+                            if(data.salesman_name == null){
+                                $('#sales_name').val('-');
+                            } else {
+                                $('#sales_name').val(data.salesman_name);
+                            }
+                        }
+                    });
+                }
             }
-        }
+        });
     });
 </script>
 
