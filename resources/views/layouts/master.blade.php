@@ -158,10 +158,30 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('mstneraca.index') }}">
-                                <i class="mdi mdi-format-list-bulleted-type"></i>
-                                <span>Manage Report Neraca</span>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i class="mdi mdi-format-list-group"></i>
+                                <span>Entity List Formula</span>
                             </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li>
+                                    <a href="{{ route('entitylist.neraca') }}">
+                                        <i class="mdi mdi-format-list-bulleted-square"></i>
+                                        <span>Neraca</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <i class="mdi mdi-format-list-bulleted-square"></i>
+                                        <span>HPP</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <i class="mdi mdi-format-list-bulleted-square"></i>
+                                        <span>Laba Rugi</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
 
                         <li class="menu-title" data-key="t-menu">Accounting</li>
@@ -205,6 +225,28 @@
                                 <span>Import</span>
                             </a>
                         </li>
+
+                        <li class="menu-title" data-key="t-menu">Report</li>
+
+                        <li>
+                            <a href="{{ route('report.neraca') }}">
+                                <i class="mdi mdi-file-chart-outline"></i>
+                                <span>Neraca</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="mdi mdi-file-chart-outline"></i>
+                                <span>HPP</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="mdi mdi-file-chart-outline"></i>
+                                <span>Laba Rugi</span>
+                            </a>
+                        </li>
+
                         {{-- <li>
                             <a href="{{ route('transdatakas.index') }}">
                                 <i class="mdi mdi-script-text"></i>
