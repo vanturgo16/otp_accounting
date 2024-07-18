@@ -12,7 +12,8 @@ class AuthController extends Controller
 {
     public function login(Request $request){
         //return view('auth.login');
-        return redirect('http://127.0.0.1:8000/login');
+        // return redirect('http://127.0.0.1:8000/login');
+        return redirect('https://sso.olefinatifaplas.my.id/login');
     }
 
     public function postlogin(Request $request)
@@ -39,7 +40,8 @@ class AuthController extends Controller
 
     public function logout(Request $request){
         Auth::logout();
-        return redirect('http://127.0.0.1:8000/login');
+        // return redirect('http://127.0.0.1:8000/login');
+        return redirect('https://sso.olefinatifaplas.my.id/login');
         //return redirect()->route('login')->with('success','Success Logout');
     }
 }
