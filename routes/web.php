@@ -4,9 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GeneralLedgersController;
-use App\Http\Controllers\MasterNeracaController;
+use App\Http\Controllers\EntityListController;
 use App\Http\Controllers\MstAccountCodesController;
 use App\Http\Controllers\MstAccountTypesController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransDataBankController;
 use App\Http\Controllers\TransDataKasController;
 use App\Http\Controllers\TransSalesController;
@@ -132,4 +133,29 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/store', 'store')->name('generalledger.store');
         });
     });
+
+    //ENTITY LIST
+    Route::controller(EntityListController::class)->group(function () {
+        Route::prefix('entitylist')->group(function () {
+            Route::get('/neraca', 'neraca')->name('entitylist.neraca');
+            Route::get('/hpp', 'hpp')->name('entitylist.hpp');
+            Route::get('/labarugi', 'labarugi')->name('entitylist.labarugi');
+        });
+    });
+
+    //REPORT
+    Route::controller(ReportController::class)->group(function () {
+        Route::prefix('report')->group(function () {
+            //Neraca
+            Route::get('/neraca', 'neraca')->name('report.neraca');
+            Route::get('/neraca/detail/{id}', 'neracaDetail')->name('report.neraca.detail');
+            Route::get('/neraca/view', 'neracaView')->name('report.neraca.view');
+            Route::post('/neraca/generate', 'neracaGenerate')->name('report.neraca.generate');
+            //Hpp
+            Route::get('/hpp', 'hpp')->name('report.hpp');
+            //LabaRugi
+            Route::get('/labarugi', 'labarugi')->name('report.labarugi');
+        });
+    });
+
 });
