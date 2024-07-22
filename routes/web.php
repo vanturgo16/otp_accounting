@@ -17,18 +17,17 @@ use App\Http\Controllers\TransImportController;
 //Route Login
 Route::get('/', [AuthController::class, 'login'])->name('login');
 Route::post('auth/login', [AuthController::class, 'postlogin'])->name('postlogin')->middleware("throttle:5,2");
-
-//Route Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware(['auth'])->group(function () {
-    Route::group(['middleware' => ['clear.permission.cache']], function () {
+
+
+Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboard'])->group(function () {
     //Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         //AccountType
         Route::controller(MstAccountTypesController::class)->group(function () {
-            Route::prefix('accounttype')->group(function () {
+            Route::prefix('accounttype')->middleware('permission:Akunting_master_data')->group(function () {
                 Route::get('/', 'index')->name('accounttype.index');
                 Route::post('/', 'index')->name('accounttype.index');
                 Route::post('/store', 'store')->name('accounttype.store');
@@ -44,7 +43,7 @@ Route::middleware(['auth'])->group(function () {
         
         //AccountCode
         Route::controller(MstAccountCodesController::class)->group(function () {
-            Route::prefix('accountcode')->group(function () {
+            Route::prefix('accountcode')->middleware('permission:Akunting_master_data')->group(function () {
                 Route::get('/', 'index')->name('accountcode.index');
                 Route::post('/', 'index')->name('accountcode.index');
                 Route::post('/store', 'store')->name('accountcode.store');
@@ -79,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
 
         //TransSales
         Route::controller(TransSalesController::class)->group(function () {
-            Route::prefix('transsales')->group(function () {
+            Route::prefix('transsales')->middleware('permission:Akunting_sales')->group(function () {
                 Route::get('/getdeliverynote/{id}', 'getDeliveryNote')->name('transsales.getdeliverynote');
                 Route::get('/getsalesorder', 'getSalesOrder')->name('transsales.getsalesorder');
 
@@ -103,7 +102,7 @@ Route::middleware(['auth'])->group(function () {
 
         //TransPurchase
         Route::controller(TransPurchaseController::class)->group(function () {
-            Route::prefix('transpurchase')->group(function () {
+            Route::prefix('transpurchase')->middleware('permission:Akunting_purchase')->group(function () {
                 Route::get('/getpurchaseorder/{id}', 'getpurchaseorder')->name('transpurchase.getpurchaseorder');
 
                 Route::get('/', 'index')->name('transpurchase.index');
@@ -116,7 +115,7 @@ Route::middleware(['auth'])->group(function () {
 
         //TransImport
         Route::controller(TransImportController::class)->group(function () {
-            Route::prefix('transimport')->group(function () {
+            Route::prefix('transimport')->middleware('permission:Akunting_import')->group(function () {
                 Route::get('/', 'index')->name('transimport.index');
                 Route::post('/', 'index')->name('transimport.index');
                 Route::get('/create', 'create')->name('transimport.create');
@@ -127,7 +126,7 @@ Route::middleware(['auth'])->group(function () {
 
         //GeneralLedger
         Route::controller(GeneralLedgersController::class)->group(function () {
-            Route::prefix('generalledger')->group(function () {
+            Route::prefix('generalledger')->middleware('permission:Akunting_generalledger ')->group(function () {
                 Route::get('/', 'index')->name('generalledger.index');
                 Route::post('/', 'index')->name('generalledger.index');
                 Route::get('/create', 'create')->name('generalledger.create');
@@ -137,7 +136,7 @@ Route::middleware(['auth'])->group(function () {
 
         //ENTITY LIST
         Route::controller(EntityListController::class)->group(function () {
-            Route::prefix('entitylist')->group(function () {
+            Route::prefix('entitylist')->middleware('permission:Akunting_master_data')->group(function () {
                 Route::get('/neraca', 'neraca')->name('entitylist.neraca');
                 Route::get('/hpp', 'hpp')->name('entitylist.hpp');
                 Route::get('/labarugi', 'labarugi')->name('entitylist.labarugi');
@@ -146,7 +145,7 @@ Route::middleware(['auth'])->group(function () {
 
         //REPORT
         Route::controller(ReportController::class)->group(function () {
-            Route::prefix('report')->group(function () {
+            Route::prefix('report')->middleware('permission:Akunting_report')->group(function () {
                 //Neraca
                 Route::get('/neraca', 'neraca')->name('report.neraca');
                 Route::get('/neraca/detail/{id}', 'neracaDetail')->name('report.neraca.detail');
@@ -160,4 +159,4 @@ Route::middleware(['auth'])->group(function () {
         });
 
     });
-});
+

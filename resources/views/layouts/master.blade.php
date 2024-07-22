@@ -144,13 +144,16 @@
                                 <span data-key="t-dashboard">Dashboard</span>
                             </a>
                         </li>
+                        @can('Akunting_master_data') 
                         <li class="menu-title" data-key="t-menu">Master</li>
+                        
                         <li>
                             <a href="{{ route('accounttype.index') }}">
                                 <i class="mdi mdi-format-list-bulleted-type"></i>
                                 <span>Manage Account Type</span>
                             </a>
                         </li>
+                        
                         <li>
                             <a href="{{ route('accountcode.index') }}">
                                 <i class="mdi mdi-barcode-scan"></i>
@@ -183,15 +186,17 @@
                                 </li>
                             </ul>
                         </li>
-
+                        @endcan
                         <li class="menu-title" data-key="t-menu">Accounting</li>
-
+                        @can('Akunting_generalledger') 
                         <li>
                             <a href="{{ route('generalledger.index') }}">
                                 <i class="mdi mdi-file-cabinet"></i>
                                 <span>General Ledger</span>
                             </a>
                         </li>
+                        @endcan
+                        @can('Akunting_sales') 
                         <li>
                             <a href="javascript: void(0);" class="has-arrow">
                                 <i class="mdi mdi-file-upload"></i>
@@ -213,19 +218,24 @@
                                 </li>
                             </ul>
                         </li>
+                        @endcan
+                        @can('Akunting_purchase') 
                         <li>
                             <a href="{{ route('transpurchase.index') }}">
                                 <i class="mdi mdi-file-download"></i>
                                 <span>Purchase</span>
                             </a>
                         </li>
+                        @endcan
+                        @can('Akunting_import') 
                         <li>
                             <a href="{{ route('transimport.index') }}">
                                 <i class="mdi mdi-import"></i>
                                 <span>Import</span>
                             </a>
                         </li>
-
+                        @endcan
+                        @can('Akunting_report') 
                         <li class="menu-title" data-key="t-menu">Report</li>
 
                         <li>
@@ -246,7 +256,7 @@
                                 <span>Laba Rugi</span>
                             </a>
                         </li>
-
+                        @endcan
                         {{-- <li>
                             <a href="{{ route('transdatakas.index') }}">
                                 <i class="mdi mdi-script-text"></i>
