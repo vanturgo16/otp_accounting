@@ -146,7 +146,14 @@
                         </li>
                         @can('Akunting_master_data') 
                         <li class="menu-title" data-key="t-menu">Master</li>
-                        
+
+                        <li>
+                            <a href="{{ route('ppn.index') }}">
+                                <i class="mdi mdi-percent"></i>
+                                <span>Manage PPN</span>
+                            </a>
+                        </li>
+
                         <li>
                             <a href="{{ route('accounttype.index') }}">
                                 <i class="mdi mdi-format-list-bulleted-type"></i>
