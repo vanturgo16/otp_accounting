@@ -16,7 +16,6 @@ use DateTime;
 use App\Models\MstAccountCodes;
 use App\Models\GeneralLedger;
 use App\Models\MstBankAccount;
-use App\Models\MstCustomers;
 use App\Models\MstPpn;
 use App\Models\TransSales;
 use App\Models\TransSalesExport;
@@ -40,10 +39,35 @@ class TransSalesController extends Controller
 
     public function getSalesOrder(Request $request)
     {
-        $datas = DeliveryNoteDetail::select('sales_orders.so_number', 'master_product_fgs.description as product', 'sales_orders.type_product', 'sales_orders.qty',
-                'master_units.unit as unit', 'sales_orders.price', 'sales_orders.total_price')
+        $datas = DeliveryNoteDetail::select('sales_orders.so_number', 'sales_orders.type_product', 'sales_orders.qty',
+                'master_units.unit as unit', 'sales_orders.price', 'sales_orders.total_price',
+                DB::raw('
+                    CASE 
+                        WHEN sales_orders.type_product = "RM" THEN master_raw_materials.description 
+                        WHEN sales_orders.type_product = "WIP" THEN master_wips.description 
+                        WHEN sales_orders.type_product = "FG" THEN master_product_fgs.description 
+                        WHEN sales_orders.type_product = "TA" THEN master_tool_auxiliaries.description 
+                    END as product'),
+                )
             ->leftjoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
-            ->leftjoin('master_product_fgs', 'sales_orders.id_master_products', 'master_product_fgs.id')
+            ->leftJoin('master_raw_materials', function ($join) {
+                $join->on('sales_orders.id_master_products', '=', 'master_raw_materials.id')
+                    ->where('sales_orders.type_product', '=', 'RM');
+            })
+            ->leftJoin('master_wips', function ($join) {
+                $join->on('sales_orders.id_master_products', '=', 'master_wips.id')
+                    ->where('sales_orders.type_product', '=', 'WIP');
+            })
+            ->leftJoin('master_product_fgs', function ($join) {
+                $join->on('sales_orders.id_master_products', '=', 'master_product_fgs.id')
+                    ->where('sales_orders.type_product', '=', 'FG');
+            })
+            ->leftJoin('master_tool_auxiliaries', function ($join) {
+                $join->on('sales_orders.id_master_products', '=', 'master_tool_auxiliaries.id')
+                    ->where('sales_orders.type_product', '=', 'TA');
+            })
+            // ->leftjoin('master_product_fgs', 'sales_orders.id_master_products', 'master_product_fgs.id')
+
             ->leftjoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
             ->where('delivery_note_details.id_delivery_notes', $request->id_delivery_notes)
             ->get();
@@ -520,6 +544,7 @@ class TransSalesController extends Controller
         $id = decrypt($id);
 
         $transSales = TransSalesExport::where('id', $id)->first();
+        $bankAccount = json_decode($transSales->bank_account, true);
 
         $deliveryNote = DeliveryNote::select(
                 'delivery_notes.dn_number', 
@@ -527,8 +552,10 @@ class TransSalesController extends Controller
                 'master_customer_addresses.*',
                 'master_customer_addresses.address', 'master_provinces.province', 'master_countries.country',
                 'master_customer_addresses.telephone', 'master_customer_addresses.mobile_phone',
+                'master_currencies.currency_code',
             )
             ->leftjoin('master_customers', 'delivery_notes.id_master_customers', 'master_customers.id')
+            ->leftjoin('master_currencies', 'master_customers.id_master_currencies', 'master_currencies.id')
             ->leftjoin('master_salesmen', 'delivery_notes.id_master_salesman', 'master_salesmen.id')
             ->leftjoin('master_customer_addresses', 'master_customers.id', 'master_customer_addresses.id_master_customers')
             ->leftjoin('master_provinces', 'master_customer_addresses.id_master_provinces', 'master_provinces.id')
@@ -549,8 +576,12 @@ class TransSalesController extends Controller
         foreach($datas as $item){
             $totalAllAmount += $item->total_price;
         }
-        $ppn = 11;
-        $ppn_val = ($totalAllAmount * $ppn) / 100;
+        $ppn = 0;
+        $ppn_val = 0;
+        if($transSales->is_tax == 1){
+            $ppn = $transSales->tax;
+            $ppn_val = ($totalAllAmount * $ppn) / 100;
+        }
         $total = $totalAllAmount + $ppn_val;
 
         $dateTime = new DateTime($transSales->created_at);
@@ -559,6 +590,7 @@ class TransSalesController extends Controller
         $pdf = PDF::loadView('pdf.transsalesexport', [
             'date' => $dateTime,
             'transSales' => $transSales,
+            'bankAccount' => $bankAccount,
             'deliveryNote' => $deliveryNote,
             'datas' => $datas,
             'totalAllAmount' => $totalAllAmount,

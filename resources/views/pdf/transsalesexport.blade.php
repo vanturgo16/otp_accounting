@@ -220,22 +220,49 @@
                     <td class="align-top text-left p-1">{{ $data->product }}</td>
                     <td class="text-center">{{ $data->qty }}</td>
                     <td class="text-center">-</td>
-                    <td class="text-center">{{ 'USD  ' . number_format($data->price, 2, ',', '.') }}</td>
-                    <td class="text-center">{{ 'USD  ' . number_format($data->total_price, 2, ',', '.') }}</td>
+                    <td class="text-center">{{ $deliveryNote->currency_code.'  ' . number_format($data->price, 2, ',', '.') }}</td>
+                    <td class="text-center">{{ $deliveryNote->currency_code.'  ' . number_format($data->total_price, 2, ',', '.') }}</td>
                 </tr>
             @endforeach
+            
+            @if($transSales->is_tax == 1)
             <tr>
-                <td class="text-center" style="border-right: none;"></td>
-                <td class="align-top text-left" style="border-left: none; border-right: none;"></td>
-                <td class="text-center" style="border-left: none; border-right: none;"></td>
-                <td class="text-center" style="border-left: none; border-right: none;"></td>
-                <td class="text-right" style="border-left: none; border-right: none;"><b>Sub Total</b></td>
-                <td class="text-center p-1" style="border-left: none;">{{ 'USD  ' . number_format($totalAllAmount, 2, ',', '.') }}</td>
+                <td class="text-center" style="border-right: none; border-bottom: none;"></td>
+                <td class="align-top text-left" style="border-left: none; border-right: none; border-bottom: none;"></td>
+                <td class="text-center" style="border-left: none; border-right: none; border-bottom: none;"></td>
+                <td class="text-center" style="border-left: none; border-right: none; border-bottom: none;"></td>
+                <td class="text-right" style="border-left: none; border-right: none; border-bottom: none;"><b>Amount</b></td>
+                <td class="text-center p-1" style="border-left: none; border-bottom: none;">{{ $deliveryNote->currency_code.'  ' . number_format($totalAllAmount, 2, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td class="text-center" style="border-right: none; border-bottom: none; border-top: none;"></td>
+                <td class="align-top text-left" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"></td>
+                <td class="text-center" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"></td>
+                <td class="text-center" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"></td>
+                <td class="text-right" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"><b>PPN {{ $ppn }}%</b></td>
+                <td class="text-center p-1" style="border-left: none; border-bottom: none; border-top: none;">{{ $deliveryNote->currency_code.'  ' . number_format($ppn_val, 2, ',', '.') }}</td>
+            </tr>
+            @endif
+            <tr>
+                <td class="text-center" style="border-right: none; border-top: none;"></td>
+                <td class="align-top text-left" style="border-left: none; border-right: none; border-top: none;"></td>
+                <td class="text-center" style="border-left: none; border-right: none; border-top: none;"></td>
+                <td class="text-center" style="border-left: none; border-right: none; border-top: none;"></td>
+                <td class="text-right" style="border-left: none; border-right: none; border-top: none;"><b>Total</b></td>
+                <td class="text-center p-1" style="border-left: none; border-top: none;">{{ $deliveryNote->currency_code.'  ' . number_format($total, 2, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>
     <div class="text-left mt-2" style="font-size: 12px;">TERMS</div>
-    <div class="text-left" style="font-size: 10px;">{!! $transSales->term !!}</div>
+    @php 
+        $find = '<p>';
+        $replaceWith = '';
+        $newString = str_replace($find, $replaceWith, $transSales->term);
+        $find = '</p>';
+        $replaceWith = '<br>';
+        $newString = str_replace($find, $replaceWith, $newString);
+    @endphp
+    <div class="text-left" style="font-size: 10px;">{!! $newString !!}</div>
     
     <div id="approval">
         <div class="text-left mt-1" style="font-size: 11px;">Please transferred to our Bank Account as details :</div>
@@ -244,27 +271,27 @@
                 <tr>
                     <td class="text-left" style="width:14%; font-size: 10px;">Bank Name</td>
                     <td class="text-left" style="width:1%; font-size: 10px;">:</td>
-                    <td class="text-left" style="width:85%; font-size: 10px;">BANK PAN INDONESIA Tbk.</td>
+                    <td class="text-left" style="width:85%; font-size: 10px;">{{ $bankAccount['bank_name'] ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td class="text-left" style="width:14%; font-size: 10px;">Account Name</td>
                     <td class="text-left" style="width:1%; font-size: 10px;">:</td>
-                    <td class="text-left" style="width:85%; font-size: 10px;">PT. OLEFINA TIFAPLAS POLIKEMINDO</td>
+                    <td class="text-left" style="width:85%; font-size: 10px;">{{ $bankAccount['account_name'] ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td class="text-left" style="width:14%; font-size: 10px;">Account Number</td>
                     <td class="text-left" style="width:1%; font-size: 10px;">:</td>
-                    <td class="text-left" style="width:85%; font-size: 10px;">098 6000 292 (USD)</td>
+                    <td class="text-left" style="width:85%; font-size: 10px;">{{ $bankAccount['account_number'] ?? '-' }} ({{ $bankAccount['currency'] ?? '-' }})</td>
                 </tr>
                 <tr>
                     <td class="text-left" style="width:14%; font-size: 10px;">Swift Code</td>
                     <td class="text-left" style="width:1%; font-size: 10px;">:</td>
-                    <td class="text-left" style="width:85%; font-size: 10px;">PINBIDJA</td>
+                    <td class="text-left" style="width:85%; font-size: 10px;">{{ $bankAccount['swift_code'] ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td class="text-left" style="width:14%; font-size: 10px;">Branch</td>
                     <td class="text-left" style="width:1%; font-size: 10px;">:</td>
-                    <td class="text-left" style="width:85%; font-size: 10px;">MAMPANG 1 - JAKARTA</td>
+                    <td class="text-left" style="width:85%; font-size: 10px;">{{ $bankAccount['branch'] ?? '-' }}</td>
                 </tr>
             </tbody>
         </table>

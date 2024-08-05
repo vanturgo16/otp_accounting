@@ -11,6 +11,8 @@ use Yajra\DataTables\Facades\DataTables;
 // Model
 use App\Models\MstAccountCodes;
 use App\Models\GeneralLedger;
+use App\Models\GoodReceiptNote;
+use App\Models\GoodReceiptNoteDetail;
 use App\Models\PurchaseOrder;
 use App\Models\TransPurchase;
 
@@ -28,6 +30,16 @@ class TransPurchaseController extends Controller
             ->first();
 
         return json_encode($purchaseorder);
+    }
+    public function getgoodReceiptNote($id)
+    {
+        $goodReceiptNote = GoodReceiptNote::select('master_suppliers.name as supplier', 'purchase_orders.*')
+            ->leftjoin('master_suppliers', 'good_receipt_notes.id_master_suppliers', 'master_suppliers.id')
+            ->leftjoin('purchase_orders', 'good_receipt_notes.id_purchase_orders', 'purchase_orders.id')
+            ->where('good_receipt_notes.id', $id)
+            ->first();
+
+        return json_encode($goodReceiptNote);
     }
 
     function generateRefNumber()
@@ -56,26 +68,27 @@ class TransPurchaseController extends Controller
     public function index(Request $request)
     {
         $ref_number = $request->get('ref_number');
-        $id_purchase_order = $request->get('id_purchase_order');
+        $id_good_receipt_notes = $request->get('id_good_receipt_notes');
         $searchDate = $request->get('searchDate');
         $startdate = $request->get('startdate');
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
-        $purchase = PurchaseOrder::select('id', 'po_number', 'status')->get();
+        $goodReceiptNote = GoodReceiptNote::select('id', 'receipt_number', 'status')->get();
 
         $datas = TransPurchase::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'trans_purchase.*', 'purchase_orders.po_number'
             )
-            ->leftjoin('purchase_orders', 'trans_purchase.id_purchase_order', 'purchase_orders.id')
+            ->leftjoin('good_receipt_notes', 'trans_purchase.id_good_receipt_notes', 'good_receipt_notes.id')
+            ->leftjoin('purchase_orders', 'good_receipt_notes.id_purchase_orders', 'purchase_orders.id')
             ->orderBy('trans_purchase.created_at','desc');
 
         if($ref_number != null){
             $datas = $datas->where('ref_number', 'like', '%'.$ref_number.'%');
         }
-        if($id_purchase_order != null){
-            $datas = $datas->where('id_purchase_order', $id_purchase_order);
+        if($id_good_receipt_notes != null){
+            $datas = $datas->where('id_good_receipt_notes', $id_good_receipt_notes);
         }
         if($startdate != null && $enddate != null){
             $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
@@ -110,19 +123,19 @@ class TransPurchaseController extends Controller
         //Audit Log
         $this->auditLogsShort('View List Trans Purchase');
 
-        return view('transpurchase.index',compact('datas', 'purchase',
-            'ref_number', 'id_purchase_order', 'searchDate', 'startdate', 'enddate', 'flag'));
+        return view('transpurchase.index',compact('datas', 'goodReceiptNote',
+            'ref_number', 'id_good_receipt_notes', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function create(Request $request)
     {
-        $purchase = PurchaseOrder::select('id', 'po_number', 'status')->get();
+        $goodReceiptNote = GoodReceiptNote::select('id', 'receipt_number', 'status')->get();
         $accountcodes = MstAccountCodes::get();
 
         //Audit Log
         $this->auditLogsShort('View Create New Purchase Transaction');
 
-        return view('transpurchase.create',compact('accountcodes', 'purchase'));
+        return view('transpurchase.create',compact('accountcodes', 'goodReceiptNote'));
     }
 
     public function store(Request $request)
@@ -130,11 +143,10 @@ class TransPurchaseController extends Controller
         // dd($request->all());
         $request->validate([
             'date_transaction' => 'required',
-            'id_purchase_order' => 'required',
+            'id_good_receipt_notes' => 'required',
             'delivery_note_date' => 'required',
             'delivery_note_number' => 'required',
             'invoice_date' => 'required',
-            'tax_invoice_number' => 'required',
             'invoice_number' => 'required',
             'quantity' => 'required',
             'description' => 'required',
@@ -150,7 +162,7 @@ class TransPurchaseController extends Controller
             TransPurchase::create([
                 'ref_number' => $refNumber,
                 'date_transaction' => $request->date_transaction,
-                'id_purchase_order' => $request->id_purchase_order,
+                'id_good_receipt_notes' => $request->id_good_receipt_notes,
                 'delivery_note_date' => $request->delivery_note_date,
                 'delivery_note_number' => $request->delivery_note_number,
                 'invoice_date' => $request->invoice_date,
@@ -191,8 +203,9 @@ class TransPurchaseController extends Controller
         $id = decrypt($id);
         // dd($id);
 
-        $data = TransPurchase::select('trans_purchase.*', 'purchase_orders.*', 'master_suppliers.name as supplier')
-            ->leftjoin('purchase_orders', 'trans_purchase.id_purchase_order', 'purchase_orders.id')
+        $data = TransPurchase::select('good_receipt_notes.receipt_number', 'trans_purchase.*', 'purchase_orders.*', 'master_suppliers.name as supplier')
+            ->leftjoin('good_receipt_notes', 'trans_purchase.id_good_receipt_notes', 'good_receipt_notes.id')
+            ->leftjoin('purchase_orders', 'good_receipt_notes.id_purchase_orders', 'purchase_orders.id')
             ->leftjoin('master_suppliers', 'purchase_orders.id_master_suppliers', 'master_suppliers.id')
             ->where('trans_purchase.id', $id)
             ->first();

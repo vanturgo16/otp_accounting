@@ -44,10 +44,15 @@
                         <div class="card p-2" style="background-color:#f0f2f7">
                             <div class="row">
                                 <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Good Receipt Note (Receipt Number)</label>
+                                    <br><span>{{ $data->receipt_number }}</span>
+                                </div>
+                                <div class="col-lg-6 mb-3">
                                     <label class="form-label mb-0">Purchase Order Number</label>
                                     <br><span>{{ $data->po_number }}</span>
                                 </div>
-                                <div class="col-6 mb-2"></div>
+                            </div>
+                            <div class="row">
                                 <div class="col-lg-3 mb-3">
                                     <label class="form-label mb-0">PO Date</label>
                                     <br><span>{{ $data->date }}</span>

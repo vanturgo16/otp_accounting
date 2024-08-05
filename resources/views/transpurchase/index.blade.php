@@ -39,11 +39,11 @@
                                     <input class="form-control" name="ref_number" type="text" value="{{ $ref_number }}" placeholder="Filter Ref Number..">
                                 </div>
                                 <div class="col-6 mb-2">
-                                    <label class="form-label">Purchase Order</label>
+                                    <label class="form-label">Good Receipt Note</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_purchase_order">
                                         <option value="" selected>--Select Type--</option>
-                                        @foreach($purchase as $item)
-                                            <option value="{{ $item->id }}" @if($id_purchase_order == $item->id) selected="selected" @endif>{{ $item->po_number." - ". $item->status }}</option>
+                                        @foreach($goodReceiptNote as $item)
+                                            <option value="{{ $item->id }}" @if($id_good_receipt_notes == $item->id) selected="selected" @endif>{{ $item->id_good_receipt_notes." - ". $item->status }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -160,7 +160,7 @@
         var fileName = "Sales Purchase Export - " + formattedDate + ".xlsx";
         var data = {
                 ref_number: '{{ $ref_number }}',
-                id_purchase_order: '{{ $id_purchase_order }}',
+                id_good_receipt_notes: '{{ $id_good_receipt_notes }}',
                 searchDate: '{{ $searchDate }}',
                 startdate: '{{ $startdate }}',
                 enddate: '{{ $enddate }}'

@@ -125,6 +125,7 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
         Route::controller(TransPurchaseController::class)->group(function () {
             Route::prefix('transpurchase')->middleware('permission:Akunting_purchase')->group(function () {
                 Route::get('/getpurchaseorder/{id}', 'getpurchaseorder')->name('transpurchase.getpurchaseorder');
+                Route::get('/getgoodreceiptnote/{id}', 'getgoodReceiptNote')->name('transpurchase.getgoodReceiptNote');
 
                 Route::get('/', 'index')->name('transpurchase.index');
                 Route::post('/', 'index')->name('transpurchase.index');
