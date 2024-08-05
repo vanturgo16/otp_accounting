@@ -155,6 +155,13 @@
                         </li>
 
                         <li>
+                            <a href="{{ route('bankaccount.index') }}">
+                                <i class="mdi mdi-bank"></i>
+                                <span>Manage Bank Account</span>
+                            </a>
+                        </li>
+
+                        <li>
                             <a href="{{ route('accounttype.index') }}">
                                 <i class="mdi mdi-format-list-bulleted-type"></i>
                                 <span>Manage Account Type</span>

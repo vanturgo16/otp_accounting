@@ -15,6 +15,7 @@ use DateTime;
 // Model
 use App\Models\MstAccountCodes;
 use App\Models\GeneralLedger;
+use App\Models\MstBankAccount;
 use App\Models\MstCustomers;
 use App\Models\MstPpn;
 use App\Models\TransSales;
@@ -303,11 +304,12 @@ class TransSalesController extends Controller
         $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')->get();
         $accountcodes = MstAccountCodes::get();
         $tax = MstPpn::where('tax_name', 'Trans. Sales (Export)')->where('is_active', 1)->first()->value;
+        $bankaccount = MstBankAccount::where('is_active', 1)->first();
 
         //Audit Log
         $this->auditLogsShort('View Create New Sales Transaction');
 
-        return view('transsales.export.create',compact('deliveryNotes', 'accountcodes', 'tax'));
+        return view('transsales.export.create',compact('deliveryNotes', 'accountcodes', 'tax', 'bankaccount'));
     }
 
     public function storeLocal(Request $request)
@@ -391,6 +393,14 @@ class TransSalesController extends Controller
                 'term' => $request->term,
                 'tax' => $request->tax,
                 'is_tax' => $is_tax,
+                'bank_account' => json_encode([
+                    'bank_name' => $request->input('bank_name'),
+                    'account_name' => $request->input('account_name'),
+                    'account_number' => $request->input('account_number'),
+                    'currency' => $request->input('currency'),
+                    'swift_code' => $request->input('swift_code'),
+                    'branch' => $request->input('branch'),
+                ]),
                 'created_by' => auth()->user()->email
             ]);
 

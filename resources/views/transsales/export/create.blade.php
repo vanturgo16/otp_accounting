@@ -48,6 +48,45 @@
                                     <label class="form-label">Term</label><label style="color: darkred">*</label>
                                     <textarea name="term" id="summernote-editor"></textarea>
                                 </div>
+                                
+                                <div class="col-lg-6 mb-3">
+                                    <table style="width: 100%">
+                                        <input type="hidden" class="form-control" name="bank_name" value="{{ $bankaccount->bank_name ?? '' }}" required>
+                                        <input type="hidden" class="form-control" name="account_name" value="{{ $bankaccount->account_name ?? '' }}" required>
+                                        <input type="hidden" class="form-control" name="account_number" value="{{ $bankaccount->account_number ?? '' }}" required>
+                                        <input type="hidden" class="form-control" name="currency" value="{{ $bankaccount->currency ?? '' }}" required>
+                                        <input type="hidden" class="form-control" name="swift_code" value="{{ $bankaccount->swift_code ?? '' }}" required>
+                                        <input type="hidden" class="form-control" name="branch" value="{{ $bankaccount->branch ?? '' }}" required>
+                                        <tbody>
+                                            <tr>
+                                                <td><label class="form-label font-weight-bold">Bank Name</label></td>
+                                                <td><label class="form-label">:</label></td>
+                                                <td><label class="form-label">{{ $bankaccount->bank_name ?? '' }}</label></td>
+                                            </tr>
+                                            <tr>
+                                                <td><label class="form-label font-weight-bold">Account Name</label></td>
+                                                <td><label class="form-label">:</label></td>
+                                                <td><label class="form-label">{{ $bankaccount->account_name ?? '' }}</label></td>
+                                            </tr>
+                                            <tr>
+                                                <td><label class="form-label font-weight-bold">Account Number</label></td>
+                                                <td><label class="form-label">:</label></td>
+                                                <td><label class="form-label">{{ $bankaccount->account_number ?? '' }} ({{ $bankaccount->currency ?? '' }})</label></td>
+                                            </tr>
+                                            <tr>
+                                                <td><label class="form-label font-weight-bold">Swift Code</label></td>
+                                                <td><label class="form-label">:</label></td>
+                                                <td><label class="form-label">{{ $bankaccount->swift_code ?? '' }}</label></td>
+                                            </tr>
+                                            <tr>
+                                                <td><label class="form-label font-weight-bold">Branch</label></td>
+                                                <td><label class="form-label">:</label></td>
+                                                <td><label class="form-label">{{ $bankaccount->branch ?? '' }}</label></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-lg-6 mb-3"></div>
                                 <hr>
                                 
                                 <div class="col-lg-6 mb-3">

@@ -7,6 +7,7 @@ use App\Http\Controllers\GeneralLedgersController;
 use App\Http\Controllers\EntityListController;
 use App\Http\Controllers\MstAccountCodesController;
 use App\Http\Controllers\MstAccountTypesController;
+use App\Http\Controllers\MstBankAccountController;
 use App\Http\Controllers\MstPpnController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransDataBankController;
@@ -32,6 +33,15 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
                 Route::get('/', 'index')->name('ppn.index');
                 Route::post('/', 'index')->name('ppn.index');
                 Route::post('/store', 'store')->name('ppn.store');
+            });
+        });
+
+        //Master Bank Account
+        Route::controller(MstBankAccountController::class)->group(function () {
+            Route::prefix('bankaccount')->middleware('permission:Akunting_master_data')->group(function () {
+                Route::get('/', 'index')->name('bankaccount.index');
+                Route::post('/', 'index')->name('bankaccount.index');
+                Route::post('/store', 'store')->name('bankaccount.store');
             });
         });
 
