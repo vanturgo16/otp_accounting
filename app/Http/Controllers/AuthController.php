@@ -11,9 +11,11 @@ use App\Models\User;
 class AuthController extends Controller
 {
     public function login(Request $request){
-        //return view('auth.login');
-        // return redirect('http://127.0.0.1:8000/login');
-        return redirect('https://sso.olefinatifaplas.my.id/login');
+        if (app()->environment('production')) {
+            return redirect('https://sso.olefinatifaplas.my.id/login');
+        } else {
+            return view('auth.login');
+        }
     }
 
     public function postlogin(Request $request)
@@ -40,8 +42,10 @@ class AuthController extends Controller
 
     public function logout(Request $request){
         Auth::logout();
-        // return redirect('http://127.0.0.1:8000/login');
-        return redirect('https://sso.olefinatifaplas.my.id/login');
-        //return redirect()->route('login')->with('success','Success Logout');
+        if (app()->environment('production')) {
+            return redirect('https://sso.olefinatifaplas.my.id/login');
+        } else {
+            return redirect('http://127.0.0.1:8000/login');
+        }
     }
 }
