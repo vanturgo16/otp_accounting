@@ -48,7 +48,59 @@
                                     <label class="form-label">Term</label><label style="color: darkred">*</label>
                                     <textarea name="term" id="summernote-editor"></textarea>
                                 </div>
+                                
+                                <div class="col-lg-6 mb-3">
+                                    <table style="width: 100%">
+                                        <input type="hidden" class="form-control" name="bank_name" value="{{ $bankaccount->bank_name ?? '' }}" required>
+                                        <input type="hidden" class="form-control" name="account_name" value="{{ $bankaccount->account_name ?? '' }}" required>
+                                        <input type="hidden" class="form-control" name="account_number" value="{{ $bankaccount->account_number ?? '' }}" required>
+                                        <input type="hidden" class="form-control" name="currency" value="{{ $bankaccount->currency ?? '' }}" required>
+                                        <input type="hidden" class="form-control" name="swift_code" value="{{ $bankaccount->swift_code ?? '' }}" required>
+                                        <input type="hidden" class="form-control" name="branch" value="{{ $bankaccount->branch ?? '' }}" required>
+                                        <tbody>
+                                            <tr>
+                                                <td><label class="form-label font-weight-bold">Bank Name</label></td>
+                                                <td><label class="form-label">:</label></td>
+                                                <td><label class="form-label">{{ $bankaccount->bank_name ?? '' }}</label></td>
+                                            </tr>
+                                            <tr>
+                                                <td><label class="form-label font-weight-bold">Account Name</label></td>
+                                                <td><label class="form-label">:</label></td>
+                                                <td><label class="form-label">{{ $bankaccount->account_name ?? '' }}</label></td>
+                                            </tr>
+                                            <tr>
+                                                <td><label class="form-label font-weight-bold">Account Number</label></td>
+                                                <td><label class="form-label">:</label></td>
+                                                <td><label class="form-label">{{ $bankaccount->account_number ?? '' }} ({{ $bankaccount->currency ?? '' }})</label></td>
+                                            </tr>
+                                            <tr>
+                                                <td><label class="form-label font-weight-bold">Swift Code</label></td>
+                                                <td><label class="form-label">:</label></td>
+                                                <td><label class="form-label">{{ $bankaccount->swift_code ?? '' }}</label></td>
+                                            </tr>
+                                            <tr>
+                                                <td><label class="form-label font-weight-bold">Branch</label></td>
+                                                <td><label class="form-label">:</label></td>
+                                                <td><label class="form-label">{{ $bankaccount->branch ?? '' }}</label></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-lg-6 mb-3"></div>
                                 <hr>
+                                
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Tax (%)</label><label style="color: darkred">*</label>
+                                    <input type="text" class="form-control" name="tax" value="{{ $tax }}" style="background-color:#EAECF4" required readonly>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Tax</label></label>
+                                    <br>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="is_tax">
+                                        <label class="form-check-label">Need Tax PPN? ({{ $tax }} %)</label>
+                                    </div>
+                                </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
@@ -87,6 +139,23 @@
                                                         <th class="align-middle text-center">Total Price</th>
                                                     </tr>
                                                 </thead>
+                                            </table>
+                                        </div>
+
+                                        <div class="col-lg-6 mt-4">
+                                        </div>
+                                        <div class="col-lg-6 mt-4">
+                                            <table style="width: 100%">
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="text-right">
+                                                            <label class="form-label font-weight-bold" style="text-align: right; display: block;">Total All Price</label>
+                                                        </td>
+                                                        <td class="text-right">
+                                                            <label class="form-label" style="text-align: right; display: block;">: <span id="currency">IDR</span> <span id="totalPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
                                             </table>
                                         </div>
                                     </div>
@@ -425,10 +494,13 @@
 
             $('#customer_name').val("");
             $('#sales_name').val("");
+            $('#currency').html("IDR");
+            $('#totalPrice').html(0);
             var id_delivery_notes = $(this).val();
             if(id_delivery_notes == ""){
                 $('#customer_name').val("");
                 $('#sales_name').val("");
+                $('#totalPrice').html(0);
             } else {
                 var url = '{{ route("transsales.getdeliverynote", ":id") }}';
                 url = url.replace(':id', id_delivery_notes);
@@ -448,6 +520,28 @@
                                 $('#sales_name').val('-');
                             } else {
                                 $('#sales_name').val(data.salesman_name);
+                            }
+
+                            if(data.currency_code == null){
+                                $('#currency').html("IDR");
+                            } else {
+                                $('#currency').html(data.currency_code);
+                            }
+                        }
+                    });
+                }
+                var url2 = '{{ route("transsales.gettotalprice", ":id") }}';
+                url2 = url2.replace(':id', id_delivery_notes);
+                if (url2) {
+                    $.ajax({
+                        url: url2,
+                        type: "GET",
+                        dataType: "json",
+                        success: function(data) {
+                            if(data == null || data == 0){
+                                $('#totalPrice').html(0);
+                            } else {
+                                $('#totalPrice').html(data);
                             }
                         }
                     });

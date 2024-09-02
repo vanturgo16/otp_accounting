@@ -15,7 +15,8 @@ use DateTime;
 // Model
 use App\Models\MstAccountCodes;
 use App\Models\GeneralLedger;
-use App\Models\MstCustomers;
+use App\Models\MstBankAccount;
+use App\Models\MstPpn;
 use App\Models\TransSales;
 use App\Models\TransSalesExport;
 
@@ -26,8 +27,9 @@ class TransSalesController extends Controller
 
     public function getDeliveryNote($id)
     {
-        $deliveryNote = DeliveryNote::select('master_customers.name as customer_name', 'master_salesmen.name as salesman_name')
+        $deliveryNote = DeliveryNote::select('master_customers.name as customer_name', 'master_salesmen.name as salesman_name', 'master_currencies.currency_code')
             ->leftjoin('master_customers', 'delivery_notes.id_master_customers', 'master_customers.id')
+            ->leftjoin('master_currencies', 'master_customers.id_master_currencies', 'master_currencies.id')
             ->leftjoin('master_salesmen', 'delivery_notes.id_master_salesman', 'master_salesmen.id')
             ->where('delivery_notes.id', $id)
             ->first();
@@ -37,18 +39,54 @@ class TransSalesController extends Controller
 
     public function getSalesOrder(Request $request)
     {
-        $datas = DeliveryNoteDetail::select('sales_orders.so_number', 'master_product_fgs.description as product', 'sales_orders.type_product', 'sales_orders.qty',
-                'master_units.unit as unit', 'sales_orders.price', 'sales_orders.total_price')
+        $datas = DeliveryNoteDetail::select('sales_orders.so_number', 'sales_orders.type_product', 'sales_orders.qty',
+                'master_units.unit as unit', 'sales_orders.price', 'sales_orders.total_price',
+                DB::raw('
+                    CASE 
+                        WHEN sales_orders.type_product = "RM" THEN master_raw_materials.description 
+                        WHEN sales_orders.type_product = "WIP" THEN master_wips.description 
+                        WHEN sales_orders.type_product = "FG" THEN master_product_fgs.description 
+                        WHEN sales_orders.type_product = "TA" THEN master_tool_auxiliaries.description 
+                    END as product'),
+                )
             ->leftjoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
-            ->leftjoin('master_product_fgs', 'sales_orders.id_master_products', 'master_product_fgs.id')
+            ->leftJoin('master_raw_materials', function ($join) {
+                $join->on('sales_orders.id_master_products', '=', 'master_raw_materials.id')
+                    ->where('sales_orders.type_product', '=', 'RM');
+            })
+            ->leftJoin('master_wips', function ($join) {
+                $join->on('sales_orders.id_master_products', '=', 'master_wips.id')
+                    ->where('sales_orders.type_product', '=', 'WIP');
+            })
+            ->leftJoin('master_product_fgs', function ($join) {
+                $join->on('sales_orders.id_master_products', '=', 'master_product_fgs.id')
+                    ->where('sales_orders.type_product', '=', 'FG');
+            })
+            ->leftJoin('master_tool_auxiliaries', function ($join) {
+                $join->on('sales_orders.id_master_products', '=', 'master_tool_auxiliaries.id')
+                    ->where('sales_orders.type_product', '=', 'TA');
+            })
+            // ->leftjoin('master_product_fgs', 'sales_orders.id_master_products', 'master_product_fgs.id')
+
             ->leftjoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
             ->where('delivery_note_details.id_delivery_notes', $request->id_delivery_notes)
             ->get();
-
+        
         if ($request->ajax()) {
             $data = DataTables::of($datas)->toJson();
             return $data;
         }
+    }
+
+    public function getTotalPrice($id)
+    {
+        $datas = DeliveryNoteDetail::select('sales_orders.total_price')
+            ->leftjoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
+            ->where('delivery_note_details.id_delivery_notes', $id)
+            ->get();
+        $totalPrice = $datas->sum('total_price');
+
+        return json_encode($totalPrice);
     }
 
     function generateRefNumber($noUrutDN)
@@ -278,21 +316,24 @@ class TransSalesController extends Controller
     {
         $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')->get();
         $accountcodes = MstAccountCodes::get();
+        $tax = MstPpn::where('tax_name', 'Trans. Sales (Local)')->where('is_active', 1)->first()->value;
 
         //Audit Log
         $this->auditLogsShort('View Create New Sales Transaction');
 
-        return view('transsales.local.create',compact('deliveryNotes', 'accountcodes'));
+        return view('transsales.local.create',compact('deliveryNotes', 'accountcodes', 'tax'));
     }
     public function createExport(Request $request)
     {
         $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')->get();
         $accountcodes = MstAccountCodes::get();
+        $tax = MstPpn::where('tax_name', 'Trans. Sales (Export)')->where('is_active', 1)->first()->value;
+        $bankaccount = MstBankAccount::where('is_active', 1)->first();
 
         //Audit Log
         $this->auditLogsShort('View Create New Sales Transaction');
 
-        return view('transsales.export.create',compact('deliveryNotes', 'accountcodes'));
+        return view('transsales.export.create',compact('deliveryNotes', 'accountcodes', 'tax', 'bankaccount'));
     }
 
     public function storeLocal(Request $request)
@@ -302,6 +343,8 @@ class TransSalesController extends Controller
             'date_transaction' => 'required',
             'id_delivery_notes' => 'required',
             'due_date' => 'required|date|after_or_equal:today',
+            'tax' => 'required',
+            'tax_sales' => 'required',
             'addmore.*.account_code' => 'required',
             'addmore.*.nominal' => 'required',
             'addmore.*.type' => 'required',
@@ -318,6 +361,8 @@ class TransSalesController extends Controller
                 'date_transaction' => $request->date_transaction,
                 'id_delivery_notes' => $request->id_delivery_notes,
                 'due_date' => $request->due_date,
+                'tax' => $request->tax,
+                'tax_sales' => $request->tax_sales,
                 'created_by' => auth()->user()->email
             ]);
 
@@ -352,12 +397,16 @@ class TransSalesController extends Controller
             'date_transaction' => 'required',
             'id_delivery_notes' => 'required',
             'term' => 'required',
+            'tax' => 'required',
             'addmore.*.account_code' => 'required',
             'addmore.*.nominal' => 'required',
             'addmore.*.type' => 'required',
         ]);
-        
+
         $refNumber = $this->generateRefNumberExport();
+        
+        $is_tax = 0;
+        if($request->is_tax == "on"){ $is_tax = 1; }
 
         DB::beginTransaction();
         try{
@@ -366,6 +415,16 @@ class TransSalesController extends Controller
                 'date_transaction' => $request->date_transaction,
                 'id_delivery_notes' => $request->id_delivery_notes,
                 'term' => $request->term,
+                'tax' => $request->tax,
+                'is_tax' => $is_tax,
+                'bank_account' => json_encode([
+                    'bank_name' => $request->input('bank_name'),
+                    'account_name' => $request->input('account_name'),
+                    'account_number' => $request->input('account_number'),
+                    'currency' => $request->input('currency'),
+                    'swift_code' => $request->input('swift_code'),
+                    'branch' => $request->input('branch'),
+                ]),
                 'created_by' => auth()->user()->email
             ]);
 
@@ -405,7 +464,6 @@ class TransSalesController extends Controller
                 'master_customers.name as customer_name', 'master_salesmen.name as salesman_name',
                 'master_customer_addresses.*',
                 'master_customer_addresses.address', 'master_provinces.province', 'master_countries.country',
-                'delivery_notes.po_number'
             )
             ->leftjoin('master_customers', 'delivery_notes.id_master_customers', 'master_customers.id')
             ->leftjoin('master_salesmen', 'delivery_notes.id_master_salesman', 'master_salesmen.id')
@@ -451,10 +509,13 @@ class TransSalesController extends Controller
             }
             return strtoupper(trim($temp));
         }
-        
-        $totalAllAmount = 140000;
+
+        $totalAllAmount = 0;
+        foreach($datas as $item){
+            $totalAllAmount += $item->total_price;
+        }
         $terbilangString = terbilang($totalAllAmount) . " RUPIAH";
-        $ppn = 11;
+        $ppn = $transSales->tax;
         $ppn_val = ($totalAllAmount * $ppn) / 100;
         $total = $totalAllAmount + $ppn_val;
 
@@ -483,6 +544,7 @@ class TransSalesController extends Controller
         $id = decrypt($id);
 
         $transSales = TransSalesExport::where('id', $id)->first();
+        $bankAccount = json_decode($transSales->bank_account, true);
 
         $deliveryNote = DeliveryNote::select(
                 'delivery_notes.dn_number', 
@@ -490,9 +552,10 @@ class TransSalesController extends Controller
                 'master_customer_addresses.*',
                 'master_customer_addresses.address', 'master_provinces.province', 'master_countries.country',
                 'master_customer_addresses.telephone', 'master_customer_addresses.mobile_phone',
-                'delivery_notes.po_number'
+                'master_currencies.currency_code',
             )
             ->leftjoin('master_customers', 'delivery_notes.id_master_customers', 'master_customers.id')
+            ->leftjoin('master_currencies', 'master_customers.id_master_currencies', 'master_currencies.id')
             ->leftjoin('master_salesmen', 'delivery_notes.id_master_salesman', 'master_salesmen.id')
             ->leftjoin('master_customer_addresses', 'master_customers.id', 'master_customer_addresses.id_master_customers')
             ->leftjoin('master_provinces', 'master_customer_addresses.id_master_provinces', 'master_provinces.id')
@@ -509,9 +572,16 @@ class TransSalesController extends Controller
             ->where('delivery_note_details.id_delivery_notes', $transSales->id_delivery_notes)
             ->get();
         
-        $totalAllAmount = 140000;
-        $ppn = 11;
-        $ppn_val = ($totalAllAmount * $ppn) / 100;
+        $totalAllAmount = 0;
+        foreach($datas as $item){
+            $totalAllAmount += $item->total_price;
+        }
+        $ppn = 0;
+        $ppn_val = 0;
+        if($transSales->is_tax == 1){
+            $ppn = $transSales->tax;
+            $ppn_val = ($totalAllAmount * $ppn) / 100;
+        }
         $total = $totalAllAmount + $ppn_val;
 
         $dateTime = new DateTime($transSales->created_at);
@@ -520,6 +590,7 @@ class TransSalesController extends Controller
         $pdf = PDF::loadView('pdf.transsalesexport', [
             'date' => $dateTime,
             'transSales' => $transSales,
+            'bankAccount' => $bankAccount,
             'deliveryNote' => $deliveryNote,
             'datas' => $datas,
             'totalAllAmount' => $totalAllAmount,

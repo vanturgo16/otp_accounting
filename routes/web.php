@@ -7,6 +7,8 @@ use App\Http\Controllers\GeneralLedgersController;
 use App\Http\Controllers\EntityListController;
 use App\Http\Controllers\MstAccountCodesController;
 use App\Http\Controllers\MstAccountTypesController;
+use App\Http\Controllers\MstBankAccountController;
+use App\Http\Controllers\MstPpnController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransDataBankController;
 use App\Http\Controllers\TransDataKasController;
@@ -24,6 +26,24 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboard'])->group(function () {
     //Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        //Master PPN
+        Route::controller(MstPpnController::class)->group(function () {
+            Route::prefix('ppn')->middleware('permission:Akunting_master_data')->group(function () {
+                Route::get('/', 'index')->name('ppn.index');
+                Route::post('/', 'index')->name('ppn.index');
+                Route::post('/store', 'store')->name('ppn.store');
+            });
+        });
+
+        //Master Bank Account
+        Route::controller(MstBankAccountController::class)->group(function () {
+            Route::prefix('bankaccount')->middleware('permission:Akunting_master_data')->group(function () {
+                Route::get('/', 'index')->name('bankaccount.index');
+                Route::post('/', 'index')->name('bankaccount.index');
+                Route::post('/store', 'store')->name('bankaccount.store');
+            });
+        });
 
         //AccountType
         Route::controller(MstAccountTypesController::class)->group(function () {
@@ -81,6 +101,7 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
             Route::prefix('transsales')->middleware('permission:Akunting_sales')->group(function () {
                 Route::get('/getdeliverynote/{id}', 'getDeliveryNote')->name('transsales.getdeliverynote');
                 Route::get('/getsalesorder', 'getSalesOrder')->name('transsales.getsalesorder');
+                Route::get('/gettotalprice/{id}', 'getTotalPrice')->name('transsales.gettotalprice');
 
                 // Local
                 Route::get('local', 'indexLocal')->name('transsales.local.index');
@@ -104,6 +125,7 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
         Route::controller(TransPurchaseController::class)->group(function () {
             Route::prefix('transpurchase')->middleware('permission:Akunting_purchase')->group(function () {
                 Route::get('/getpurchaseorder/{id}', 'getpurchaseorder')->name('transpurchase.getpurchaseorder');
+                Route::get('/getgoodreceiptnote/{id}', 'getgoodReceiptNote')->name('transpurchase.getgoodReceiptNote');
 
                 Route::get('/', 'index')->name('transpurchase.index');
                 Route::post('/', 'index')->name('transpurchase.index');
@@ -126,7 +148,7 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
 
         //GeneralLedger
         Route::controller(GeneralLedgersController::class)->group(function () {
-            Route::prefix('generalledger')->middleware('permission:Akunting_generalledger ')->group(function () {
+            Route::prefix('generalledger')->middleware('permission:Akunting_generalledger')->group(function () {
                 Route::get('/', 'index')->name('generalledger.index');
                 Route::post('/', 'index')->name('generalledger.index');
                 Route::get('/create', 'create')->name('generalledger.create');
@@ -153,6 +175,9 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
                 Route::post('/neraca/generate', 'neracaGenerate')->name('report.neraca.generate');
                 //Hpp
                 Route::get('/hpp', 'hpp')->name('report.hpp');
+                Route::get('/hpp/detail/{id}', 'hppDetail')->name('report.hpp.detail');
+                Route::get('/hpp/view', 'hppView')->name('report.hpp.view');
+                Route::post('/hpp/generate', 'hppGenerate')->name('report.hpp.generate');
                 //LabaRugi
                 Route::get('/labarugi', 'labarugi')->name('report.labarugi');
             });
