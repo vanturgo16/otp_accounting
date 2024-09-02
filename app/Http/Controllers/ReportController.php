@@ -239,7 +239,7 @@ class ReportController extends Controller
         
         // Fetch data from general_ledgers filtered by the current month
         $monthlyData = DB::table('general_ledgers')
-            // ->whereBetween('date_transaction', [$currentMonthStart, $currentMonthEnd])
+            ->whereBetween('date_transaction', [$currentMonthStart, $currentMonthEnd])
             ->select(
                 'id_account_code',
                 DB::raw('SUM(CASE WHEN transaction = "D" THEN amount ELSE -amount END) as monthly_sum')
