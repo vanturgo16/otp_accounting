@@ -46,7 +46,7 @@
                 <div class="d-flex">
                     <!-- LOGO -->
                     <div class="navbar-brand-box">
-                        <a href="index.html" class="logo logo-dark">
+                        <a href="https://sso.olefinatifaplas.my.id/menu" class="logo logo-dark">
                             <span class="logo-sm">
                                 <img src="{{ asset('assets/images/icon-otp.png') }}" alt="" height="30">
                             </span>
@@ -55,7 +55,7 @@
                             </span>
                         </a>
 
-                        <a href="index.html" class="logo logo-light">
+                        <a href="https://sso.olefinatifaplas.my.id/menu" class="logo logo-light">
                             <span class="logo-sm">
                                 <img src="{{ asset('assets/images/icon-otp.png') }}" alt="" height="30">
                             </span>
@@ -187,7 +187,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#">
+                                    <a href="{{ route('entitylist.hpp') }}">
                                         <i class="mdi mdi-format-list-bulleted-square"></i>
                                         <span>HPP</span>
                                     </a>
@@ -259,7 +259,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('report.hpp') }}">
                                 <i class="mdi mdi-file-chart-outline"></i>
                                 <span>HPP</span>
                             </a>

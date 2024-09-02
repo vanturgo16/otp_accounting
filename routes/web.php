@@ -175,6 +175,9 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
                 Route::post('/neraca/generate', 'neracaGenerate')->name('report.neraca.generate');
                 //Hpp
                 Route::get('/hpp', 'hpp')->name('report.hpp');
+                Route::get('/hpp/detail/{id}', 'hppDetail')->name('report.hpp.detail');
+                Route::get('/hpp/view', 'hppView')->name('report.hpp.view');
+                Route::post('/hpp/generate', 'hppGenerate')->name('report.hpp.generate');
                 //LabaRugi
                 Route::get('/labarugi', 'labarugi')->name('report.labarugi');
             });
