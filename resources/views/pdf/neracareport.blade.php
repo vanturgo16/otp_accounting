@@ -35,8 +35,8 @@
         }
 
         .padded-element-main {
-            padding-top: 150px;
-            padding-bottom: 25px;
+            padding-top: 160px;
+            padding-bottom: 55px;
             padding-left: 20px;
             padding-right: 20px;
         }

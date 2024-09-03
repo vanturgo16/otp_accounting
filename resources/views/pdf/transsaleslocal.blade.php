@@ -124,7 +124,12 @@
       </tbody>
     </table>
     <div style="font-size: 10px;">
-        Tax Sales : -
+        Tax Sales : 
+        @if($transSales->tax_sales == null)
+        -
+        @else
+        {{ $transSales->tax_sales }}
+        @endif
     </div>
 
     <table class="styled-table-service">
@@ -193,7 +198,12 @@
                     </td>
                     <td style="width:55%;">
                         <div style="font-size: 10px;">
-                            : {{ $deliveryNote->po_number }}
+                            : 
+                            @if($datas[0]->po_number == null)
+                            -
+                            @else
+                            {{ $datas[0]->po_number }}
+                            @endif
                         </div>
                     </td>
                     <td class="text-right" style="width:20%; font-size: 12px;">

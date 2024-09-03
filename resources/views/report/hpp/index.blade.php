@@ -8,12 +8,12 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('transpurchase.create') }}" type="button" class="btn btn-primary waves-effect btn-label waves-light"><i class="mdi mdi-plus-box label-icon"></i> Add New Purchase Transaction</a>
+                        <a href="{{ route('report.hpp.view') }}" type="button" class="btn btn-info waves-effect btn-label waves-light"><i class="mdi mdi-eye-arrow-right-outline label-icon"></i> View Report HPP This Month</a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Accounting</a></li>
-                            <li class="breadcrumb-item active">Purchase</li>
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Report</a></li>
+                            <li class="breadcrumb-item active">HPP</li>
                         </ol>
                     </div>
                 </div>
@@ -21,7 +21,7 @@
         </div>
 
         @include('layouts.alert')
-
+        
         <!-- Modal Search -->
         <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
@@ -30,24 +30,10 @@
                         <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="{{ route('transpurchase.index') }}" id="formfilter" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('report.hpp') }}" id="formfilter" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
                             <div class="row">
-                                <div class="col-6 mb-2">
-                                    <label class="form-label">Ref Number</label>
-                                    <input class="form-control" name="ref_number" type="text" value="{{ $ref_number }}" placeholder="Filter Ref Number..">
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <label class="form-label">Good Receipt Note</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_purchase_order">
-                                        <option value="" selected>--Select Type--</option>
-                                        @foreach($goodReceiptNote as $item)
-                                            <option value="{{ $item->id }}" @if($id_good_receipt_notes == $item->id) selected="selected" @endif>{{ $item->id_good_receipt_notes." - ". $item->status }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <hr class="mt-2">
                                 <div class="col-4 mb-2">
                                     <label class="form-label">Filter Date</label>
                                     <select class="form-control" name="searchDate">
@@ -114,11 +100,8 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header text-center py-3">
-                        <h5 class="mb-0"><b>Purchase Transaction</b></h5>
+                        <h5 class="mb-0"><b>Report HPP List</b></h5>
                         List of 
-                        @if($ref_number != null)
-                            (Ref. Number<b> - {{ $ref_number }}</b>)
-                        @endif
                         @if($searchDate == 'Custom')
                             (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
                         @else
@@ -133,13 +116,8 @@
                                         <input type="checkbox" id="checkAllRows">
                                     </th>
                                     <th class="align-middle text-center">No.</th>
-                                    <th class="align-middle text-center">Ref. Number</th>
-                                    <th class="align-middle text-center">PO Number</th>
-                                    <th class="align-middle text-center">Delivery Note Number</th>
-                                    <th class="align-middle text-center">Invoice Number</th>
-                                    <th class="align-middle text-center">Quantity</th>
-                                    <th class="align-middle text-center">Total Transaction</th>
-                                    <th class="align-middle text-center">Created By</th>
+                                    <th class="align-middle text-center">Period Report Date</th>
+                                    <th class="align-middle text-center">Generate By</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
@@ -153,22 +131,12 @@
 
 <script>
     $(function() {
-        var i = 1;
-        var url = '{!! route('transpurchase.index') !!}';
-        var currentDate = new Date();
-        var formattedDate = currentDate.toISOString().split('T')[0];
-        var fileName = "Sales Purchase Export - " + formattedDate + ".xlsx";
+        var url = '{!! route('report.hpp') !!}';
         var data = {
-                ref_number: '{{ $ref_number }}',
-                id_good_receipt_notes: '{{ $id_good_receipt_notes }}',
                 searchDate: '{{ $searchDate }}',
                 startdate: '{{ $startdate }}',
                 enddate: '{{ $enddate }}'
             };
-        var requestData = Object.assign({}, data);
-        requestData.flag = 1;
-
-        // <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteselected"><i class="mdi mdi-trash-can"></i> Delete Selected</button></li>
 
         var dataTable = $('#server-side-table').DataTable({
             dom: '<"top d-flex"<"position-absolute top-0 end-0 d-flex"fl><"pull-left col-sm-12 col-md-5"B>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>><"clear:both">',
@@ -184,34 +152,12 @@
                                 <i class="mdi mdi-checkbox-multiple-marked-outline"></i> Bulk Actions <i class="fas fa-caret-down"></i>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><button class="dropdown-item">No Action</button></li>
+                                <li><button class="dropdown-item">No Action</li>
                             </ul>
                         </div>
                     </div>`
                 );
             },
-            buttons: [
-                {
-                    extend: "excel",
-                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
-                    action: function (e, dt, button, config) {
-                        $.ajax({
-                            url: url,
-                            method: "GET",
-                            data: requestData,
-                            success: function (response) {
-                                generateExcel(response, fileName);
-                            },
-                            error: function (error) {
-                                console.error(
-                                    "Error sending data to server:",
-                                    error
-                                );
-                            },
-                        });
-                    },
-                },
-            ],
             language: {
                 processing: '<div id="custom-loader" class="dataTables_processing"></div>'
             },
@@ -257,78 +203,33 @@
                     className: 'align-middle text-center',
                 },
                 {
-                    data: 'ref_number',
-                    name: 'ref_number',
+                    data: 'report_period_date',
+                    name: 'report_period_date',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center text-bold'
+                    className: 'align-top text-center text-bold'
                 },
                 {
-                    data: 'po_number',
-                    name: 'po_number',
+                    data: 'report_by',
+                    name: 'report_by',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center text-bold'
-                },
-                {
-                    data: 'delivery_note_number',
-                    searchable: true,
-                    orderable: true,
-                    className: 'align-middle text-center',
-                    render: function(data, type, row) {
-                        var delivery_note_date = new Date(row.delivery_note_date);
-                        return '<b>( ' + row.delivery_note_number + ' )</b><br><b>Date. </b>' + delivery_note_date.toLocaleDateString('es-CL').replace(/\//g, '-');
-                    },
-                },
-                {
-                    data: 'invoice_number',
-                    searchable: true,
-                    orderable: true,
-                    className: 'align-middle text-center',
-                    render: function(data, type, row) {
-                        var invoice_date = new Date(row.invoice_date);
-                        return '<b>( ' + row.invoice_number + ' )</b><br><b>Date. </b>' + invoice_date.toLocaleDateString('es-CL').replace(/\//g, '-');
-                    },
-                },
-                {
-                    data: 'quantity',
-                    name: 'quantity',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-middle text-center'
-                },
-                {
-                    data: 'count',
-                    name: 'count',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-middle text-center',
-                    render: function(data, type, row) {
-                        return '<h5><span class="badge bg-info">'+ row.count +'</span></h5>';
-                    },
-                },
-                {
-                    data: 'created_by',
-                    searchable: true,
-                    orderable: true,
-                    render: function(data, type, row) {
-                        var created_at = new Date(row.created_at);
-                        return row.created_by + '<br><b>At. </b>' + created_at.toLocaleDateString('es-CL').replace(/\//g, '-');
-                    },
+                    className: 'align-top text-center'
                 },
                 {
                     data: 'action',
                     name: 'action',
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
             ],
             bAutoWidth: false,
             columnDefs: [{
                 width: "1%",
                 targets: [0]
-            }]
+            }],
+            buttons: []
         });
 
         $(document).on('keyup', '#custom-search-input', function () {

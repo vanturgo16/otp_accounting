@@ -46,11 +46,11 @@
                                 </div>
                                 <hr>
                                 <div class="col-6 mb-2">
-                                    <label class="form-label">Purchase Order</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_purchase_order">
+                                    <label class="form-label">Good Receipt Note</label><label style="color: darkred">*</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_good_receipt_notes" required>
                                         <option value="" selected>--Select Type--</option>
-                                        @foreach($purchase as $item)
-                                            <option value="{{ $item->id }}">{{ $item->po_number." - ". $item->status }}</option>
+                                        @foreach($goodReceiptNote as $item)
+                                            <option value="{{ $item->id }}">{{ $item->receipt_number." - ". $item->status }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -115,8 +115,8 @@
                                     <input type="text" class="form-control" name="invoice_number" value="" placeholder="Input Invoice Number.." required>
                                 </div>
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Tax Invoice Number</label><label style="color: darkred">*</label>
-                                    <input type="text" class="form-control" name="tax_invoice_number" value="" placeholder="Input Tax Invoice Number.." required>
+                                    <label class="form-label">Tax Invoice Number</label>
+                                    <input type="text" class="form-control" name="tax_invoice_number" value="" placeholder="Input Tax Invoice Number..">
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Quantity</label><label style="color: darkred">*</label>
@@ -321,7 +321,7 @@
 
 {{-- Purchase Order Choose --}}
 <script>
-    $('select[name="id_purchase_order"]').on('change', function() {
+    $('select[name="id_good_receipt_notes"]').on('change', function() {
         $('#po_date').val("");
         $('#supplier').val("");
         $('#reference_number').val("");
@@ -333,9 +333,8 @@
         $('#total_ppn').val("");
         $('#total_amount').val("");
 
-        var id_purchase_order = $(this).val();
-        console.log(id_purchase_order);
-        if(id_purchase_order == ""){
+        var id_good_receipt_notes = $(this).val();
+        if(id_good_receipt_notes == ""){
             $('#po_date').val("");
             $('#supplier').val("");
             $('#reference_number').val("");
@@ -347,9 +346,9 @@
             $('#total_ppn').val("");
             $('#total_amount').val("");
         } else {
-            var url = '{{ route("transpurchase.getpurchaseorder", ":id") }}';
-            url = url.replace(':id', id_purchase_order);
-            if (id_purchase_order) {
+            var url = '{{ route("transpurchase.getgoodReceiptNote", ":id") }}';
+            url = url.replace(':id', id_good_receipt_notes);
+            if (id_good_receipt_notes) {
                 $.ajax({
                     url: url,
                     type: "GET",

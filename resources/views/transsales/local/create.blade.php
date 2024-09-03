@@ -50,6 +50,14 @@
                                 </div>
                                 <hr>
                                 <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Tax (%)</label><label style="color: darkred">*</label>
+                                    <input type="text" class="form-control" name="tax" value="{{ $tax }}" style="background-color:#EAECF4" required readonly>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Tax Sales</label><label style="color: darkred">*</label>
+                                    <input type="text" class="form-control rupiah-input" style="width: 100%" placeholder="Input Amount.." name="tax_sales" value="" required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
                                     <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
                                         <option value="" selected>-- Select --</option>
@@ -87,6 +95,23 @@
                                                         <th class="align-middle text-center">Total Price</th>
                                                     </tr>
                                                 </thead>
+                                            </table>
+                                        </div>
+
+                                        <div class="col-lg-6 mt-4">
+                                        </div>
+                                        <div class="col-lg-6 mt-4">
+                                            <table style="width: 100%">
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="text-right">
+                                                            <label class="form-label font-weight-bold" style="text-align: right; display: block;">Total All Price</label>
+                                                        </td>
+                                                        <td class="text-right">
+                                                            <label class="form-label" style="text-align: right; display: block;">: Rp. <span id="totalPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
                                             </table>
                                         </div>
                                     </div>
@@ -204,6 +229,7 @@
     document.getElementById('formstore').addEventListener('submit', function(event) {
         event.preventDefault();
         let totals = calculateTotals();
+        let totalPrice = $('#totalPrice').html();
 
         if (totals.debitTotal !== totals.kreditTotal) {
             let modalBodyContent = `
@@ -235,11 +261,37 @@
             var myModal = new bootstrap.Modal(document.getElementById('alert'));
             myModal.show();
         } else {
-            var submitButton = this.querySelector('button[name="sb"]');
-            submitButton.disabled = true;
-            submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
-            this.submit();
-            return true;
+            if(totals.debitTotal == totalPrice){
+                var submitButton = this.querySelector('button[name="sb"]');
+                submitButton.disabled = true;
+                submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
+                this.submit();
+                return true;
+            } 
+            else {
+                let modalBodyContent = `
+                    <div class="col-12">
+                        <table class="table dt-responsive w-100">
+                            <thead>
+                                <tr>
+                                    <th class="align-top text-center text-bold">Total Debit</th>
+                                    <th class="align-top text-center text-bold">?</th>
+                                    <th class="align-top text-center text-bold">Total Sales Price</th>
+                                </tr>
+                                <tr>
+                                    <th class="align-top text-center">${totals.debitTotal.toLocaleString('id-ID')}</th>
+                                    <th class="align-top text-center text-danger">!=</th>
+                                    <th class="align-top text-center">${totalPrice}</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                `;
+
+                document.getElementById('modalBodyContent').innerHTML = modalBodyContent;
+                var myModal = new bootstrap.Modal(document.getElementById('alert'));
+                myModal.show();
+            }
         }
     });
 </script>
@@ -424,10 +476,12 @@
 
             $('#customer_name').val("");
             $('#sales_name').val("");
+            $('#totalPrice').html(0);
             var id_delivery_notes = $(this).val();
             if(id_delivery_notes == ""){
                 $('#customer_name').val("");
                 $('#sales_name').val("");
+                $('#totalPrice').html(0);
             } else {
                 var url = '{{ route("transsales.getdeliverynote", ":id") }}';
                 url = url.replace(':id', id_delivery_notes);
@@ -447,6 +501,22 @@
                                 $('#sales_name').val('-');
                             } else {
                                 $('#sales_name').val(data.salesman_name);
+                            }
+                        }
+                    });
+                }
+                var url2 = '{{ route("transsales.gettotalprice", ":id") }}';
+                url2 = url2.replace(':id', id_delivery_notes);
+                if (url2) {
+                    $.ajax({
+                        url: url2,
+                        type: "GET",
+                        dataType: "json",
+                        success: function(data) {
+                            if(data == null || data == 0){
+                                $('#totalPrice').html(0);
+                            } else {
+                                $('#totalPrice').html(data);
                             }
                         }
                     });
