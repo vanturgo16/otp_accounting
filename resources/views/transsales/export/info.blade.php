@@ -31,13 +31,17 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-6 mb-3">
+                            <div class="col-lg-4 mb-3">
                                 <label class="form-label mb-0">Ref Number</label>
                                 <br><span class="badge bg-info">{{ $data->ref_number }}</span>
                             </div>
-                            <div class="col-lg-6 mb-3">
+                            <div class="col-lg-4 mb-3">
+                                <label class="form-label mb-0">Invoice Date</label>
+                                <br><span>{{ $data->date_invoice ? \Carbon\Carbon::parse($data->date_invoice)->format('d-m-Y') : '-' }}</span>
+                            </div>
+                            <div class="col-lg-4 mb-3">
                                 <label class="form-label mb-0">Transaction Date</label>
-                                <br><span>{{ $data->date_transaction }}</span>
+                                <br><span>{{ $data->date_transaction ? \Carbon\Carbon::parse($data->date_transaction)->format('d-m-Y') : '-' }}</span>
                             </div>
                             <div class="col-lg-12 mb-3">
                                 <label class="form-label mb-0">Term</label>
