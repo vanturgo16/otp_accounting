@@ -216,12 +216,12 @@
             @foreach ($datas as $data)
                 <?php $no++; ?>
                 <tr>
-                    <td class="text-center">{{ $no }}</td>
-                    <td class="align-top text-left p-1">{{ $data->product }}</td>
-                    <td class="text-center">{{ $data->qty }}</td>
-                    <td class="text-center">-</td>
-                    <td class="text-center">{{ $deliveryNote->currency_code.'  ' . number_format($data->price, 2, ',', '.') }}</td>
-                    <td class="text-center">{{ $deliveryNote->currency_code.'  ' . number_format($data->total_price, 2, ',', '.') }}</td>
+                    <td class="px-2 text-center">{{ $no }}</td>
+                    <td class="px-2">{{ $data->product }}</td>
+                    <td class="px-2 text-center">{{ $data->qty }}</td>
+                    <td class="px-2 text-center">-</td>
+                    <td class="px-2 text-right">{{ $deliveryNote->currency_code.'  ' . number_format($data->price, 2, ',', '.') }}</td>
+                    <td class="px-2 text-right">{{ $deliveryNote->currency_code.'  ' . number_format($data->total_price, 2, ',', '.') }}</td>
                 </tr>
             @endforeach
             
@@ -232,7 +232,7 @@
                 <td class="text-center" style="border-left: none; border-right: none; border-bottom: none;"></td>
                 <td class="text-center" style="border-left: none; border-right: none; border-bottom: none;"></td>
                 <td class="text-right" style="border-left: none; border-right: none; border-bottom: none;"><b>Amount</b></td>
-                <td class="text-center p-1" style="border-left: none; border-bottom: none;">{{ $deliveryNote->currency_code.'  ' . number_format($totalAllAmount, 2, ',', '.') }}</td>
+                <td class="px-2 text-right" style="border-left: none; border-bottom: none;">{{ $deliveryNote->currency_code.'  ' . number_format($totalAllAmount, 2, ',', '.') }}</td>
             </tr>
             <tr>
                 <td class="text-center" style="border-right: none; border-bottom: none; border-top: none;"></td>
@@ -240,7 +240,7 @@
                 <td class="text-center" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"></td>
                 <td class="text-center" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"></td>
                 <td class="text-right" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"><b>PPN {{ $ppn }}%</b></td>
-                <td class="text-center p-1" style="border-left: none; border-bottom: none; border-top: none;">{{ $deliveryNote->currency_code.'  ' . number_format($ppn_val, 2, ',', '.') }}</td>
+                <td class="px-2 text-right" style="border-left: none; border-bottom: none; border-top: none;">{{ $deliveryNote->currency_code.'  ' . number_format($ppn_val, 2, ',', '.') }}</td>
             </tr>
             @endif
             <tr>
@@ -249,7 +249,7 @@
                 <td class="text-center" style="border-left: none; border-right: none; border-top: none;"></td>
                 <td class="text-center" style="border-left: none; border-right: none; border-top: none;"></td>
                 <td class="text-right" style="border-left: none; border-right: none; border-top: none;"><b>Total</b></td>
-                <td class="text-center p-1" style="border-left: none; border-top: none;">{{ $deliveryNote->currency_code.'  ' . number_format($total, 2, ',', '.') }}</td>
+                <td class="px-2 text-right" style="border-left: none; border-top: none;">{{ $deliveryNote->currency_code.'  ' . number_format($total, 2, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>
