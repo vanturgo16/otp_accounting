@@ -35,12 +35,16 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-lg-4 mb-3">
                                     <label class="form-label">Ref Number</label><label style="color: darkred">*</label>
                                     <br>
                                     <span class="badge bg-info text-white">Auto Generate</span>
                                 </div>
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label">Invoice Date</label><label style="color: darkred">*</label>
+                                    <input type="date" class="form-control" name="date_invoice" value="" required>
+                                </div>
+                                <div class="col-lg-4 mb-3">
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
                                     <input type="date" class="form-control" name="date_transaction" value="" required>
                                 </div>

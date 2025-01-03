@@ -270,7 +270,7 @@ class TransSalesController extends Controller
         $id = decrypt($id);
         // dd($id);
 
-        $data = TransSales::select('delivery_notes.id as id_delivery_notes', 'trans_sales.ref_number', 'trans_sales.date_transaction',
+        $data = TransSales::select('delivery_notes.id as id_delivery_notes', 'trans_sales.ref_number', 'trans_sales.date_invoice', 'trans_sales.date_transaction',
                 'trans_sales.due_date', 'delivery_notes.dn_number', 'master_customers.name as customer_name', 'master_salesmen.name as salesman_name')
             ->leftjoin('delivery_notes', 'trans_sales.id_delivery_notes', 'delivery_notes.id')
             ->leftjoin('master_customers', 'delivery_notes.id_master_customers', 'master_customers.id')
@@ -293,7 +293,7 @@ class TransSalesController extends Controller
         $id = decrypt($id);
         // dd($id);
 
-        $data = TransSalesExport::select('delivery_notes.id as id_delivery_notes', 'trans_sales_export.ref_number', 'trans_sales_export.date_transaction',
+        $data = TransSalesExport::select('delivery_notes.id as id_delivery_notes', 'trans_sales_export.ref_number', 'trans_sales_export.date_invoice', 'trans_sales_export.date_transaction',
                 'trans_sales_export.term', 'delivery_notes.dn_number', 'master_customers.name as customer_name', 'master_salesmen.name as salesman_name')
             ->leftjoin('delivery_notes', 'trans_sales_export.id_delivery_notes', 'delivery_notes.id')
             ->leftjoin('master_customers', 'delivery_notes.id_master_customers', 'master_customers.id')
@@ -340,6 +340,7 @@ class TransSalesController extends Controller
     {
         // dd($request->all());
         $request->validate([
+            'date_invoice' => 'required',
             'date_transaction' => 'required',
             'id_delivery_notes' => 'required',
             'due_date' => 'required|date|after_or_equal:today',
@@ -358,6 +359,7 @@ class TransSalesController extends Controller
         try{
             TransSales::create([
                 'ref_number' => $refNumber,
+                'date_invoice' => $request->date_invoice,
                 'date_transaction' => $request->date_transaction,
                 'id_delivery_notes' => $request->id_delivery_notes,
                 'due_date' => $request->due_date,
@@ -394,6 +396,7 @@ class TransSalesController extends Controller
     {
         // dd($request->all());
         $request->validate([
+            'date_invoice' => 'required',
             'date_transaction' => 'required',
             'id_delivery_notes' => 'required',
             'term' => 'required',
@@ -412,6 +415,7 @@ class TransSalesController extends Controller
         try{
             TransSalesExport::create([
                 'ref_number' => $refNumber,
+                'date_invoice' => $request->date_invoice,
                 'date_transaction' => $request->date_transaction,
                 'id_delivery_notes' => $request->id_delivery_notes,
                 'term' => $request->term,
@@ -453,6 +457,27 @@ class TransSalesController extends Controller
         }
     }
 
+
+    function formatDateToIndonesian($date)
+    {
+        $dateTime = new DateTime($date);
+        $formattedDate = $dateTime->format('d F Y');
+        $indonesianMonths = [
+            'January' => 'Januari',
+            'February' => 'Februari',
+            'March' => 'Maret',
+            'April' => 'April',
+            'May' => 'Mei',
+            'June' => 'Juni',
+            'July' => 'Juli',
+            'August' => 'Agustus',
+            'September' => 'September',
+            'October' => 'Oktober',
+            'November' => 'November',
+            'December' => 'Desember',
+        ];
+        return str_replace(array_keys($indonesianMonths), array_values($indonesianMonths), $formattedDate);
+    }
     public function printLocal($id)
     {
         $id = decrypt($id);
@@ -519,8 +544,7 @@ class TransSalesController extends Controller
         $ppn_val = ($totalAllAmount * $ppn) / 100;
         $total = $totalAllAmount + $ppn_val;
 
-        $dateTime = new DateTime($transSales->created_at);
-        $dateTime = $dateTime->format('d F Y');
+        $dateTime = $this->formatDateToIndonesian($transSales->date_invoice);
 
         $pdf = PDF::loadView('pdf.transsaleslocal', [
             'date' => $dateTime,
@@ -584,8 +608,7 @@ class TransSalesController extends Controller
         }
         $total = $totalAllAmount + $ppn_val;
 
-        $dateTime = new DateTime($transSales->created_at);
-        $dateTime = $dateTime->format('d F Y');
+        $dateTime = $this->formatDateToIndonesian($transSales->date_invoice);
 
         $pdf = PDF::loadView('pdf.transsalesexport', [
             'date' => $dateTime,

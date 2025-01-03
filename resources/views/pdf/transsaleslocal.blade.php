@@ -148,12 +148,13 @@
             @foreach ($datas as $data)
                 <?php $no++; ?>
                 <tr>
-                    <td class="text-center">{{ $no }}</td>
-                    <td class="text-center">{{ $deliveryNote->dn_number }}</td>
-                    <td class="text-center">{{ $data->product }}</td>
-                    <td class="text-center">{{ $data->qty }}</td>
-                    <td class="text-center">{{ 'Rp. ' . number_format($data->price, 2, ',', '.') }}</td>
-                    <td class="text-center">{{ 'Rp. ' . number_format($data->total_price, 2, ',', '.') }}</td>
+                    <td class="px-2 text-center">{{ $no }}</td>
+                    <td class="px-2 text-center">{{ $deliveryNote->dn_number }}</td>
+                    <td class="px-2">{{ $data->product }}</td>
+                    <td class="px-2 text-center">{{ $data->qty }}</td>
+                    <td class="px-2 text-right">{{ 'Rp. ' . number_format($data->price, 2, ',', '.') }}</td>
+                    <td class="px-2 text-right">{{ 'Rp. ' . number_format($data->total_price, 2, ',', '.') }}</td>
+                    
                 </tr>
             @endforeach
         </tbody>
