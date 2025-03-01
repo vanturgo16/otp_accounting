@@ -53,30 +53,30 @@
                                     <input type="date" class="form-control" name="due_date" value="" required min="<?= date('Y-m-d'); ?>">
                                 </div>
                                 <hr>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Tax (%)</label><label style="color: darkred">*</label>
-                                    <input type="text" class="form-control" name="tax" value="{{ $tax }}" style="background-color:#EAECF4" required readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Tax Sales</label><label style="color: darkred">*</label>
-                                    <input type="text" class="form-control rupiah-input" style="width: 100%" placeholder="Input Amount.." name="tax_sales" value="" required>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
-                                        <option value="" selected>-- Select --</option>
-                                        @foreach($deliveryNotes as $item)
-                                            <option value="{{ $item->id }}">{{ $item->dn_number." - ". $item->status }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                </div>
                             </div>
 
                             <div class="card">
                                 <div class="card-body" style="background-color:ghostwhite">
                                     <div class="row">
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
+                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
+                                                <option value="" selected>-- Select --</option>
+                                                @foreach($deliveryNotes as $item)
+                                                    <option value="{{ $item->id }}">{{ $item->dn_number." - ". $item->status }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label" for="tax">Tax (%)</label>
+                                            <input type="number" class="form-control" name="tax" id="tax" value="" placeholder="Input Tax.." style="background-color:#EAECF4" required readonly>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">Tax Sales</label><label style="color: darkred">*</label>
+                                            <input type="text" class="form-control rupiah-input" style="width: 100%" placeholder="Input Amount.." name="tax_sales" value="" required>
+                                        </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Customer Name</label>
                                             <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
@@ -474,6 +474,7 @@
             ]
         });
 
+        var initiateppn = '{{ $tax }}';
         $('select[name="id_delivery_notes"]').on('change', function() {
             data.id_delivery_notes = $(this).val();
             dataTable.ajax.reload();
@@ -486,6 +487,10 @@
                 $('#customer_name').val("");
                 $('#sales_name').val("");
                 $('#totalPrice').html(0);
+
+                $('input[name="tax"]').val("").prop('readonly', true).css('background-color', '#EAECF4');
+                $('input[name="tax"]').prop('required', false);
+
             } else {
                 var url = '{{ route("transsales.getdeliverynote", ":id") }}';
                 url = url.replace(':id', id_delivery_notes);
@@ -495,16 +500,18 @@
                         type: "GET",
                         dataType: "json",
                         success: function(data) {
-                            if(data.customer_name == null){
-                                $('#customer_name').val('-');
-                            } else {
-                                $('#customer_name').val(data.customer_name);
-                            }
+                            $('#customer_name').val(data.customer_name ?? '-');
+                            $('#sales_name').val(data.salesman_name ?? '-');
 
-                            if(data.salesman_name == null){
-                                $('#sales_name').val('-');
+                            if (data.ppn === "Include") {
+                                $('input[name="tax"]').val(initiateppn).prop('readonly', false).css('background-color', '');
+                                $('input[name="tax"]').prop('required', true);
+                            } else if (data.ppn === "Exclude") {
+                                $('input[name="tax"]').val("Exclude").prop('readonly', true).css('background-color', '#EAECF4').attr('placeholder', 'N/A');
+                                $('input[name="tax"]').prop('required', false);
                             } else {
-                                $('#sales_name').val(data.salesman_name);
+                                $('input[name="tax"]').val("").prop('readonly', true).css('background-color', '#EAECF4').attr('placeholder', 'N/A');
+                                $('input[name="tax"]').prop('required', false);
                             }
                         }
                     });

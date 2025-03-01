@@ -34,6 +34,15 @@ class TransSalesController extends Controller
             ->where('delivery_notes.id', $id)
             ->first();
 
+        $tax = DeliveryNoteDetail::select('sales_orders.ppn')
+            ->leftjoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
+            ->where('delivery_note_details.id_delivery_notes', $id)
+            ->first();
+
+        if ($deliveryNote) {
+            $deliveryNote->ppn = $tax->ppn ?? null;
+        }
+
         return json_encode($deliveryNote);
     }
 
@@ -111,7 +120,7 @@ class TransSalesController extends Controller
         ];
         $romanMonth = $romanMonths[$month];
         // Create the formatted number
-        $refNumber = "OTP/{$romanMonth}/{$year}/{$noUrutDN}";
+        $refNumber = "INV/{$romanMonth}/{$year}/{$noUrutDN}";
     
         return $refNumber;
     }
@@ -344,7 +353,6 @@ class TransSalesController extends Controller
             'date_transaction' => 'required',
             'id_delivery_notes' => 'required',
             'due_date' => 'required|date|after_or_equal:today',
-            'tax' => 'required',
             'tax_sales' => 'required',
             'addmore.*.account_code' => 'required',
             'addmore.*.nominal' => 'required',
@@ -355,6 +363,8 @@ class TransSalesController extends Controller
         $noUrutDN = substr($noUrutDN, -6);
         $refNumber = $this->generateRefNumber($noUrutDN);
 
+        $tax = ($request->tax === "Exclude" || !isset($request->tax) || $request->tax === null) ? null : $request->tax;
+
         DB::beginTransaction();
         try{
             TransSales::create([
@@ -363,7 +373,7 @@ class TransSalesController extends Controller
                 'date_transaction' => $request->date_transaction,
                 'id_delivery_notes' => $request->id_delivery_notes,
                 'due_date' => $request->due_date,
-                'tax' => $request->tax,
+                'tax' => $tax,
                 'tax_sales' => $request->tax_sales,
                 'created_by' => auth()->user()->email
             ]);
@@ -486,7 +496,7 @@ class TransSalesController extends Controller
 
         $deliveryNote = DeliveryNote::select(
                 'delivery_notes.dn_number', 
-                'master_customers.name as customer_name', 'master_salesmen.name as salesman_name',
+                'master_customers.name as customer_name', 'master_salesmen.name as salesman_name', 'master_customers.tax_number',
                 'master_customer_addresses.*',
                 'master_customer_addresses.address', 'master_provinces.province', 'master_countries.country',
             )
@@ -499,49 +509,74 @@ class TransSalesController extends Controller
             ->whereIn('master_customer_addresses.type_address', ['Same As (Invoice, Shipping)', 'Invoice'])
             ->first();
 
-        $datas = DeliveryNoteDetail::select('sales_orders.so_number', 'master_product_fgs.description as product', 'sales_orders.type_product', 'sales_orders.qty',
-                'master_units.unit as unit', 'sales_orders.price', 'sales_orders.total_price')
-            ->leftjoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
-            ->leftjoin('master_product_fgs', 'sales_orders.id_master_products', 'master_product_fgs.id')
-            ->leftjoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
-            ->where('delivery_note_details.id_delivery_notes', $transSales->id_delivery_notes)
-            ->get();
+        $datas = DeliveryNoteDetail::select('sales_orders.so_number', 'sales_orders.type_product', 'sales_orders.qty',
+            'master_units.unit as unit', 'sales_orders.price', 'sales_orders.total_price', 'delivery_note_details.po_number',
+            DB::raw('
+                CASE 
+                    WHEN sales_orders.type_product = "RM" THEN master_raw_materials.description 
+                    WHEN sales_orders.type_product = "WIP" THEN master_wips.description 
+                    WHEN sales_orders.type_product = "FG" THEN master_product_fgs.description 
+                    WHEN sales_orders.type_product = "TA" THEN master_tool_auxiliaries.description 
+                END as product'),
+            )
+        ->leftjoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
+        ->leftJoin('master_raw_materials', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_raw_materials.id')
+                ->where('sales_orders.type_product', '=', 'RM');
+        })
+        ->leftJoin('master_wips', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_wips.id')
+                ->where('sales_orders.type_product', '=', 'WIP');
+        })
+        ->leftJoin('master_product_fgs', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_product_fgs.id')
+                ->where('sales_orders.type_product', '=', 'FG');
+        })
+        ->leftJoin('master_tool_auxiliaries', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_tool_auxiliaries.id')
+                ->where('sales_orders.type_product', '=', 'TA');
+        })
+        ->leftjoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
+        ->where('delivery_note_details.id_delivery_notes', $transSales->id_delivery_notes)
+        ->get();
 
         function terbilang($number) {
             $number = abs($number);
-            $words = array("", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas");
+            $words = array("", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas");
             $temp = "";
             if ($number < 12) {
                 $temp = " " . $words[$number];
             } else if ($number < 20) {
-                $temp = terbilang($number - 10) . " belas";
+                $temp = terbilang($number - 10) . " Belas ";
             } else if ($number < 100) {
-                $temp = terbilang(intval($number / 10)) . " puluh" . terbilang($number % 10);
+                $temp = terbilang(intval($number / 10)) . " Puluh " . terbilang($number % 10);
             } else if ($number < 200) {
                 $temp = " seratus " . terbilang($number - 100);
             } else if ($number < 1000) {
-                $temp = terbilang(intval($number / 100)) . " ratus" . terbilang($number % 100);
+                $temp = terbilang(intval($number / 100)) . " Ratus " . terbilang($number % 100);
             } else if ($number < 2000) {
                 $temp = " seribu " . terbilang($number - 1000);
             } else if ($number < 1000000) {
-                $temp = terbilang(intval($number / 1000)) . " ribu" . terbilang($number % 1000);
+                $temp = terbilang(intval($number / 1000)) . " Ribu " . terbilang($number % 1000);
             } else if ($number < 1000000000) {
-                $temp = terbilang(intval($number / 1000000)) . " juta" . terbilang($number % 1000000);
+                $temp = terbilang(intval($number / 1000000)) . " Juta " . terbilang($number % 1000000);
             } else if ($number < 1000000000000) {
-                $temp = terbilang(intval($number / 1000000000)) . " milyar" . terbilang(fmod($number, 1000000000));
+                $temp = terbilang(intval($number / 1000000000)) . " Milyar " . terbilang(fmod($number, 1000000000));
             } else if ($number < 1000000000000000) {
-                $temp = terbilang(intval($number / 1000000000000)) . " trilyun" . terbilang(fmod($number, 1000000000000));
+                $temp = terbilang(intval($number / 1000000000000)) . " Trilyun " . terbilang(fmod($number, 1000000000000));
             }
-            return strtoupper(trim($temp));
+            return trim($temp);
         }
 
         $totalAllAmount = 0;
         foreach($datas as $item){
             $totalAllAmount += $item->total_price;
         }
-        $terbilangString = terbilang($totalAllAmount) . " RUPIAH";
-        $ppn = $transSales->tax;
-        $ppn_val = ($totalAllAmount * $ppn) / 100;
+        $terbilangString = terbilang($totalAllAmount) . " Rupiah.";
+        $ppn = $transSales->tax ?? '0';
+        $ppn_val = ($ppn !== '-') ? ($totalAllAmount * $ppn) / 100 : 0;
+
+        $dpp = $totalAllAmount * (11/12);
         $total = $totalAllAmount + $ppn_val;
 
         $dateTime = $this->formatDateToIndonesian($transSales->date_invoice);
@@ -555,6 +590,7 @@ class TransSalesController extends Controller
             'terbilangString' => $terbilangString,
             'ppn' => $ppn,
             'ppn_val' => $ppn_val,
+            'dpp' => $dpp,
             'total' => $total,
         ])->setPaper('a4', 'portrait');
 
@@ -588,13 +624,36 @@ class TransSalesController extends Controller
             ->whereIn('master_customer_addresses.type_address', ['Same As (Invoice, Shipping)', 'Invoice'])
             ->first();
 
-        $datas = DeliveryNoteDetail::select('sales_orders.so_number', 'master_product_fgs.description as product', 'sales_orders.type_product', 'sales_orders.qty',
-                'master_units.unit as unit', 'sales_orders.price', 'sales_orders.total_price')
-            ->leftjoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
-            ->leftjoin('master_product_fgs', 'sales_orders.id_master_products', 'master_product_fgs.id')
-            ->leftjoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
-            ->where('delivery_note_details.id_delivery_notes', $transSales->id_delivery_notes)
-            ->get();
+        $datas = DeliveryNoteDetail::select('sales_orders.so_number', 'sales_orders.type_product', 'sales_orders.qty',
+            'master_units.unit as unit', 'sales_orders.price', 'sales_orders.total_price', 'delivery_note_details.po_number',
+            DB::raw('
+                CASE 
+                    WHEN sales_orders.type_product = "RM" THEN master_raw_materials.description 
+                    WHEN sales_orders.type_product = "WIP" THEN master_wips.description 
+                    WHEN sales_orders.type_product = "FG" THEN master_product_fgs.description 
+                    WHEN sales_orders.type_product = "TA" THEN master_tool_auxiliaries.description 
+                END as product'),
+            )
+        ->leftjoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
+        ->leftJoin('master_raw_materials', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_raw_materials.id')
+                ->where('sales_orders.type_product', '=', 'RM');
+        })
+        ->leftJoin('master_wips', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_wips.id')
+                ->where('sales_orders.type_product', '=', 'WIP');
+        })
+        ->leftJoin('master_product_fgs', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_product_fgs.id')
+                ->where('sales_orders.type_product', '=', 'FG');
+        })
+        ->leftJoin('master_tool_auxiliaries', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_tool_auxiliaries.id')
+                ->where('sales_orders.type_product', '=', 'TA');
+        })
+        ->leftjoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
+        ->where('delivery_note_details.id_delivery_notes', $transSales->id_delivery_notes)
+        ->get();
         
         $totalAllAmount = 0;
         foreach($datas as $item){
