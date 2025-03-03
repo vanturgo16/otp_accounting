@@ -86,22 +86,27 @@
                 <div style="font-size: 10px;" class="mt-4">
                     Kepada Yth,
                 </div>
-                @if($deliveryNote->address == null)
-                    <div class="card p-1" style="border: 1px solid black; width: 100%; height: 60px;">
-                        <div style="font-size: 10px;">
-                            <b>{{ $deliveryNote->customer_name }}</b>
-                        </div> 
+                
+                <div class="card p-1" style="border: 1px solid black; width: 100%;">
+                    <div style="font-size: 10px;">
+                        <b>{{ $deliveryNote->customer_name ?? '-' }}</b>
+                    </div>  
+                    <div style="font-size: 8px;">
+                        @if($deliveryNote->address)
+                            {{  $deliveryNote->address . ', ' . 
+                                ($deliveryNote->postal_code ?? '-') . ', ' . 
+                                ($deliveryNote->city ?? '-') . ', ' . 
+                                ($deliveryNote->province ?? '-') . ', ' . 
+                                ($deliveryNote->country ?? '-') }}
+                        @else
+                            Address: -
+                        @endif
                     </div>
-                @else
-                    <div class="card p-1" style="border: 1px solid black; width: 100%;">
-                        <div style="font-size: 10px;">
-                            <b>{{ $deliveryNote->customer_name }}</b>
-                        </div>  
-                        <div style="font-size: 8px;">
-                            {{ $deliveryNote->address.', '.$deliveryNote->postal_code.', '.$deliveryNote->city.', '.$deliveryNote->province.', '.$deliveryNote->country }}
-                        </div>  
+                    <br>
+                    <div style="font-size: 8px;">
+                        NPWP : {{ $deliveryNote->tax_number ?? '-' }}
                     </div>
-                @endif
+                </div>
                 <div style="font-size: 10px;">
                     Tangerang, {{ $date }}
                 </div>             
@@ -116,45 +121,43 @@
     <table class="mt-n2 mb-2" style="width: 100%; border-collapse: collapse;" cellspacing="1">
       <tbody>
           <tr>
-              <td class="align-middle text-center font-weight-bold" style="width:100%;">INVOICE</td>
-          </tr>
-          <tr>
-              <td class="align-middle text-center" style="width:100%; font-size: 10px;">No. {{ $transSales->ref_number }}</td>
+            <td class="align-middle text-center" style="width:100%; line-height: 1; width: 70%;">
+                <div class="font-weight-bold" style="margin: 0 !important; padding: 0 !important; line-height: 1;">
+                    FAKTUR PENJUALAN
+                </div>
+                <small style="font-size: 10px; margin: 0 !important; padding: 0 !important; line-height: 1;">
+                    {{ $transSales->ref_number }}
+                </small>
+            </td>
+            <td style="width:30%; font-size: 8px; padding: 0; position: relative;"></td>   
           </tr>
       </tbody>
     </table>
-    <div style="font-size: 10px;">
+    {{-- <div style="font-size: 10px;">
         Tax Sales : 
         @if($transSales->tax_sales == null)
         -
         @else
         {{ $transSales->tax_sales }}
         @endif
-    </div>
+    </div> --}}
 
     <table class="styled-table-service">
         <thead>
             <tr style="font-size: 11px;">
-                <th class="align-middle text-center"><b>No.</b></th>
-                <th class="align-middle text-center"><b>Delivery Number</b></th>
-                <th class="align-middle text-center"><b>Item Product</b></th>
-                <th class="align-middle text-center"><b>Qty</b></th>
-                <th class="align-middle text-center"><b>Unit Price (Rp)</b></th>
-                <th class="align-middle text-center"><b>Total Price (Rp)</b></th>
+                <th class="align-middle text-center" style="border-left: none;">URAIAN BARANG</th>
+                <th class="align-middle text-center">BANYAKNYA</th>
+                <th class="align-middle text-center">HARGA SATUAN (Rp)</th>
+                <th class="align-middle text-center" style="border-right: none;">JUMLAH (Rp)</th>
             </tr>
         </thead>
         <tbody>
-            <?php $no = 0; ?>
             @foreach ($datas as $data)
-                <?php $no++; ?>
                 <tr>
-                    <td class="px-2 text-center">{{ $no }}</td>
-                    <td class="px-2 text-center">{{ $deliveryNote->dn_number }}</td>
-                    <td class="px-2">{{ $data->product }}</td>
-                    <td class="px-2 text-center">{{ $data->qty }}</td>
-                    <td class="px-2 text-right">{{ 'Rp. ' . number_format($data->price, 2, ',', '.') }}</td>
-                    <td class="px-2 text-right">{{ 'Rp. ' . number_format($data->total_price, 2, ',', '.') }}</td>
-                    
+                    <td class="px-2" style="border-left: none;">{{ $data->product }}</td>
+                    <td class="px-2 text-center">{{ $data->qty. ' '. $data->unit }}</td>
+                    <td class="px-2 text-right">{{ number_format($data->price, 2, ',', '.') }}</td>
+                    <td class="px-2 text-right" style="border-right: none;">{{ number_format($data->total_price, 2, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -164,40 +167,68 @@
         <table class="mt-2 mb-2" style="width: 100%; border-collapse: collapse;" cellspacing="1">
             <tbody>
                 <tr>
-                    <td style="width:5%;">
+                    <td style="width:15%;">
                         <div style="font-size: 10px;">
-                            TERBILANG
+                            Terbilang
                         </div>
                     </td>
-                    <td style="width:55%;">
+                    <td class="text-left" style="width:45%;">
                         <div style="font-size: 10px;">
-                            : <b>"{{ $terbilangString }}"</b>
+                            : <u><i>"{{ $terbilangString }}"</i></u>
                         </div>
                     </td>
-                    <td class="text-right" style="width:20%; font-size: 12px;">
-                        <b>AMOUNT</b>
+                    <td class="text-left" style="width:20%; font-size: 10px;">
+                        Nilai Jual
                     </td>
-                    <td class="text-right" style="width:20%; font-size: 12px;">
-                        <b>{{ 'Rp. ' . number_format($totalAllAmount, 2, ',', '.') }}</b>
+                    <td class="text-right" style="width:20%; font-size: 10px;">
+                        <b>{{ number_format($totalAllAmount, 2, ',', '.') }}</b>
                     </td>
                 </tr>
                 <tr>
                     <td style="width:5%;"></td>
                     <td style="width:55%;"></td>
-                    <td class="text-right" style="width:20%; font-size: 12px;">
-                        <b>PPN {{ $ppn }}%</b>
+                    <td class="text-left" style="width:20%; font-size: 10px;">
+                        DPP Lain-lain
                     </td>
-                    <td class="text-right" style="width:20%; font-size: 12px;">
-                        <b>{{ 'Rp. ' . number_format($ppn_val, 2, ',', '.') }}</b>
+                    <td class="text-right" style="width:20%; font-size: 10px;">
+                        <b>{{ number_format($dpp, 2, ',', '.') }}</b>
                     </td>
                 </tr>
                 <tr>
-                    <td style="width:5%;">
+                    <td style="width:5%;"></td>
+                    <td style="width:55%;"></td>
+                    <td class="text-left" style="width:20%; font-size: 10px;">
+                        PPN {{ $ppn }}%
+                    </td>
+                    <td class="text-right" style="width:20%; font-size: 10px;">
+                        <b>{{ number_format($ppn_val, 2, ',', '.') }}</b>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:15%;">
                         <div style="font-size: 10px;">
-                            PO Number
+                            No. Surat Jalan
                         </div>
                     </td>
-                    <td style="width:55%;">
+                    <td style="width:45%;">
+                        <div style="font-size: 10px;">
+                            : {{ !empty($deliveryNote->dn_number) ? str_replace('DN', 'INV', $deliveryNote->dn_number) : '-' }}
+                        </div>                        
+                    </td>
+                    <td class="text-left" style="width:20%; font-size: 10px;">
+                        Total Nilai Jual + PPN
+                    </td>
+                    <td class="text-right" style="width:20%; font-size: 10px;">
+                        <b>{{ number_format($total, 2, ',', '.') }}</b>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:15%;">
+                        <div style="font-size: 10px;">
+                            No. PO
+                        </div>
+                    </td>
+                    <td style="width:45%;">
                         <div style="font-size: 10px;">
                             : 
                             @if($datas[0]->po_number == null)
@@ -207,20 +238,16 @@
                             @endif
                         </div>
                     </td>
-                    <td class="text-right" style="width:20%; font-size: 12px;">
-                        <b>Total</b>
-                    </td>
-                    <td class="text-right" style="width:20%; font-size: 12px;">
-                        <b>{{ 'Rp. ' . number_format($total, 2, ',', '.') }}</b>
-                    </td>
+                    <td></td>
+                    <td></td>
                 </tr>
                 <tr>
-                    <td style="width:5%;">
+                    <td style="width:15%;">
                         <div style="font-size: 10px;">
-                            Due Date
+                            Jatuh Tempo
                         </div>
                     </td>
-                    <td style="width:55%;">
+                    <td style="width:45%;">
                         @php
                             $due_date = (new DateTime($transSales->due_date))->format('d F Y');
                         @endphp
@@ -232,12 +259,12 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td style="width:5%;">
+                    <td style="width:15%;">
                         <div style="font-size: 10px;">
-                            Payment to
+                            Pembayaran Ke
                         </div>
                     </td>
-                    <td style="width:55%;">
+                    <td style="width:45%;">
                         <div style="font-size: 10px;">
                             : PT. OLEFINA TIFAPLAS POLIKEMINDO
                         </div>
@@ -248,7 +275,7 @@
                 <tr>
                     <td colspan="2" style="width:55%;">
                         <div style="font-size: 10px;">
-                            <b>A/C. 764 188 4999&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BCA KCP Citra Raya Tangerang</b>
+                            A/C. 764 188 4999&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BCA KCP Citra Raya Tangerang
                         </div>
                     </td>
                     <td></td>

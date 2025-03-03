@@ -227,29 +227,29 @@
             
             @if($transSales->is_tax == 1)
             <tr>
-                <td class="text-center" style="border-right: none; border-bottom: none;"></td>
+                <td class="text-center" style="border-right: none; border-bottom: none;border-left: none;"></td>
                 <td class="align-top text-left" style="border-left: none; border-right: none; border-bottom: none;"></td>
                 <td class="text-center" style="border-left: none; border-right: none; border-bottom: none;"></td>
                 <td class="text-center" style="border-left: none; border-right: none; border-bottom: none;"></td>
                 <td class="text-right" style="border-left: none; border-right: none; border-bottom: none;"><b>Amount</b></td>
-                <td class="px-2 text-right" style="border-left: none; border-bottom: none;">{{ $deliveryNote->currency_code.'  ' . number_format($totalAllAmount, 2, ',', '.') }}</td>
+                <td class="px-2 text-right" style="border-left: none; border-bottom: none; border-right: none;">{{ $deliveryNote->currency_code.'  ' . number_format($totalAllAmount, 2, ',', '.') }}</td>
             </tr>
             <tr>
-                <td class="text-center" style="border-right: none; border-bottom: none; border-top: none;"></td>
+                <td class="text-center" style="border-right: none; border-bottom: none; border-top: none;border-left: none;"></td>
                 <td class="align-top text-left" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"></td>
                 <td class="text-center" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"></td>
                 <td class="text-center" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"></td>
                 <td class="text-right" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"><b>PPN {{ $ppn }}%</b></td>
-                <td class="px-2 text-right" style="border-left: none; border-bottom: none; border-top: none;">{{ $deliveryNote->currency_code.'  ' . number_format($ppn_val, 2, ',', '.') }}</td>
+                <td class="px-2 text-right" style="border-left: none; border-bottom: none; border-top: none; border-right: none;">{{ $deliveryNote->currency_code.'  ' . number_format($ppn_val, 2, ',', '.') }}</td>
             </tr>
             @endif
             <tr>
-                <td class="text-center" style="border-right: none; border-top: none;"></td>
-                <td class="align-top text-left" style="border-left: none; border-right: none; border-top: none;"></td>
-                <td class="text-center" style="border-left: none; border-right: none; border-top: none;"></td>
-                <td class="text-center" style="border-left: none; border-right: none; border-top: none;"></td>
-                <td class="text-right" style="border-left: none; border-right: none; border-top: none;"><b>Total</b></td>
-                <td class="px-2 text-right" style="border-left: none; border-top: none;">{{ $deliveryNote->currency_code.'  ' . number_format($total, 2, ',', '.') }}</td>
+                <td class="text-center" style="border-right: none; border-top: none; border-left: none; border-bottom: none;"></td>
+                <td class="align-top text-left" style="border-left: none; border-right: none; border-top: none; border-bottom: none;"></td>
+                <td class="text-center" style="border-left: none; border-right: none; border-top: none; border-bottom: none;"></td>
+                <td class="text-center" style="border-left: none; border-right: none; border-top: none; border-bottom: none;"></td>
+                <td class="text-right" style="border-left: none; border-right: none; border-top: none; border-bottom: none;"><b>Total</b></td>
+                <td class="px-2 text-right" style="border-left: none; border-top: none; border-right: none; border-bottom: none;">{{ $deliveryNote->currency_code.'  ' . number_format($total, 2, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>
