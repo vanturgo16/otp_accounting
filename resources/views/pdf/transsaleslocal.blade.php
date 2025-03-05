@@ -81,7 +81,7 @@
             </td>
             <td style="width:30%; font-size: 8px; padding: 0; position: relative;">
                 <div style="position: absolute; top: 0; right: 0; font-size: 10px;">
-                    FM-SM-ACC-06, Rev. 0, 01 September 2021
+                    {{ $docNo }}
                 </div>
                 <div style="font-size: 10px;" class="mt-4">
                     Kepada Yth,
@@ -167,20 +167,20 @@
         <table class="mt-2 mb-2" style="width: 100%; border-collapse: collapse;" cellspacing="1">
             <tbody>
                 <tr>
-                    <td style="width:15%;">
+                    <td class="align-top" style="width:15%;">
                         <div style="font-size: 10px;">
                             Terbilang
                         </div>
                     </td>
-                    <td class="text-left" style="width:45%;">
+                    <td class="align-top text-left" style="width:45%;">
                         <div style="font-size: 10px;">
                             : <u><i>"{{ $terbilangString }}"</i></u>
                         </div>
                     </td>
-                    <td class="text-left" style="width:20%; font-size: 10px;">
+                    <td class="align-bottom text-left" style="width:20%; font-size: 10px;">
                         Nilai Jual
                     </td>
-                    <td class="text-right" style="width:20%; font-size: 10px;">
+                    <td class="align-bottom text-right" style="width:20%; font-size: 10px;">
                         <b>{{ number_format($totalAllAmount, 2, ',', '.') }}</b>
                     </td>
                 </tr>
@@ -212,7 +212,7 @@
                     </td>
                     <td style="width:45%;">
                         <div style="font-size: 10px;">
-                            : {{ !empty($deliveryNote->dn_number) ? str_replace('DN', 'INV', $deliveryNote->dn_number) : '-' }}
+                            : {{ !empty($deliveryNote->dn_number) ? $deliveryNote->dn_number : '-' }}
                         </div>                        
                     </td>
                     <td class="text-left" style="width:20%; font-size: 10px;">

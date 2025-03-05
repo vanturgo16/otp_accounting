@@ -19,6 +19,7 @@ use App\Models\MstBankAccount;
 use App\Models\MstPpn;
 use App\Models\TransSales;
 use App\Models\TransSalesExport;
+use App\Models\MstRule;
 
 class TransSalesController extends Controller
 {
@@ -493,6 +494,7 @@ class TransSalesController extends Controller
         $id = decrypt($id);
 
         $transSales = TransSales::where('id', $id)->first();
+        $docNo = MstRule::where('rule_name', 'DocNo. Invoice')->first()->rule_value;
 
         $deliveryNote = DeliveryNote::select(
                 'delivery_notes.dn_number', 
@@ -572,18 +574,19 @@ class TransSalesController extends Controller
         foreach($datas as $item){
             $totalAllAmount += $item->total_price;
         }
-        $terbilangString = terbilang($totalAllAmount) . " Rupiah.";
         $ppn = $transSales->tax ?? '0';
         $ppn_val = ($ppn !== '-') ? ($totalAllAmount * $ppn) / 100 : 0;
 
         $dpp = $totalAllAmount * (11/12);
         $total = $totalAllAmount + $ppn_val;
+        $terbilangString = terbilang($total) . " Rupiah.";
 
         $dateTime = $this->formatDateToIndonesian($transSales->date_invoice);
 
         $pdf = PDF::loadView('pdf.transsaleslocal', [
             'date' => $dateTime,
             'transSales' => $transSales,
+            'docNo' => $docNo,
             'deliveryNote' => $deliveryNote,
             'datas' => $datas,
             'totalAllAmount' => $totalAllAmount,
