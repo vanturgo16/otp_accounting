@@ -324,7 +324,9 @@ class TransSalesController extends Controller
 
     public function createLocal(Request $request)
     {
-        $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')->get();
+        $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')
+            ->where('dn_number', 'like', 'DN%')
+            ->get();
         $accountcodes = MstAccountCodes::get();
         $tax = MstPpn::where('tax_name', 'Trans. Sales (Local)')->where('is_active', 1)->first()->value;
 
@@ -335,7 +337,9 @@ class TransSalesController extends Controller
     }
     public function createExport(Request $request)
     {
-        $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')->get();
+        $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')
+            ->where('dn_number', 'like', 'DE%')
+            ->get();
         $accountcodes = MstAccountCodes::get();
         $tax = MstPpn::where('tax_name', 'Trans. Sales (Export)')->where('is_active', 1)->first()->value;
         $bankaccount = MstBankAccount::where('is_active', 1)->first();
