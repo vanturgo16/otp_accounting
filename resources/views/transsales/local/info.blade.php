@@ -57,6 +57,18 @@
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                 </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Tax (%)</label>
+                                    <br><span>{{ $data->tax ?? '-' }}</span>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label mb-0">Tax Sales</label>
+                                    <br><span>{{ $data->tax_sales ? number_format($data->tax_sales, 3, ',', '.') : '-' }}</span>
+                                </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label mb-0">Customer Name</label>
                                     <br>
