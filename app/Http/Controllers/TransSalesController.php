@@ -154,6 +154,10 @@ class TransSalesController extends Controller
         return $refNumber;
     }
 
+    function parseLocaleNumber(string $value): float {
+        return floatval(str_replace(',', '.', str_replace('.', '', $value)));
+    }
+
     public function indexLocal(Request $request)
     {
         $ref_number = $request->get('ref_number');
@@ -280,7 +284,7 @@ class TransSalesController extends Controller
         $id = decrypt($id);
         // dd($id);
 
-        $data = TransSales::select('delivery_notes.id as id_delivery_notes', 'trans_sales.ref_number', 'trans_sales.date_invoice', 'trans_sales.date_transaction',
+        $data = TransSales::select('delivery_notes.id as id_delivery_notes', 'trans_sales.ref_number', 'trans_sales.date_invoice', 'trans_sales.date_transaction', 'trans_sales.tax', 'trans_sales.tax_sales',
                 'trans_sales.due_date', 'delivery_notes.dn_number', 'master_customers.name as customer_name', 'master_salesmen.name as salesman_name')
             ->leftjoin('delivery_notes', 'trans_sales.id_delivery_notes', 'delivery_notes.id')
             ->leftjoin('master_customers', 'delivery_notes.id_master_customers', 'master_customers.id')
@@ -379,7 +383,7 @@ class TransSalesController extends Controller
                 'id_delivery_notes' => $request->id_delivery_notes,
                 'due_date' => $request->due_date,
                 'tax' => $tax,
-                'tax_sales' => $request->tax_sales,
+                'tax_sales' => $this->parseLocaleNumber($request->tax_sales),
                 'created_by' => auth()->user()->email
             ]);
 
