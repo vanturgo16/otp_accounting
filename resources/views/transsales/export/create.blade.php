@@ -463,14 +463,11 @@
                     orderable: true,
                     searchable: true,
                     className: 'text-center',
-                    render: function(data, type, row) {
-                        var html;
+                    render: function (data, type, row) {
                         if (row.price == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = row.price;
+                            return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return html;
+                        return formatPrice(row.price);
                     },
                 },
                 {
@@ -479,14 +476,11 @@
                     orderable: true,
                     searchable: true,
                     className: 'text-center',
-                    render: function(data, type, row) {
-                        var html;
+                    render: function (data, type, row) {
                         if (row.total_price == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = row.total_price;
+                            return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return html;
+                        return formatPrice(row.total_price);
                     },
                 },
             ]
@@ -545,7 +539,8 @@
                             if(data == null || data == 0){
                                 $('#totalPrice').html(0);
                             } else {
-                                $('#totalPrice').html(data);
+                                // $('#totalPrice').html(data);
+                                $('#totalPrice').html(formatPrice(data));
                             }
                         }
                     });
@@ -553,6 +548,17 @@
             }
         });
     });
+    function formatPrice(value) {
+        if (!value) return '0';
+        // format with 3 decimals first
+        let formatted = Number(value).toLocaleString('id-ID', {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
+        });
+        // remove trailing zeros after comma
+        formatted = formatted.replace(/,?0+$/, '');
+        return formatted;
+    }
 </script>
 
 @endsection
