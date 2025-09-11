@@ -225,17 +225,12 @@
                 <tr>
                     <td style="width:15%;">
                         <div style="font-size: 10px;">
-                            No. PO
+                            No. KO / PO
                         </div>
                     </td>
                     <td style="width:45%;">
                         <div style="font-size: 10px;">
-                            : 
-                            @if($datas[0]->po_number == null)
-                            -
-                            @else
-                            {{ $datas[0]->po_number }}
-                            @endif
+                            : {{ $datas[0]->ko_number ?? $datas[0]->po_number ?? '-' }}
                         </div>
                     </td>
                     <td></td>

@@ -324,9 +324,7 @@ class TransSalesController extends Controller
 
     public function createLocal(Request $request)
     {
-        $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')
-            ->where('dn_number', 'like', 'DN%')
-            ->get();
+        $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')->get();
         $accountcodes = MstAccountCodes::get();
         $tax = MstPpn::where('tax_name', 'Trans. Sales (Local)')->where('is_active', 1)->first()->value;
 
@@ -337,9 +335,7 @@ class TransSalesController extends Controller
     }
     public function createExport(Request $request)
     {
-        $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')
-            ->where('dn_number', 'like', 'DE%')
-            ->get();
+        $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')->get();
         $accountcodes = MstAccountCodes::get();
         $tax = MstPpn::where('tax_name', 'Trans. Sales (Export)')->where('is_active', 1)->first()->value;
         $bankaccount = MstBankAccount::where('is_active', 1)->first();
@@ -516,7 +512,7 @@ class TransSalesController extends Controller
             ->first();
 
         $datas = DeliveryNoteDetail::select('sales_orders.so_number', 'sales_orders.type_product', 'sales_orders.qty',
-            'master_units.unit as unit', 'sales_orders.price', 'sales_orders.total_price', 'delivery_note_details.po_number',
+            'master_units.unit as unit', 'sales_orders.price', 'sales_orders.total_price', 'sales_orders.id_order_confirmations as ko_number', 'sales_orders.reference_number as po_number',
             DB::raw('
                 CASE 
                     WHEN sales_orders.type_product = "RM" THEN master_raw_materials.description 
