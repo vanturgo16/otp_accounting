@@ -35,13 +35,13 @@ class TransSalesController extends Controller
             ->where('delivery_notes.id', $id)
             ->first();
 
-        $tax = DeliveryNoteDetail::select('sales_orders.ppn')
-            ->leftjoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
+        $hasInclude = DeliveryNoteDetail::leftJoin('sales_orders', 'delivery_note_details.id_sales_orders', '=', 'sales_orders.id')
             ->where('delivery_note_details.id_delivery_notes', $id)
-            ->first();
-
+            ->where('sales_orders.ppn', 'Include')
+            ->exists();
+        
         if ($deliveryNote) {
-            $deliveryNote->ppn = $tax->ppn ?? null;
+            $deliveryNote->ppn = $hasInclude ? 'Include' : 'Exclude';
         }
 
         return json_encode($deliveryNote);
@@ -50,7 +50,7 @@ class TransSalesController extends Controller
     public function getSalesOrder(Request $request)
     {
         $datas = DeliveryNoteDetail::select('sales_orders.so_number', 'sales_orders.type_product', 'sales_orders.qty',
-                'master_units.unit as unit', 'sales_orders.price', 'sales_orders.total_price',
+                'master_units.unit as unit', 'sales_orders.ppn', 'sales_orders.price', 'sales_orders.total_price',
                 DB::raw('
                     CASE 
                         WHEN sales_orders.type_product = "RM" THEN master_raw_materials.description 
@@ -304,7 +304,8 @@ class TransSalesController extends Controller
         // dd($id);
 
         $data = TransSalesExport::select('delivery_notes.id as id_delivery_notes', 'trans_sales_export.ref_number', 'trans_sales_export.date_invoice', 'trans_sales_export.date_transaction',
-                'trans_sales_export.term', 'delivery_notes.dn_number', 'master_customers.name as customer_name', 'master_salesmen.name as salesman_name')
+                'trans_sales_export.term', 'delivery_notes.dn_number', 'master_customers.name as customer_name', 'master_salesmen.name as salesman_name',
+                'trans_sales_export.total_price', 'trans_sales_export.is_tax', 'trans_sales_export.tax', 'trans_sales_export.tax_sales')
             ->leftjoin('delivery_notes', 'trans_sales_export.id_delivery_notes', 'delivery_notes.id')
             ->leftjoin('master_customers', 'delivery_notes.id_master_customers', 'master_customers.id')
             ->leftjoin('master_salesmen', 'delivery_notes.id_master_salesman', 'master_salesmen.id')
@@ -316,10 +317,18 @@ class TransSalesController extends Controller
             ->where('general_ledgers.ref_number', $data->ref_number)
             ->get();
 
+        $totalAllAmount = $data->total_price ?? 0;
+        $ppn = $ppn_val = 0;
+        if($data->is_tax == 1){
+            $ppn = $data->tax ?? 0;
+            $ppn_val = $data->tax_sales ?? 0;
+        }
+        $total = $totalAllAmount + $ppn_val;
+
         //Audit Log
         $this->auditLogsShort('View Info Sales Transaction Export Ref Number ('. $data->ref_number . ')');
 
-        return view('transsales.export.info',compact('data', 'general_ledgers'));
+        return view('transsales.export.info',compact('data', 'general_ledgers', 'totalAllAmount', 'ppn', 'ppn_val', 'total'));
     }
 
     public function createLocal(Request $request)
@@ -364,6 +373,14 @@ class TransSalesController extends Controller
         $noUrutDN = substr($noUrutDN, -6);
         $refNumber = $this->generateRefNumber($noUrutDN);
 
+        if ($request->tax === "Exclude" || !isset($request->tax) || $request->tax === null || $request->tax === 'N/A'){
+            $tax = $tax_sales = null;
+        } else {
+            $tax = $request->tax;
+            $tax_sales = str_replace('.', '', $request->tax_sales);
+            $tax_sales = str_replace(',', '.', $tax_sales);
+        }
+
         $tax = ($request->tax === "Exclude" || !isset($request->tax) || $request->tax === null) ? null : $request->tax;
 
         DB::beginTransaction();
@@ -375,7 +392,7 @@ class TransSalesController extends Controller
                 'id_delivery_notes' => $request->id_delivery_notes,
                 'due_date' => $request->due_date,
                 'tax' => $tax,
-                'tax_sales' => $request->tax_sales,
+                'tax_sales' => $tax_sales,
                 'created_by' => auth()->user()->email
             ]);
 
@@ -405,13 +422,13 @@ class TransSalesController extends Controller
     }
     public function storeExport(Request $request)
     {
-        // dd($request->all());
+        dd($request->all());
         $request->validate([
             'date_invoice' => 'required',
             'date_transaction' => 'required',
             'id_delivery_notes' => 'required',
             'term' => 'required',
-            'tax' => 'required',
+            'total_price' => 'required',
             'addmore.*.account_code' => 'required',
             'addmore.*.nominal' => 'required',
             'addmore.*.type' => 'required',
@@ -419,8 +436,16 @@ class TransSalesController extends Controller
 
         $refNumber = $this->generateRefNumberExport();
         
+        $total_price = str_replace('.', '', $request->total_price);
+        $total_price = str_replace(',', '.', $total_price);
         $is_tax = 0;
-        if($request->is_tax == "on"){ $is_tax = 1; }
+        $tax = $tax_sales = null;
+        if($request->is_tax == "on"){ 
+            $is_tax = 1;
+            $tax = $request->tax;
+            $tax_sales = str_replace('.', '', $request->tax_sales);
+            $tax_sales = str_replace(',', '.', $tax_sales);
+        }
 
         DB::beginTransaction();
         try{
@@ -430,8 +455,10 @@ class TransSalesController extends Controller
                 'date_transaction' => $request->date_transaction,
                 'id_delivery_notes' => $request->id_delivery_notes,
                 'term' => $request->term,
-                'tax' => $request->tax,
+                'total_price' => $total_price,
                 'is_tax' => $is_tax,
+                'tax' => $tax,
+                'tax_sales' => $tax_sales,
                 'bank_account' => json_encode([
                     'bank_name' => $request->input('bank_name'),
                     'account_name' => $request->input('account_name'),
@@ -658,15 +685,11 @@ class TransSalesController extends Controller
         ->where('delivery_note_details.id_delivery_notes', $transSales->id_delivery_notes)
         ->get();
         
-        $totalAllAmount = 0;
-        foreach($datas as $item){
-            $totalAllAmount += $item->total_price;
-        }
-        $ppn = 0;
-        $ppn_val = 0;
+        $totalAllAmount = $transSales->total_price ?? 0;
+        $ppn = $ppn_val = 0;
         if($transSales->is_tax == 1){
-            $ppn = $transSales->tax;
-            $ppn_val = ($totalAllAmount * $ppn) / 100;
+            $ppn = $transSales->tax ?? 0;
+            $ppn_val = $transSales->tax_sales ?? 0;
         }
         $total = $totalAllAmount + $ppn_val;
 
