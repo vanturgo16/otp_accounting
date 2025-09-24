@@ -92,12 +92,32 @@
                                                 <th class="align-middle text-center">No.</th>
                                                 <th class="align-middle text-center">SO Number</th>
                                                 <th class="align-middle text-center">Product</th>
-                                                <th class="align-middle text-center">Qty</th>
-                                                <th class="align-middle text-center">Unit</th>
+                                                <th class="align-middle text-center">Qty (Unit)</th>
+                                                <th class="align-middle text-center">Tax</th>
                                                 <th class="align-middle text-center">Price</th>
                                                 <th class="align-middle text-center">Total Price</th>
                                             </tr>
                                         </thead>
+                                    </table>
+                                </div>
+                                <div class="col-lg-6 mt-4">
+                                </div>
+                                <div class="col-lg-6 mt-4">
+                                    <table style="width: 100%">
+                                        <tbody>
+                                            <tr>
+                                                <td class="text-right">
+                                                    <label class="form-label font-weight-bold" style="text-align: right; display: block;">Total All Price</label>
+                                                    <label class="form-label font-weight-bold" style="text-align: right; display: block;">PPN {{ $ppn }}%</label>
+                                                    <label class="form-label font-weight-bold" style="text-align: right; display: block;">Total</label>
+                                                </td>
+                                                <td class="text-right">
+                                                    <label class="form-label" style="text-align: right; display: block;">: Rp. <span id="totalPrice">{{ number_format($totalAllAmount, 2, ',', '.') }}</span></label>
+                                                    <label class="form-label" style="text-align: right; display: block;">: Rp. <span id="totalPrice">{{ number_format($ppn_val, 2, ',', '.') }}</span></label>
+                                                    <label class="form-label" style="text-align: right; display: block;">: Rp. <span id="totalPrice">{{ number_format($total, 2, ',', '.') }}</span></label>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                 </div>
                             </div>
@@ -225,29 +245,17 @@
                     searchable: true,
                     className: 'text-center',
                     render: function(data, type, row) {
-                        var html;
-                        if (row.qty == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = row.qty;
-                        }
-                        return html;
+                        return (data ? data : '-') + ' (' + (row.unit ? row.unit : '-') + ')';
                     },
                 },
                 {
-                    data: 'unit',
-                    name: 'unit',
+                    data: 'ppn',
+                    name: 'ppn',
                     orderable: true,
                     searchable: true,
                     className: 'text-center',
                     render: function(data, type, row) {
-                        var html;
-                        if (row.unit == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = row.unit;
-                        }
-                        return html;
+                        return (data ? data : '-');
                     },
                 },
                 {
@@ -256,14 +264,11 @@
                     orderable: true,
                     searchable: true,
                     className: 'text-center',
-                    render: function(data, type, row) {
-                        var html;
+                    render: function (data, type, row) {
                         if (row.price == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = row.price;
+                            return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return html;
+                        return formatPrice(row.price);
                     },
                 },
                 {
@@ -272,19 +277,28 @@
                     orderable: true,
                     searchable: true,
                     className: 'text-center',
-                    render: function(data, type, row) {
-                        var html;
+                    render: function (data, type, row) {
                         if (row.total_price == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = row.total_price;
+                            return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return html;
+                        return formatPrice(row.total_price);
                     },
                 },
             ]
         });
     });
+    
+    function formatPrice(value) {
+        if (!value) return '0';
+        // format with 3 decimals first
+        let formatted = Number(value).toLocaleString('id-ID', {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
+        });
+        // remove trailing zeros after comma
+        formatted = formatted.replace(/,?0+$/, '');
+        return formatted;
+    }
 </script>
 
 @endsection
