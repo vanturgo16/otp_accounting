@@ -92,19 +92,6 @@
                                 </div>
                                 <div class="col-lg-6 mb-3"></div>
                                 <hr>
-                                
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Tax (%)</label><label style="color: darkred">*</label>
-                                    <input type="text" class="form-control" name="tax" value="{{ $tax }}" style="background-color:#EAECF4" required readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Tax</label></label>
-                                    <br>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="is_tax">
-                                        <label class="form-check-label">Need Tax PPN? ({{ $tax }} %)</label>
-                                    </div>
-                                </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
@@ -137,8 +124,8 @@
                                                         <th class="align-middle text-center">No.</th>
                                                         <th class="align-middle text-center">SO Number</th>
                                                         <th class="align-middle text-center">Product</th>
-                                                        <th class="align-middle text-center">Qty</th>
-                                                        <th class="align-middle text-center">Unit</th>
+                                                        <th class="align-middle text-center">Qty (Unit)</th>
+                                                        <th class="align-middle text-center">Tax</th>
                                                         <th class="align-middle text-center">Price</th>
                                                         <th class="align-middle text-center">Total Price</th>
                                                     </tr>
@@ -157,14 +144,47 @@
                                                         </td>
                                                         <td class="text-right">
                                                             <label class="form-label" style="text-align: right; display: block;">: <span id="currency">IDR</span> <span id="totalPrice">0</span></label>
+                                                            <input type="hidden" name="total_price" value="0">
                                                         </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
+
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3"></div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="row">
+                                                <div class="col-12 mb-3">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" name="is_tax" disabled>
+                                                        <label class="form-check-label">Need Tax PPN?</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4 mb-3">
+                                                    <label class="form-label" for="tax">Tax (%)</label>
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control" name="tax" id="tax" value="0" placeholder="Tax.." style="background-color:#EAECF4" required readonly>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text" style="background-color:#EAECF4">%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-8 mb-3">
+                                                    <label class="form-label">Tax Amount</label><label style="color: darkred">*</label>
+                                                    <input type="text" class="form-control rupiah-input" name="tax_sales" value="0" style="background-color:#EAECF4" required readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
+                            <script>
+                                
+                            </script>
 
                             <div class="row">
                                 <div class="col-lg-12 mt-3">
@@ -372,6 +392,12 @@
 </style>
 
 <script>
+    let totalPriceGlobal = 0;
+    var initiateppn = '{{ $tax }}';
+    var isTax = $('input[name="is_tax"]');
+    var tax = $('input[name="tax"]');
+    var taxAmount = $('input[name="tax_sales"]');
+
     $(function() {
         var data = {id_delivery_notes: ''};
         var dataTable = $('#server-side-table').DataTable({
@@ -432,29 +458,17 @@
                     searchable: true,
                     className: 'text-center',
                     render: function(data, type, row) {
-                        var html;
-                        if (row.qty == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = row.qty;
-                        }
-                        return html;
+                        return (data ? data : '-') + ' (' + (row.unit ? row.unit : '-') + ')';
                     },
                 },
                 {
-                    data: 'unit',
-                    name: 'unit',
+                    data: 'ppn',
+                    name: 'ppn',
                     orderable: true,
                     searchable: true,
                     className: 'text-center',
                     render: function(data, type, row) {
-                        var html;
-                        if (row.unit == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = row.unit;
-                        }
-                        return html;
+                        return (data ? data : '-');
                     },
                 },
                 {
@@ -494,60 +508,52 @@
             $('#sales_name').val("");
             $('#currency').html("IDR");
             $('#totalPrice').html(0);
+            $('input[name="total_price"]').val(0);
             var id_delivery_notes = $(this).val();
+
+            isTax.prop('checked', false);
+            isTax.prop('disabled', true);
+            tax.val(0);
+            taxAmount.val(0);
+
             if(id_delivery_notes == ""){
                 $('#customer_name').val("");
                 $('#sales_name').val("");
                 $('#totalPrice').html(0);
             } else {
-                var url = '{{ route("transsales.getdeliverynote", ":id") }}';
-                url = url.replace(':id', id_delivery_notes);
+                let urlTotal = '{{ route("transsales.gettotalprice", ":id") }}'.replace(':id', id_delivery_notes);
+                let urlDN    = '{{ route("transsales.getdeliverynote", ":id") }}'.replace(':id', id_delivery_notes);
+
                 if (id_delivery_notes) {
                     $.ajax({
-                        url: url,
+                        url: urlTotal,
                         type: "GET",
                         dataType: "json",
-                        success: function(data) {
-                            if(data.customer_name == null){
-                                $('#customer_name').val('-');
-                            } else {
-                                $('#customer_name').val(data.customer_name);
-                            }
+                        success: function(totalPrice) {
+                            totalPriceGlobal = parseFloat(totalPrice) || 0;
+                            // show total price
+                            $('#totalPrice').html(totalPrice ? formatPrice(totalPrice) : 0);
+                            $('input[name="total_price"]').val(totalPrice ? formatPrice(totalPrice) : 0);
+                            isTax.prop('disabled', false);
 
-                            if(data.salesman_name == null){
-                                $('#sales_name').val('-');
-                            } else {
-                                $('#sales_name').val(data.salesman_name);
-                            }
-
-                            if(data.currency_code == null){
-                                $('#currency').html("IDR");
-                            } else {
-                                $('#currency').html(data.currency_code);
-                            }
-                        }
-                    });
-                }
-                var url2 = '{{ route("transsales.gettotalprice", ":id") }}';
-                url2 = url2.replace(':id', id_delivery_notes);
-                if (url2) {
-                    $.ajax({
-                        url: url2,
-                        type: "GET",
-                        dataType: "json",
-                        success: function(data) {
-                            if(data == null || data == 0){
-                                $('#totalPrice').html(0);
-                            } else {
-                                // $('#totalPrice').html(data);
-                                $('#totalPrice').html(formatPrice(data));
-                            }
+                            // now get delivery note after we know totalPrice
+                            $.ajax({
+                                url: urlDN,
+                                type: "GET",
+                                dataType: "json",
+                                success: function(data) {
+                                    $('#customer_name').val(data.customer_name ?? '-');
+                                    $('#sales_name').val(data.salesman_name ?? '-');
+                                    $('#currency').html(data.currency_code ?? 'IDR');
+                                }
+                            });
                         }
                     });
                 }
             }
         });
     });
+
     function formatPrice(value) {
         if (!value) return '0';
         // format with 3 decimals first
@@ -559,6 +565,23 @@
         formatted = formatted.replace(/,?0+$/, '');
         return formatted;
     }
+
+    $('input[name="is_tax"]').on('click', function () {
+        if ($(this).is(':checked')) {
+            tax.val(initiateppn);
+            let initiateAmount = (initiateppn / 100) * (totalPriceGlobal ?? 0);
+            taxAmount.val(formatPrice(initiateAmount));
+        } else {
+            tax.val(0);
+            taxAmount.val(0);
+        }
+    });
+
+    $('input[name="tax"]').on('input', function () {
+        let ppn = parseFloat($(this).val()) || 0;
+        let newAmount = (ppn / 100) * totalPriceGlobal;
+        $('input[name="tax_sales"]').val(formatPrice(newAmount));
+    });
 </script>
 
 @endsection

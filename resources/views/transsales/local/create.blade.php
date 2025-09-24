@@ -70,14 +70,6 @@
                                         <div class="col-lg-6 mb-3">
                                         </div>
                                         <div class="col-lg-6 mb-3">
-                                            <label class="form-label" for="tax">Tax (%)</label>
-                                            <input type="number" class="form-control" name="tax" id="tax" value="" placeholder="Input Tax.." style="background-color:#EAECF4" required readonly>
-                                        </div>
-                                        <div class="col-lg-6 mb-3">
-                                            <label class="form-label">Tax Sales</label><label style="color: darkred">*</label>
-                                            <input type="text" class="form-control rupiah-input" style="width: 100%" placeholder="Input Amount.." name="tax_sales" value="" required>
-                                        </div>
-                                        <div class="col-lg-6 mb-3">
                                             <label class="form-label">Customer Name</label>
                                             <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
                                         </div>
@@ -93,8 +85,8 @@
                                                         <th class="align-middle text-center">No.</th>
                                                         <th class="align-middle text-center">SO Number</th>
                                                         <th class="align-middle text-center">Product</th>
-                                                        <th class="align-middle text-center">Qty</th>
-                                                        <th class="align-middle text-center">Unit</th>
+                                                        <th class="align-middle text-center">Qty (Unit)</th>
+                                                        <th class="align-middle text-center">Tax</th>
                                                         <th class="align-middle text-center">Price</th>
                                                         <th class="align-middle text-center">Total Price</th>
                                                     </tr>
@@ -117,6 +109,23 @@
                                                     </tr>
                                                 </tbody>
                                             </table>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3"></div>
+                                        <div class="col-lg-2 mb-3">
+                                            <label class="form-label" for="tax">Tax (%)</label><label style="color: darkred">*</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" name="tax" id="tax" value="" placeholder="Tax.." style="background-color:#EAECF4" required readonly>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text" style="background-color:#EAECF4">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4 mb-3">
+                                            <label class="form-label">Tax Amount</label><label style="color: darkred">*</label>
+                                            <input type="text" class="form-control rupiah-input" placeholder="Input Amount.." name="tax_sales" value="" style="width: 100%; background-color:#EAECF4" required readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -233,7 +242,6 @@
     document.getElementById('formstore').addEventListener('submit', function(event) {
         event.preventDefault();
         let totals = calculateTotals();
-        let totalPrice = $('#totalPrice').html();
 
         if (totals.debitTotal !== totals.kreditTotal) {
             let modalBodyContent = `
@@ -265,7 +273,7 @@
             var myModal = new bootstrap.Modal(document.getElementById('alert'));
             myModal.show();
         } else {
-            if(totals.debitTotal == totalPrice){
+            if(totals.debitTotal == totalPriceGlobal){
                 var submitButton = this.querySelector('button[name="sb"]');
                 submitButton.disabled = true;
                 submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
@@ -285,7 +293,7 @@
                                 <tr>
                                     <th class="align-top text-center">${totals.debitTotal.toLocaleString('id-ID')}</th>
                                     <th class="align-top text-center text-danger">!=</th>
-                                    <th class="align-top text-center">${totalPrice}</th>
+                                    <th class="align-top text-center">${totalPriceGlobal}</th>
                                 </tr>
                             </thead>
                         </table>
@@ -354,6 +362,7 @@
 </style>
 
 <script>
+    let totalPriceGlobal = 0;
     $(function() {
         var data = {id_delivery_notes: ''};
         var dataTable = $('#server-side-table').DataTable({
@@ -414,29 +423,17 @@
                     searchable: true,
                     className: 'text-center',
                     render: function(data, type, row) {
-                        var html;
-                        if (row.qty == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = row.qty;
-                        }
-                        return html;
+                        return (data ? data : '-') + ' (' + (row.unit ? row.unit : '-') + ')';
                     },
                 },
                 {
-                    data: 'unit',
-                    name: 'unit',
+                    data: 'ppn',
+                    name: 'ppn',
                     orderable: true,
                     searchable: true,
                     className: 'text-center',
                     render: function(data, type, row) {
-                        var html;
-                        if (row.unit == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = row.unit;
-                        }
-                        return html;
+                        return (data ? data : '-');
                     },
                 },
                 {
@@ -468,7 +465,7 @@
             ]
         });
 
-        var initiateppn = '{{ $tax }}';
+        let initiateppn = parseFloat('{{ $tax }}') || 0;
         $('select[name="id_delivery_notes"]').on('change', function() {
             data.id_delivery_notes = $(this).val();
             dataTable.ajax.reload();
@@ -482,48 +479,53 @@
                 $('#sales_name').val("");
                 $('#totalPrice').html(0);
 
-                $('input[name="tax"]').val("").prop('readonly', true).css('background-color', '#EAECF4');
-                $('input[name="tax"]').prop('required', false);
-
+                $('input[name="tax"]').val("N/A")
+                    .prop('readonly', true).css('background-color', '#EAECF4')
+                    .attr('placeholder', 'N/A');
+                $('input[name="tax_sales"]').val(0)
+                    .prop('readonly', true).css('background-color', '#EAECF4')
+                    .attr('placeholder', 'N/A');
             } else {
-                var url = '{{ route("transsales.getdeliverynote", ":id") }}';
-                url = url.replace(':id', id_delivery_notes);
+                let urlTotal = '{{ route("transsales.gettotalprice", ":id") }}'.replace(':id', id_delivery_notes);
+                let urlDN    = '{{ route("transsales.getdeliverynote", ":id") }}'.replace(':id', id_delivery_notes);
+
                 if (id_delivery_notes) {
                     $.ajax({
-                        url: url,
+                        url: urlTotal,
                         type: "GET",
                         dataType: "json",
-                        success: function(data) {
-                            $('#customer_name').val(data.customer_name ?? '-');
-                            $('#sales_name').val(data.salesman_name ?? '-');
+                        success: function(totalPrice) {
+                            totalPriceGlobal = parseFloat(totalPrice) || 0;
+                            // show total price
+                            $('#totalPrice').html(totalPrice ? formatPrice(totalPrice) : 0);
 
-                            if (data.ppn === "Include") {
-                                $('input[name="tax"]').val(initiateppn).prop('readonly', false).css('background-color', '');
-                                $('input[name="tax"]').prop('required', true);
-                            } else if (data.ppn === "Exclude") {
-                                $('input[name="tax"]').val("Exclude").prop('readonly', true).css('background-color', '#EAECF4').attr('placeholder', 'N/A');
-                                $('input[name="tax"]').prop('required', false);
-                            } else {
-                                $('input[name="tax"]').val("").prop('readonly', true).css('background-color', '#EAECF4').attr('placeholder', 'N/A');
-                                $('input[name="tax"]').prop('required', false);
-                            }
-                        }
-                    });
-                }
-                var url2 = '{{ route("transsales.gettotalprice", ":id") }}';
-                url2 = url2.replace(':id', id_delivery_notes);
-                if (url2) {
-                    $.ajax({
-                        url: url2,
-                        type: "GET",
-                        dataType: "json",
-                        success: function(data) {
-                            if(data == null || data == 0){
-                                $('#totalPrice').html(0);
-                            } else {
-                                // $('#totalPrice').html(data);
-                                $('#totalPrice').html(formatPrice(data));
-                            }
+                            // now get delivery note after we know totalPrice
+                            $.ajax({
+                                url: urlDN,
+                                type: "GET",
+                                dataType: "json",
+                                success: function(data) {
+                                    $('#customer_name').val(data.customer_name ?? '-');
+                                    $('#sales_name').val(data.salesman_name ?? '-');
+
+                                    if (data.ppn === "Include") {
+                                        let initiateAmount = (initiateppn / 100) * (totalPrice ?? 0);
+                                        $('input[name="tax"]').val(initiateppn)
+                                            .prop('readonly', false).css('background-color', '')
+                                            .attr('placeholder', 'Tax..');
+                                        $('input[name="tax_sales"]').val(formatPrice(initiateAmount))
+                                            .prop('readonly', false).css('background-color', '')
+                                            .attr('placeholder', 'Input Amount..');
+                                    } else {
+                                        $('input[name="tax"]').val("N/A")
+                                            .prop('readonly', true).css('background-color', '#EAECF4')
+                                            .attr('placeholder', 'N/A');
+                                        $('input[name="tax_sales"]').val(0)
+                                            .prop('readonly', true).css('background-color', '#EAECF4')
+                                            .attr('placeholder', 'N/A');
+                                    }
+                                }
+                            });
                         }
                     });
                 }
@@ -542,6 +544,12 @@
         formatted = formatted.replace(/,?0+$/, '');
         return formatted;
     }
+
+    $('input[name="tax"]').on('input', function () {
+        let ppn = parseFloat($(this).val()) || 0;
+        let newAmount = (ppn / 100) * totalPriceGlobal;
+        $('input[name="tax_sales"]').val(formatPrice(newAmount));
+    });
 </script>
 
 @endsection
