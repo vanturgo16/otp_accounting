@@ -422,7 +422,7 @@ class TransSalesController extends Controller
     }
     public function storeExport(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
         $request->validate([
             'date_invoice' => 'required',
             'date_transaction' => 'required',
