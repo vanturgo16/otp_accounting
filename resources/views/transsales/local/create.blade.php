@@ -60,22 +60,32 @@
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
-                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
+                                            {{-- <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
                                                 <option value="" selected>-- Select --</option>
                                                 @foreach($deliveryNotes as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->dn_number." - ". $item->status }}</option>
+                                                    <option value="{{ $item->id }}">{{ $item->dn_number." || ". $item->date . " || ". $item->status ." || Ref : ". $item->reference_number ?? '-' }}</option>
+                                                @endforeach
+                                            </select> --}}
+                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
+                                                <option value="" selected disabled>-- Select --</option>
+                                                @foreach($deliveryNotes as $item)
+                                                    <option value="{{ $item->id }}">
+                                                        {{ $item->dn_number }} || {{ \Carbon\Carbon::parse($item->date)->format('d M Y') }} || 
+                                                        Status: {{ ucfirst($item->status) }} || Ref: {{ $item->reference_number ?? '-' }}
+                                                    </option>
                                                 @endforeach
                                             </select>
+
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Customer Name</label>
-                                            <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Sales Name</label>
-                                            <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
                                         </div>
                                         
                                         <div class="col-12">

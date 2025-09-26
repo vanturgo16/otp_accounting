@@ -286,7 +286,8 @@
                     <td style="width:35%; font-size: 11px;">
                         PT. OLEFINA TIFAPLAS POLIKEMINDO
                         
-                        <div class="card" style="border:0px; border-bottom: 1.5px solid black; width: 100%; height: 80px;"></div>   
+                        <div style="margin-top: 90px"></div>
+                        <hr style="border: 1px solid black;">   
                     </td>
                 </tr>
             </tbody>

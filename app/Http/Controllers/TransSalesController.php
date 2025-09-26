@@ -333,7 +333,13 @@ class TransSalesController extends Controller
 
     public function createLocal(Request $request)
     {
-        $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')->get();
+        // $deliveryNotes = DeliveryNote::select('id', 'dn_number', 'status')->get();
+
+        $deliveryNotes = DeliveryNote::select('delivery_notes.id', 'delivery_notes.dn_number', 'delivery_notes.date', 'sales_orders.reference_number', 'delivery_notes.status')
+            ->leftJoin('sales_orders', 'delivery_notes.id_sales_orders', 'sales_orders.id')
+            ->get();
+
+        // dd($deliveryNotes);
         $accountcodes = MstAccountCodes::get();
         $tax = MstPpn::where('tax_name', 'Trans. Sales (Local)')->where('is_active', 1)->first()->value;
 
