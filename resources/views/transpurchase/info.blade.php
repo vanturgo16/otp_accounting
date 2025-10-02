@@ -32,8 +32,8 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-6 mb-3">
-                                <label class="form-label mb-0">Ref Number</label>
-                                <br><span class="badge bg-info">{{ $data->ref_number }}</span>
+                                <label class="form-label mb-0">Ref. Number</label>
+                                <br><h4><span class="badge bg-info">{{ $data->ref_number }}</span></h4>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label mb-0">Transaction Date</label>
@@ -177,9 +177,9 @@
                                             <table class="table table-bordered" id="dynamicTable">
                                                 <thead>
                                                     <tr>
-                                                        <th>Account Code</th>
-                                                        <th>Nominal</th>
-                                                        <th>Debit / Kredit</th>
+                                                        <th class="text-center">Account Code</th>
+                                                        <th class="text-center">Nominal</th>
+                                                        <th class="text-center">Debit / Kredit</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -188,10 +188,14 @@
                                                         <td>
                                                             {{ $item->account_code." - ".$item->account_name }}
                                                         </td>
-                                                        <td>
-                                                            {{ number_format($item->amount, 3, ',', '.') }}
+                                                        <td class="text-end">
+                                                            @php
+                                                                $formatted = number_format($item->amount, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
                                                         </td>
-                                                        <td>
+                                                        <td class="text-center">
                                                             @if($item->transaction == 'D')
                                                                 <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
                                                             @else

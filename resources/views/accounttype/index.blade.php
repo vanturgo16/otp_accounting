@@ -4,72 +4,11 @@
 
 <div class="page-content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <div class="page-title-left">
-                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Account Type</button>
-                        {{-- Modal Add --}}
-                        <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-top" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Add New Account Type</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ route('accounttype.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="modal-body">
-                                            <div class="row">
-                                                <div class="col-lg-12">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Account Type Code</label><label style="color: darkred">*</label>
-                                                        <input class="form-control" name="account_type_code" type="text" value="" placeholder="Input Account Type Code.." required>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-12">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Account Type Name</label><label style="color: darkred">*</label>
-                                                        <input class="form-control" name="account_type_name" type="text" value="" placeholder="Input Account Type.." required>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-plus-box label-icon"></i>Add</button>
-                                        </div>
-                                    </form>
-                                    <script>
-                                        document.getElementById('formadd').addEventListener('submit', function(event) {
-                                            if (!this.checkValidity()) {
-                                                event.preventDefault(); // Prevent form submission if it's not valid
-                                                return false;
-                                            }
-                                            var submitButton = this.querySelector('button[name="sb"]');
-                                            submitButton.disabled = true;
-                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
-                                            return true; // Allow form submission
-                                        });
-                                    </script>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master</a></li>
-                            <li class="breadcrumb-item active">Account Type</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         @include('layouts.alert')
 
         <!-- Modal for bulk delete confirmation -->
-        <div class="modal fade" id="deleteselected" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        {{-- <div class="modal fade" id="deleteselected" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-top" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -87,9 +26,9 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
         <!-- Modal for bulk deactive confirmation -->
-        <div class="modal fade" id="deactivateselected" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        {{-- <div class="modal fade" id="deactivateselected" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-top" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -107,7 +46,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
         <!-- Modal Search -->
         <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
@@ -202,31 +141,91 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header text-center py-3">
-                        <h5 class="mb-0"><b>Master Account Type</b></h5>
-                        List of 
-                        @if($account_type_code != null)
-                            (Code<b> - {{ $account_type_code }}</b>)
-                        @endif
-                        @if($account_type_name != null)
-                            (Account Type<b> - {{ $account_type_name }}</b>)
-                        @endif
-                        @if($status != null)
-                            (Status<b> - {{ $status }}</b>)
-                        @endif
-                        @if($searchDate == 'Custom')
-                            (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
-                        @else
-                            (<b>All Date</b>)
-                        @endif 
+                    <div class="card-header py-3">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Account Type</button>
+                                {{-- Modal Add --}}
+                                <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-top" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="staticBackdropLabel">Add New Account Type</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form action="{{ route('accounttype.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="col-lg-12">
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Account Type Code</label><label style="color: darkred">*</label>
+                                                                <input class="form-control" name="account_type_code" type="text" value="" placeholder="Input Account Type Code.." required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-12">
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Account Type Name</label><label style="color: darkred">*</label>
+                                                                <input class="form-control" name="account_type_name" type="text" value="" placeholder="Input Account Type.." required>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-plus-box label-icon"></i>Add</button>
+                                                </div>
+                                            </form>
+                                            <script>
+                                                document.getElementById('formadd').addEventListener('submit', function(event) {
+                                                    if (!this.checkValidity()) {
+                                                        event.preventDefault(); // Prevent form submission if it's not valid
+                                                        return false;
+                                                    }
+                                                    var submitButton = this.querySelector('button[name="sb"]');
+                                                    submitButton.disabled = true;
+                                                    submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+                                                    return true; // Allow form submission
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="text-center">
+                                    <h5 class="fw-bold">Master Account Type</h5>
+                                </div>
+                            </div>
+                            <div class="col-lg-4"></div>
+                            <div class="col-lg-12">
+                                <div class="text-center">
+                                    List of 
+                                    @if($account_type_code != null)
+                                        (Code<b> - {{ $account_type_code }}</b>)
+                                    @endif
+                                    @if($account_type_name != null)
+                                        (Account Type<b> - {{ $account_type_name }}</b>)
+                                    @endif
+                                    @if($status != null)
+                                        (Status<b> - {{ $status }}</b>)
+                                    @endif
+                                    @if($searchDate == 'Custom')
+                                        (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
+                                    @else
+                                        (<b>All Date</b>)
+                                    @endif 
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
                             <thead>
                                 <tr>
-                                    <th class="align-middle text-center">
+                                    {{-- <th class="align-middle text-center">
                                         <input type="checkbox" id="checkAllRows">
-                                    </th>
+                                    </th> --}}
                                     <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Code</th>
                                     <th class="align-middle text-center">Account Type</th>
@@ -259,8 +258,6 @@
             };
         var requestData = Object.assign({}, data);
         requestData.flag = 1;
-        
-        // <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteselected"><i class="mdi mdi-trash-can"></i> Delete Selected</button></li>
 
         var dataTable = $('#server-side-table').DataTable({
             dom: '<"top d-flex"<"position-absolute top-0 end-0 d-flex"fl><"pull-left col-sm-12 col-md-5"B>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>><"clear:both">',
@@ -269,23 +266,25 @@
                 '<button class="btn btn-sm btn-light me-1" type="button" id="custom-button" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Sort & Filter</button>' +
                 '<input class="form-control me-1" id="custom-search-input" type="text" placeholder="Search...">' +
                 '</div>');
-                $('.top').prepend(
-                    `<div class='pull-left'>
-                        <div class="btn-group mb-2" style="margin-right: 10px;"> <!-- Added inline style for margin -->
-                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="mdi mdi-checkbox-multiple-marked-outline"></i> Bulk Actions <i class="fas fa-caret-down"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deactivateselected"><i class="mdi mdi-close-circle"></i> Deactive Selected</button></li>
-                            </ul>
-                        </div>
-                    </div>`
-                );
+                // $('.top').prepend(
+                //     `<div class='pull-left'>
+                //         <div class="btn-group mb-2" style="margin-right: 10px;"> <!-- Added inline style for margin -->
+                //             <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                //                 <i class="mdi mdi-checkbox-multiple-marked-outline"></i> Bulk Actions <i class="fas fa-caret-down"></i>
+                //             </button>
+                //             <ul class="dropdown-menu">
+                //                 <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deactivateselected"><i class="mdi mdi-close-circle"></i> Deactive Selected</button></li>
+                //                 <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteselected"><i class="mdi mdi-trash-can"></i> Delete Selected</button></li>
+                //             </ul>
+                //         </div>
+                //     </div>`
+                // );
             },
             buttons: [
                 {
                     extend: "excel",
-                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
+                    text: '<i class="mdi mdi-file-excel label-icon"></i> Export to Excel',
+                    className: 'btn btn-light waves-effect btn-label waves-light mb-2',
                     action: function (e, dt, button, config) {
                         $.ajax({
                             url: url,
@@ -332,13 +331,14 @@
                 type: 'GET',
                 data: data
             },
-            columns: [{
-                    data: 'bulk-action',
-                    name: 'bulk-action',
-                    className: 'align-middle text-center',
-                    orderable: false,
-                    searchable: false
-                },
+            columns: [
+                // {
+                //     data: 'bulk-action',
+                //     name: 'bulk-action',
+                //     className: 'align-top text-center',
+                //     orderable: false,
+                //     searchable: false
+                // },
                 {
                 data: null,
                     render: function(data, type, row, meta) {
@@ -346,26 +346,26 @@
                     },
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'account_type_code',
                     name: 'account_type_code',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center'
+                    className: 'align-top'
                 },
                 {
                     data: 'account_type_name',
                     name: 'account_type_name',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center'
+                    className: 'align-top'
                 },
                 {
                     data: 'is_active',
                     orderable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     render: function(data, type, row) {
                         var html
                         if(row.is_active == 1){
@@ -381,14 +381,14 @@
                     name: 'action',
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
             ],
-            bAutoWidth: false,
-            columnDefs: [{
-                width: "1%",
-                targets: [0]
-            }]
+            // bAutoWidth: false,
+            // columnDefs: [{
+            //     width: "1%",
+            //     targets: [0]
+            // }]
         });
 
         $(document).on('keyup', '#custom-search-input', function () {

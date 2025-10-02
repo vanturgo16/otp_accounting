@@ -21,6 +21,7 @@ class MstAccountCodesController extends Controller
         $account_name = $request->get('account_name');
         $id_master_account_types = $request->get('id_master_account_types');
         $status = $request->get('status');
+        $is_used = $request->get('is_used');
         $searchDate = $request->get('searchDate');
         $startdate = $request->get('startdate');
         $enddate = $request->get('enddate');
@@ -30,11 +31,11 @@ class MstAccountCodesController extends Controller
         $acctypes = MstAccountTypes::get();
 
         $datas = MstAccountCodes::select(
-                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'master_account_codes.*', 'master_account_types.account_type_code', 'master_account_types.account_type_name'
             )
             ->leftjoin('master_account_types', 'master_account_codes.id_master_account_types', 'master_account_types.id')
-            ->orderBy('master_account_codes.created_at','desc');
+            ->orderBy('master_account_codes.id','desc')
+            ->orderBy('master_account_codes.id_master_account_types');
 
         if($account_code != null){
             $datas = $datas->where('account_code', 'like', '%'.$account_code.'%');
@@ -48,8 +49,12 @@ class MstAccountCodesController extends Controller
         if($status != null){
             $datas = $datas->where('master_account_codes.is_active', $status);
         }
+        if($is_used != null){
+            $statusIsUsed = $is_used == 0 ? null : 1;
+            $datas = $datas->where('master_account_codes.is_used', $statusIsUsed);
+        }
         if($startdate != null && $enddate != null){
-            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+            $datas = $datas->whereDate('master_account_codes.created_at','>=',$startdate)->whereDate('master_account_codes.created_at','<=',$enddate);
         }
         
         if($request->flag != null){
@@ -65,11 +70,11 @@ class MstAccountCodesController extends Controller
                 ->addColumn('action', function ($data) use ($acctypes){
                     return view('accountcode.action', compact('data', 'acctypes'));
                 })
-                ->addColumn('bulk-action', function ($data) {
-                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
-                    return $checkBox;
-                })
-                ->rawColumns(['bulk-action'])
+                // ->addColumn('bulk-action', function ($data) {
+                //     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                //     return $checkBox;
+                // })
+                // ->rawColumns(['bulk-action'])
                 ->make(true);
         }
         
@@ -77,13 +82,11 @@ class MstAccountCodesController extends Controller
         $this->auditLogsShort('View List Mst Account Code');
 
         return view('accountcode.index',compact('datas', 'acctypes',
-            'account_code', 'account_name', 'id_master_account_types', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'account_code', 'account_name', 'id_master_account_types', 'status', 'is_used', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)
     {
-        // dd($request->all());
-
         $request->validate([
             'account_code' => 'required',
             'account_name' => 'required',
@@ -125,19 +128,18 @@ class MstAccountCodesController extends Controller
         $id = decrypt($id);
 
         $data = MstAccountCodes::where('id', $id)->first();
-        // $acctypes = MstAccountTypes::where('is_active', 1)->get();
-        $acctypes = MstAccountTypes::get();
+        $acctypesActive = MstAccountTypes::where('is_active', 1)->get();
+        $acctypesUsed = MstAccountTypes::where('id', $data->id_master_account_types)->first();
+        $acctypes = $acctypesActive->merge(collect([$acctypesUsed]))->unique('id')->values();
 
         //Audit Log
         $this->auditLogsShort('View Edit Account Code ID ='. $id);
 
-        return view('accountcode.edit',compact('data', 'acctypes'));
+        return view('accountcode.edit',compact('data', 'acctypesUsed', 'acctypes'));
     }
 
     public function update(Request $request, $id)
     {
-        // dd($request->all());
-
         $id = decrypt($id);
 
         $request->validate([
@@ -189,21 +191,18 @@ class MstAccountCodesController extends Controller
         $id = decrypt($id);
 
         DB::beginTransaction();
-        try{
-            $data = MstAccountCodes::where('id', $id)->update([
-                'is_active' => 1
-            ]);
+        try {
+            $accountCode = MstAccountCodes::findOrFail($id);
+            $accountCode->update(['is_active' => 1]);
 
-            $name = MstAccountCodes::where('id', $id)->first();
-
-            //Audit Log
-            $this->auditLogsShort('Activate Account Type ('. $name->account_name . ')');
+            // Audit Log
+            $this->auditLogsShort('Activate Account Code (' . $accountCode->account_name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Account Code ' . $name->account_name]);
-        } catch (Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Account Code ' . $name->account_name .'!']);
+            return redirect()->back()->with('success', 'Success Activate Account Code ' . $accountCode->account_name);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail', 'Failed to Activate Account Code!');
         }
     }
 
@@ -212,21 +211,18 @@ class MstAccountCodesController extends Controller
         $id = decrypt($id);
 
         DB::beginTransaction();
-        try{
-            $data = MstAccountCodes::where('id', $id)->update([
-                'is_active' => 0
-            ]);
+        try {
+            $accountCode = MstAccountCodes::findOrFail($id);
+            $accountCode->update(['is_active' => 0]);
 
-            $name = MstAccountCodes::where('id', $id)->first();
-            
-            //Audit Log
-            $this->auditLogsShort('Deactivate Account Code ('. $name->account_name . ')');
+            // Audit Log
+            $this->auditLogsShort('Deactivate Account Code (' . $accountCode->account_name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Account Code ' . $name->account_name]);
-        } catch (Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Account Code ' . $name->account_name .'!']);
+            return redirect()->back()->with('success', 'Success Deactivate Account Code ' . $accountCode->account_name);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail', 'Failed to Deactivate Account Code!');
         }
     }
 
@@ -235,10 +231,15 @@ class MstAccountCodesController extends Controller
         $id = decrypt($id);
 
         DB::beginTransaction();
-        try{
-            $data = MstAccountCodes::where('id', $id)->delete();
-            
-            //Audit Log
+        try {
+            $accountCode = MstAccountCodes::findOrFail($id);
+            // Check
+            if ($accountCode->is_used == 1) {
+                return redirect()->back()->with('info', 'Cannot Delete, Account Code has used in transaction.');
+            }
+            $accountCode->delete();
+
+            // Audit Log
             $this->auditLogsShort('Delete Mst Account Code');
 
             DB::commit();
@@ -251,20 +252,38 @@ class MstAccountCodesController extends Controller
 
     public function deleteselected(Request $request)
     {
-        $idselected = $request->input('idChecked');
+        $idSelected = $request->input('idChecked', []);
 
         DB::beginTransaction();
-        try{
-            $account_code = MstAccountCodes::whereIn('id', $idselected)->pluck('account_code')->toArray();
-            $delete = MstAccountCodes::whereIn('id', $idselected)->delete();
+        try {
+            $accountCodes = MstAccountCodes::whereIn('id', $idSelected)->get(['id', 'account_code', 'is_used']);
 
-            //Audit Log
-            $this->auditLogsShort('Delete Master Account Code Selected : ' . implode(', ', $account_code));
+            if ($accountCodes->isEmpty()) {
+                return response()->json(['message' => 'No data selected', 'type' => 'info'], 200);
+            }
+
+            // Check if any account code is marked as used
+            $usedCodes = $accountCodes->where('is_used', 1)->pluck('account_code');
+            if ($usedCodes->isNotEmpty()) {
+                return response()->json([
+                    'message' => 'Cannot delete, these Account Codes are in use: ' . $usedCodes->implode(', '),
+                    'type'    => 'info'
+                ], 200);
+            }
+
+            // Proceed with delete
+            MstAccountCodes::whereIn('id', $accountCodes->pluck('id'))->delete();
+
+            // Audit Log
+            $this->auditLogsShort('Delete Master Account Codes: ' . $accountCodes->pluck('account_code')->implode(', '));
 
             DB::commit();
-            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $account_code), 'type' => 'success'], 200);
-        } catch (Exception $e) {
-            DB::rollback();
+            return response()->json([
+                'message' => 'Successfully Deleted Data: ' . $accountCodes->pluck('account_code')->implode(', '),
+                'type'    => 'success'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
@@ -276,7 +295,7 @@ class MstAccountCodesController extends Controller
         DB::beginTransaction();
         try{
             $account_code = MstAccountCodes::whereIn('id', $idselected)->pluck('account_code')->toArray();
-            $update = MstAccountCodes::whereIn('id', $idselected)
+            MstAccountCodes::whereIn('id', $idselected)
                 ->update([
                     'is_active' => 0
                 ]);
