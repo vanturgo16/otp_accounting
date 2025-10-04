@@ -168,8 +168,6 @@ class MstAccountCodesController extends Controller
                     'id_master_account_types' => $request->id_master_account_types,
                     'opening_balance' => $opening_balance,
                     'opening_balance_type' => $request->type,
-                    'balance' => $opening_balance,
-                    'balance_type' => $request->type,
                 ]);
 
                 //Audit Log
