@@ -39,6 +39,9 @@
 
 <body>
 <!-- <body data-layout="horizontal"> -->
+    
+    <!-- Loading -->
+    @include('layouts.loading')
     <!-- Begin page -->
     <div id="layout-wrapper">
         <header id="page-topbar">
@@ -70,19 +73,19 @@
                     </button>
 
                     <!-- App Search-->
-                    {{-- <form class="app-search d-none d-lg-block">
-                        <div class="position-relative">
-                            <input type="text" class="form-control" placeholder="Search...">
+                    <form class="app-search d-none d-lg-block">
+                        <div class="position-relative border rounded">
+                            <input type="text" class="form-control" placeholder="Search..." id="searchInput">
                             <button class="btn btn-primary" type="button"><i class="bx bx-search-alt align-middle"></i></button>
                         </div>
-                    </form> --}}
+                    </form>
+
                 </div>
 
                 <div class="d-flex">
 
-                    {{-- <div class="dropdown d-inline-block d-lg-none ms-2">
-                        <button type="button" class="btn header-item" id="page-header-search-dropdown"
-                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <div class="dropdown d-inline-block d-lg-none ms-2">
+                        <button type="button" class="btn header-item" id="page-header-search-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i data-feather="search" class="icon-lg"></i>
                         </button>
                         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
@@ -98,7 +101,7 @@
                                 </div>
                             </form>
                         </div>
-                    </div> --}}
+                    </div>
 
                     <div class="dropdown d-none d-sm-inline-block">
                         <button type="button" class="btn header-item" id="mode-setting-btn">
@@ -133,195 +136,9 @@
 
         <!-- ========== Left Sidebar Start ========== -->
         <div class="vertical-menu">
-            <div data-simplebar class="h-100">
-                <!--- Sidemenu -->
-                <div id="sidebar-menu">
-                    <!-- Left Menu Start -->
-                    <ul class="metismenu list-unstyled" id="side-menu">
-                        <li>
-                            <a href="{{ route('dashboard') }}">
-                                <i data-feather="home"></i>
-                                <span data-key="t-dashboard">Dashboard</span>
-                            </a>
-                        </li>
-                        @can('Akunting_master_data') 
-                        <li class="menu-title" data-key="t-menu">Master</li>
-
-                        <li>
-                            <a href="{{ route('ppn.index') }}">
-                                <i class="mdi mdi-percent"></i>
-                                <span>Manage PPN</span>
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('bankaccount.index') }}">
-                                <i class="mdi mdi-bank"></i>
-                                <span>Manage Bank Account</span>
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('accounttype.index') }}">
-                                <i class="mdi mdi-format-list-bulleted-type"></i>
-                                <span>Manage Account Type</span>
-                            </a>
-                        </li>
-                        
-                        <li>
-                            <a href="{{ route('accountcode.index') }}">
-                                <i class="mdi mdi-barcode-scan"></i>
-                                <span>Manage Account Code</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="javascript: void(0);" class="has-arrow">
-                                <i class="mdi mdi-format-list-group"></i>
-                                <span>Entity List Formula</span>
-                            </a>
-                            <ul class="sub-menu" aria-expanded="false">
-                                <li>
-                                    <a href="{{ route('entitylist.neraca') }}">
-                                        <i class="mdi mdi-format-list-bulleted-square"></i>
-                                        <span>Neraca</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('entitylist.hpp') }}">
-                                        <i class="mdi mdi-format-list-bulleted-square"></i>
-                                        <span>HPP</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#">
-                                        <i class="mdi mdi-format-list-bulleted-square"></i>
-                                        <span>Laba Rugi</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        @endcan
-                        <li class="menu-title" data-key="t-menu">Accounting</li>
-                        @can('Akunting_generalledger') 
-                        <li>
-                            <a href="{{ route('generalledger.index') }}">
-                                <i class="mdi mdi-file-cabinet"></i>
-                                <span>General Ledger</span>
-                            </a>
-                        </li>
-                        @endcan
-                        @can('Akunting_sales') 
-                        <li>
-                            <a href="javascript: void(0);" class="has-arrow">
-                                <i class="mdi mdi-file-upload"></i>
-                                <span>Sales</span>
-                            </a>
-                            <ul class="sub-menu" aria-expanded="false">
-                                <li>
-                                    <a href="{{ route('transsales.local.index') }}">
-                                        <i class="mdi mdi-ballot-outline"></i>
-                                        <span>Local</span>
-                                    </a>
-                                </li>
-    
-                                <li>
-                                    <a href="{{ route('transsales.export.index') }}">
-                                        <i class="mdi mdi-ballot"></i>
-                                        <span>Export</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        @endcan
-                        @can('Akunting_purchase') 
-                        <li>
-                            <a href="{{ route('transpurchase.index') }}">
-                                <i class="mdi mdi-file-download"></i>
-                                <span>Purchase</span>
-                            </a>
-                        </li>
-                        @endcan
-                        @can('Akunting_import') 
-                        <li>
-                            <a href="{{ route('transimport.index') }}">
-                                <i class="mdi mdi-import"></i>
-                                <span>Import</span>
-                            </a>
-                        </li>
-                        @endcan
-                        @can('Akunting_report') 
-                        <li class="menu-title" data-key="t-menu">Report</li>
-
-                        <li>
-                            <a href="{{ route('report.neraca') }}">
-                                <i class="mdi mdi-file-chart-outline"></i>
-                                <span>Neraca</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('report.hpp') }}">
-                                <i class="mdi mdi-file-chart-outline"></i>
-                                <span>HPP</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <i class="mdi mdi-file-chart-outline"></i>
-                                <span>Laba Rugi</span>
-                            </a>
-                        </li>
-                        @endcan
-                        {{-- <li>
-                            <a href="{{ route('transdatakas.index') }}">
-                                <i class="mdi mdi-script-text"></i>
-                                <span>Kas Transaction</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('transdatabank.index') }}">
-                                <i class="mdi mdi-script-text"></i>
-                                <span>Bank Transaction</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <i class="mdi mdi-script-text"></i>
-                                <span>Sale Transaction</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <i class="mdi mdi-script-text"></i>
-                                <span>Purchase Transaction</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <i class="mdi mdi-script-text"></i>
-                                <span>Expor Transaction</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <i class="mdi mdi-script-text"></i>
-                                <span>Impor Transaction</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <i class="mdi mdi-script-text"></i>
-                                <span>Nr Dr Transaction</span>
-                            </a>
-                        </li> --}}
-
-                    </ul>
-                </div>
-                <!-- Sidebar -->
-            </div>
+            @include('layouts.sidebar')
         </div>
         <!-- Left Sidebar End -->
-
-        
 
         <!-- ============================================================== -->
         <!-- Start right Content here -->
@@ -331,19 +148,13 @@
             <!-- Start Page-content -->
             @yield('konten')
             <!-- End Page-content -->
-
-
-            <footer class="footer">
+            
+            <footer class="footer" style="position: fixed; z-index: 10;">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-sm-6">
-                            © PT Olefina Tifaplas Polikemindo 2024
+                        <div class="col-sm-6 footer-text">
+                            © PT Olefina Tifaplas Polikemindo {{ date('Y') }}
                         </div>
-                        {{-- <div class="col-sm-6">
-                            <div class="text-sm-end d-none d-sm-block">
-                                Design & Develop by <a href="#!" class="text-decoration-underline">Themesbrand</a>
-                            </div>
-                        </div> --}}
                     </div>
                 </div>
             </footer>
@@ -564,11 +375,39 @@
     <!-- custom -->
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script src="{{ asset('assets/js/bulkaction.js') }}"></script>
+    <script src="{{ asset('assets/js/searchInput.js') }}"></script>
 
     <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
     <script>
+        function formatPrice(value) {
+            if (!value) return '0';
+            // format with 3 decimals first
+            let formatted = Number(value).toLocaleString('id-ID', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            });
+            // remove trailing zeros after comma
+            formatted = formatted.replace(/,?0+$/, '');
+            return formatted;
+        }
+        function formatPriceWithStyle(value) {
+            // Format with 3 decimals, comma as decimal sep, dot as thousand sep
+            let formatted = new Intl.NumberFormat('de-DE', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            }).format(value);
+            // Split integer and decimal part
+            let parts = formatted.split(',');
+            let before = parts[0]; // integer part with thousand separator
+            let after = parts[1] ? ',' + parts[1] : '';
+            return `<span class="fw-bold">${before}</span><span class="text-muted">${after}</span>`;
+        }
+    </script>
+    <script>
         $(document).ready(function() {
-            $('#summernote-editor').summernote();
+            $('.summernote-editor').each(function() {
+                $(this).summernote();
+            });
         });
     </script>
 </body>

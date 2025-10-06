@@ -77,8 +77,8 @@ class TransPurchaseController extends Controller
         $goodReceiptNote = GoodReceiptNote::select('id', 'receipt_number', 'status')->get();
 
         $datas = TransPurchase::select(
-                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
-                'trans_purchase.*', 'purchase_orders.po_number'
+                'trans_purchase.*', 'purchase_orders.po_number',
+                DB::raw('(SELECT COUNT(*) FROM general_ledgers WHERE general_ledgers.ref_number = trans_purchase.ref_number) as count')
             )
             ->leftjoin('good_receipt_notes', 'trans_purchase.id_good_receipt_notes', 'good_receipt_notes.id')
             ->leftjoin('purchase_orders', 'good_receipt_notes.id_purchase_orders', 'purchase_orders.id')
@@ -91,7 +91,7 @@ class TransPurchaseController extends Controller
             $datas = $datas->where('id_good_receipt_notes', $id_good_receipt_notes);
         }
         if($startdate != null && $enddate != null){
-            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+            $datas = $datas->whereDate('trans_purchase.created_at','>=',$startdate)->whereDate('trans_purchase.created_at','<=',$enddate);
         }
         
         if($request->flag != null){
@@ -100,11 +100,6 @@ class TransPurchaseController extends Controller
         }
         
         $datas = $datas->get();
-
-        foreach($datas as $data){
-            $count = GeneralLedger::where('ref_number', $data->ref_number)->count();
-            $data->count = $count;
-        }
         
         // Datatables
         if ($request->ajax()) {
@@ -112,11 +107,11 @@ class TransPurchaseController extends Controller
                 ->addColumn('action', function ($data){
                     return view('transpurchase.action', compact('data'));
                 })
-                ->addColumn('bulk-action', function ($data) {
-                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
-                    return $checkBox;
-                })
-                ->rawColumns(['bulk-action'])
+                // ->addColumn('bulk-action', function ($data) {
+                //     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                //     return $checkBox;
+                // })
+                // ->rawColumns(['bulk-action'])
                 ->make(true);
         }
         
@@ -130,7 +125,7 @@ class TransPurchaseController extends Controller
     public function create(Request $request)
     {
         $goodReceiptNote = GoodReceiptNote::select('id', 'receipt_number', 'status')->get();
-        $accountcodes = MstAccountCodes::get();
+        $accountcodes = MstAccountCodes::where('is_active', 1)->get();
 
         //Audit Log
         $this->auditLogsShort('View Create New Purchase Transaction');

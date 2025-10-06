@@ -27,6 +27,7 @@
 
         <form action="{{ route('transsales.export.store') }}" id="formstore" method="POST" enctype="multipart/form-data">
             @csrf
+            <input type="hidden" name="currency" value="IDR">
             <div class="row">
                 <div class="col-12">
                     <div class="card">
@@ -42,62 +43,107 @@
                                 </div>
                                 <div class="col-lg-4 mb-3">
                                     <label class="form-label">Invoice Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="date_invoice" value="" required>
+                                    <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Tanggal yang akan ditampilkan pada lembar invoice"></i>
+                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" required>
                                 </div>
                                 <div class="col-lg-4 mb-3">
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="date_transaction" value="" required>
+                                    <input type="date" class="form-control" name="date_transaction" value="{{ date('Y-m-d') }}" required>
                                 </div>
                                 <div class="col-lg-12 mb-3">
                                     <label class="form-label">Term</label><label style="color: darkred">*</label>
-                                    <textarea name="term" id="summernote-editor"></textarea>
+                                    <textarea class="summernote-editor" name="term" placeholder="Input Term..." required></textarea>
                                 </div>
+                            </div>
                                 
-                                <div class="col-lg-6 mb-3">
-                                    <table style="width: 100%">
-                                        <input type="hidden" class="form-control" name="bank_name" value="{{ $bankaccount->bank_name ?? '' }}" required>
-                                        <input type="hidden" class="form-control" name="account_name" value="{{ $bankaccount->account_name ?? '' }}" required>
-                                        <input type="hidden" class="form-control" name="account_number" value="{{ $bankaccount->account_number ?? '' }}" required>
-                                        <input type="hidden" class="form-control" name="currency" value="{{ $bankaccount->currency ?? '' }}" required>
-                                        <input type="hidden" class="form-control" name="swift_code" value="{{ $bankaccount->swift_code ?? '' }}" required>
-                                        <input type="hidden" class="form-control" name="branch" value="{{ $bankaccount->branch ?? '' }}" required>
-                                        <tbody>
-                                            <tr>
-                                                <td><label class="form-label font-weight-bold">Bank Name</label></td>
-                                                <td><label class="form-label">:</label></td>
-                                                <td><label class="form-label">{{ $bankaccount->bank_name ?? '' }}</label></td>
-                                            </tr>
-                                            <tr>
-                                                <td><label class="form-label font-weight-bold">Account Name</label></td>
-                                                <td><label class="form-label">:</label></td>
-                                                <td><label class="form-label">{{ $bankaccount->account_name ?? '' }}</label></td>
-                                            </tr>
-                                            <tr>
-                                                <td><label class="form-label font-weight-bold">Account Number</label></td>
-                                                <td><label class="form-label">:</label></td>
-                                                <td><label class="form-label">{{ $bankaccount->account_number ?? '' }} ({{ $bankaccount->currency ?? '' }})</label></td>
-                                            </tr>
-                                            <tr>
-                                                <td><label class="form-label font-weight-bold">Swift Code</label></td>
-                                                <td><label class="form-label">:</label></td>
-                                                <td><label class="form-label">{{ $bankaccount->swift_code ?? '' }}</label></td>
-                                            </tr>
-                                            <tr>
-                                                <td><label class="form-label font-weight-bold">Branch</label></td>
-                                                <td><label class="form-label">:</label></td>
-                                                <td><label class="form-label">{{ $bankaccount->branch ?? '' }}</label></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                            <div class="card w-100 bg-light">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        Additional Info
+                                        <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Tambahan informasi yang akan ditampikan pada lembar invoice, dapat di perbaharui melalui (Master Bank Account & Master Approval)"></i>
+                                    </h6>
                                 </div>
-                                <div class="col-lg-6 mb-3"></div>
-                                <hr>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3">
+                                            <table style="width: 100%">
+                                                <input type="hidden" class="form-control" name="bank_name" value="{{ $bankaccount->bank_name ?? '' }}" required>
+                                                <input type="hidden" class="form-control" name="account_name" value="{{ $bankaccount->account_name ?? '' }}" required>
+                                                <input type="hidden" class="form-control" name="account_number" value="{{ $bankaccount->account_number ?? '' }}" required>
+                                                <input type="hidden" class="form-control" name="currency" value="{{ $bankaccount->currency ?? '' }}" required>
+                                                <input type="hidden" class="form-control" name="swift_code" value="{{ $bankaccount->swift_code ?? '' }}" required>
+                                                <input type="hidden" class="form-control" name="branch" value="{{ $bankaccount->branch ?? '' }}" required>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><label class="form-label font-weight-bold">Bank Name</label></td>
+                                                        <td><label class="form-label">:</label></td>
+                                                        <td><label class="form-label">{{ $bankaccount->bank_name ?? '' }}</label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><label class="form-label font-weight-bold">Account Name</label></td>
+                                                        <td><label class="form-label">:</label></td>
+                                                        <td><label class="form-label">{{ $bankaccount->account_name ?? '' }}</label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><label class="form-label font-weight-bold">Account Number</label></td>
+                                                        <td><label class="form-label">:</label></td>
+                                                        <td><label class="form-label">{{ $bankaccount->account_number ?? '' }} ({{ $bankaccount->currency ?? '' }})</label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><label class="form-label font-weight-bold">Swift Code</label></td>
+                                                        <td><label class="form-label">:</label></td>
+                                                        <td><label class="form-label">{{ $bankaccount->swift_code ?? '' }}</label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><label class="form-label font-weight-bold">Branch</label></td>
+                                                        <td><label class="form-label">:</label></td>
+                                                        <td><label class="form-label">{{ $bankaccount->branch ?? '' }}</label></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <table style="width: 100%">
+                                                <input type="hidden" class="form-control" name="app_name" value="{{ $approvalInfo['name'] ?? '' }}" required>
+                                                <input type="hidden" class="form-control" name="app_email" value="{{ $approvalInfo['email'] ?? '' }}" required>
+                                                <input type="hidden" class="form-control" name="app_position" value="{{ $approvalInfo['position'] ?? '' }}" required>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><label class="form-label font-weight-bold">Approval Name</label></td>
+                                                        <td><label class="form-label">:</label></td>
+                                                        <td><label class="form-label">{{ $approvalInfo['name'] ?? '-' }}</label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><label class="form-label font-weight-bold">Approval Email</label></td>
+                                                        <td><label class="form-label">:</label></td>
+                                                        <td><label class="form-label">{{ $approvalInfo['email'] ?? '-' }}</label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><label class="form-label font-weight-bold">Approval Position</label></td>
+                                                        <td><label class="form-label">:</label></td>
+                                                        <td><label class="form-label">{{ $approvalInfo['position'] ?? '-' }}</label></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+
+                            <div class="row">
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
+                                    <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Daftar Delivery Note (DN) berstatus Posted yang belum dibuatkan invoice"></i>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
                                         <option value="" selected>-- Select --</option>
                                         @foreach($deliveryNotes as $item)
-                                            <option value="{{ $item->id }}">{{ $item->dn_number." - ". $item->status }}</option>
+                                            <option value="{{ $item->id }}">
+                                                {{ $item->dn_number }} || 
+                                                {{ $item->date }} || 
+                                                {{ ucfirst($item->status) }} || 
+                                                KO/PO: {{ $item->ko_number ?? $item->po_number ?? '-' }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -110,10 +156,12 @@
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Customer Name</label>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
                                             <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Sales Name</label>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
                                             <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
                                         </div>
                                         
@@ -135,62 +183,67 @@
 
                                         <div class="col-lg-6 mt-4">
                                         </div>
-                                        <div class="col-lg-6 mt-4">
+                                        <div class="col-lg-6 mt-4">                                          
                                             <table style="width: 100%">
                                                 <tbody>
                                                     <tr>
-                                                        <td class="text-right">
-                                                            <label class="form-label font-weight-bold" style="text-align: right; display: block;">Total All Price</label>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Set PPN Rate <br><small>(default {{ $tax }}%)</small> :</label>
                                                         </td>
-                                                        <td class="text-right">
-                                                            <label class="form-label" style="text-align: right; display: block;">: <span id="currency">IDR</span> <span id="totalPrice">0</span></label>
-                                                            <input type="hidden" name="total_price" value="0">
+                                                        <td class="text-end" style="width: 50%;">
+                                                            <div class="input-group" style="width: 150px; margin-left: auto;">
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonMinus" disabled>-</button>
+                                                                <input type="text" name="tax" class="form-control text-center" value="{{ $tax }}" id="quantity" style="background-color:#EAECF4" required readonly>
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonPlus" disabled>+</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><br></td><td><br></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Total Nilai Jual :</label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="currency text-muted">IDR</span> <span id="njPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">
+                                                                PPN
+                                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Total Nilai Jual X PPN Rate"></i>
+                                                                :
+                                                            </label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="currency text-muted">IDR</span> <span id="ppnPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Total Nilai Jual + PPN :</label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="currency text-muted">IDR</span> <span id="totalPrice">0</span></label>
                                                         </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
-
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-lg-6 mb-3"></div>
-                                        <div class="col-lg-6 mb-3">
-                                            <div class="row">
-                                                <div class="col-12 mb-3">
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="checkbox" name="is_tax" disabled>
-                                                        <label class="form-check-label">Need Tax PPN?</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-4 mb-3">
-                                                    <label class="form-label" for="tax">Tax (%)</label>
-                                                    <div class="input-group">
-                                                        <input type="number" class="form-control" name="tax" id="tax" value="0" placeholder="Tax.." style="background-color:#EAECF4" required readonly>
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text" style="background-color:#EAECF4">%</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-8 mb-3">
-                                                    <label class="form-label">Tax Amount</label><label style="color: darkred">*</label>
-                                                    <input type="text" class="form-control rupiah-input" name="tax_sales" value="0" style="background-color:#EAECF4" required readonly>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
-
-                            <script>
-                                
-                            </script>
 
                             <div class="row">
                                 <div class="col-lg-12 mt-3">
                                     <div class="card">
                                         <div class="card-header text-center">
-                                            <h6 class="mb-0">Transaction</h6>
+                                            <h6 class="mb-0">
+                                                Transaction
+                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Aturan Transaksi: Total Debit harus sama dengan Total Kredit, serta sama dengan Total Nilai Jual + PPN"></i>
+                                            </h6>
                                         </div>
                                         <div class="card-body">
                                             <div class="table-repsonsive">
@@ -273,6 +326,15 @@
 
 {{-- Validation Form --}}
 <script>
+    function normalizeNumber(value) {
+        if (typeof value === "string") {
+            return parseFloat(
+                value.replace(/\./g, "").replace(",", ".")
+            );
+        }
+        return Number(value);
+    }
+
     function parseCurrency(value) {
         return parseFloat(value.replace(/\./g, '').replace(',', '.'));
     }
@@ -329,11 +391,39 @@
             var myModal = new bootstrap.Modal(document.getElementById('alert'));
             myModal.show();
         } else {
-            var submitButton = this.querySelector('button[name="sb"]');
-            submitButton.disabled = true;
-            submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
-            this.submit();
-            return true;
+            let numDebit = normalizeNumber(totals.debitTotal);
+            let numPrice = normalizeNumber(totalPriceGlobal);
+            if(numDebit == numPrice){
+                var submitButton = this.querySelector('button[name="sb"]');
+                submitButton.disabled = true;
+                submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
+                this.submit();
+                return true;
+            } 
+            else {
+                let modalBodyContent = `
+                    <div class="col-12">
+                        <table class="table dt-responsive w-100">
+                            <thead>
+                                <tr>
+                                    <th class="align-top text-center text-bold">Total Debit</th>
+                                    <th class="align-top text-center text-bold">?</th>
+                                    <th class="align-top text-center text-bold">Total Sales Price</th>
+                                </tr>
+                                <tr>
+                                    <th class="align-top text-center">${totals.debitTotal.toLocaleString('id-ID')}</th>
+                                    <th class="align-top text-center text-danger">!=</th>
+                                    <th class="align-top text-center">${totalPriceGlobal}</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                `;
+
+                document.getElementById('modalBodyContent').innerHTML = modalBodyContent;
+                var myModal = new bootstrap.Modal(document.getElementById('alert'));
+                myModal.show();
+            }
         }
     });
 </script>
@@ -393,10 +483,6 @@
 
 <script>
     let totalPriceGlobal = 0;
-    var initiateppn = '{{ $tax }}';
-    var isTax = $('input[name="is_tax"]');
-    var tax = $('input[name="tax"]');
-    var taxAmount = $('input[name="tax_sales"]');
 
     $(function() {
         var data = {id_delivery_notes: ''};
@@ -425,15 +511,10 @@
                     name: 'so_number',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
                     render: function(data, type, row) {
-                        var html;
-                        if (row.so_number == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = '<span class="text-bold">' + row.so_number + '</span>';
-                        }
-                        return html;
+                        return row.so_number 
+                            ? `<span class="text-bold">${row.so_number}</span>` 
+                            : `<span class="badge bg-secondary">Null</span>`;
                     },
                 },
                 {
@@ -476,12 +557,17 @@
                     name: 'price',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
-                    render: function (data, type, row) {
-                        if (row.price == null) {
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return formatPrice(row.price);
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
                 {
@@ -489,98 +575,104 @@
                     name: 'total_price',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
-                    render: function (data, type, row) {
-                        if (row.total_price == null) {
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return formatPrice(row.total_price);
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
             ]
         });
 
         $('select[name="id_delivery_notes"]').on('change', function() {
+            let initiateppn = parseFloat('{{ $tax }}') || 0;
+            $('#quantity').val(initiateppn);
+
+            // To Update Datatable Display
             data.id_delivery_notes = $(this).val();
             dataTable.ajax.reload();
 
             $('#customer_name').val("");
             $('#sales_name').val("");
-            $('#currency').html("IDR");
+            $('input[name="currency"]').val('IDR');
+            $('.currency').html('IDR');
+
+            $('#njPrice').html(0);
+            $('#ppnPrice').html(0);
             $('#totalPrice').html(0);
-            $('input[name="total_price"]').val(0);
+
             var id_delivery_notes = $(this).val();
-
-            isTax.prop('checked', false);
-            isTax.prop('disabled', true);
-            tax.val(0);
-            taxAmount.val(0);
-
-            if(id_delivery_notes == ""){
-                $('#customer_name').val("");
-                $('#sales_name').val("");
-                $('#totalPrice').html(0);
-            } else {
-                let urlTotal = '{{ route("transsales.gettotalprice", ":id") }}'.replace(':id', id_delivery_notes);
-                let urlDN    = '{{ route("transsales.getdeliverynote", ":id") }}'.replace(':id', id_delivery_notes);
-
-                if (id_delivery_notes) {
-                    $.ajax({
-                        url: urlTotal,
-                        type: "GET",
-                        dataType: "json",
-                        success: function(totalPrice) {
-                            totalPriceGlobal = parseFloat(totalPrice) || 0;
-                            // show total price
-                            $('#totalPrice').html(totalPrice ? formatPrice(totalPrice) : 0);
-                            $('input[name="total_price"]').val(totalPrice ? formatPrice(totalPrice) : 0);
-                            isTax.prop('disabled', false);
-
-                            // now get delivery note after we know totalPrice
-                            $.ajax({
-                                url: urlDN,
-                                type: "GET",
-                                dataType: "json",
-                                success: function(data) {
-                                    $('#customer_name').val(data.customer_name ?? '-');
-                                    $('#sales_name').val(data.salesman_name ?? '-');
-                                    $('#currency').html(data.currency_code ?? 'IDR');
-                                }
-                            });
-                        }
-                    });
-                }
+            if(id_delivery_notes) {
+                let urlDN = '{{ route("transsales.getdeliverynote", ":id") }}'.replace(':id', id_delivery_notes);
+                $.ajax({
+                    url: urlDN,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#customer_name').val(data.customer_name ?? '-');
+                        $('#sales_name').val(data.salesman_name ?? '-');
+                        $('input[name="currency"]').val(data.currency_code ?? 'IDR');
+                        $('.currency').html(data.currency_code ?? 'IDR');
+                    }
+                });
+                setFieldPrice(id_delivery_notes,initiateppn);
             }
         });
     });
 
-    function formatPrice(value) {
-        if (!value) return '0';
-        // format with 3 decimals first
-        let formatted = Number(value).toLocaleString('id-ID', {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
-        });
-        // remove trailing zeros after comma
-        formatted = formatted.replace(/,?0+$/, '');
-        return formatted;
+    function setFieldPrice(id_delivery_notes, ppnRate){
+        let urlTotal = '{{ route("transsales.gettotalprice", [":id", ":ppnRate", ":type"]) }}'
+            .replace(':id', id_delivery_notes)
+            .replace(':ppnRate', ppnRate)
+            .replace(':type', 'Export');
+
+        if (id_delivery_notes) {
+            $.ajax({
+                url: urlTotal,
+                type: "GET",
+                dataType: "json",
+                success: function(resultPrice) {
+                    totalPriceGlobal = parseFloat(resultPrice.total) || 0;
+                    totalPriceGlobal = formatPrice(resultPrice.total) || 0;
+                    // show total price
+                    $('#njPrice').html(resultPrice.nj ? formatPriceWithStyle(resultPrice.nj) : 0);
+                    $('#ppnPrice').html(resultPrice.ppn ? formatPriceWithStyle(resultPrice.ppn) : 0);
+                    $('#totalPrice').html(resultPrice.total ? formatPriceWithStyle(resultPrice.total) : 0);
+                    
+                    $('#buttonMinus').prop('disabled', false);
+                    $('#buttonPlus').prop('disabled', false);
+                    $('input[name="tax"]').css('background-color', '');
+                }
+            });
+        }
     }
 
-    $('input[name="is_tax"]').on('click', function () {
-        if ($(this).is(':checked')) {
-            tax.val(initiateppn);
-            let initiateAmount = (initiateppn / 100) * (totalPriceGlobal ?? 0);
-            taxAmount.val(formatPrice(initiateAmount));
-        } else {
-            tax.val(0);
-            taxAmount.val(0);
+    // plus
+    $('#buttonPlus').on('click', function() {
+        let id_delivery_notes = $('select[name="id_delivery_notes"]').val();
+        let tax = parseFloat($('#quantity').val()) || 0;
+        if(tax < 100) {
+            tax++;
+            $('#quantity').val(tax);
+            setFieldPrice(id_delivery_notes, tax);
         }
     });
-
-    $('input[name="tax"]').on('input', function () {
-        let ppn = parseFloat($(this).val()) || 0;
-        let newAmount = (ppn / 100) * totalPriceGlobal;
-        $('input[name="tax_sales"]').val(formatPrice(newAmount));
+    // minus
+    $('#buttonMinus').on('click', function() {
+        let id_delivery_notes = $('select[name="id_delivery_notes"]').val();
+        let tax = parseFloat($('#quantity').val()) || 0;
+        if (tax > 0) { // prevent negative
+            tax--;
+            $('#quantity').val(tax);
+            setFieldPrice(id_delivery_notes, tax);
+        }
     });
 </script>
 

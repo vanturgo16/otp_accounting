@@ -32,8 +32,8 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-3 mb-3">
-                                <label class="form-label mb-0">Ref Number</label>
-                                <br><span class="badge bg-info">{{ $data->ref_number }}</span>
+                                <label class="form-label mb-0">Ref. Number</label>
+                                <br><h4><span class="badge bg-info">{{ $data->ref_number }}</span></h4>
                             </div>
                             <div class="col-lg-3 mb-3">
                                 <label class="form-label mb-0">Invoice Date</label>
@@ -46,102 +46,147 @@
                             <div class="col-lg-3 mb-3">
                                 <label class="form-label mb-0">Due Date</label>
                                 <br><span>{{ $data->due_date ? \Carbon\Carbon::parse($data->due_date)->format('d-m-Y') : '-' }}</span>
-                            </div>                            
-                            <hr>
+                            </div>
                         </div>
-                        <div class="card p-2" style="background-color:#f0f2f7">
-                            <div class="row">
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label mb-0">Delivery Note</label>
-                                    <br><span>{{ $data->dn_number }}</span>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label mb-0">Customer Name</label>
-                                    <br>
-                                    <span>
-                                        @if($data->customer_name == null)
-                                        -
-                                        @else
-                                            {{ $data->customer_name }}
-                                        @endif
-                                    </span>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label mb-0">Sales Name</label>
-                                    <br>
-                                    <span>
-                                        @if($data->salesman_name == null)
-                                        -
-                                        @else
-                                            {{ $data->salesman_name }}
-                                        @endif
-                                    </span>
-                                </div>
+                        <hr>
 
-                                <div class="col-12">
-                                    <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                                        <thead>
-                                            <tr>
-                                                <th class="align-middle text-center">No.</th>
-                                                <th class="align-middle text-center">SO Number</th>
-                                                <th class="align-middle text-center">Product</th>
-                                                <th class="align-middle text-center">Qty (Unit)</th>
-                                                <th class="align-middle text-center">Tax</th>
-                                                <th class="align-middle text-center">Price</th>
-                                                <th class="align-middle text-center">Total Price</th>
-                                            </tr>
-                                        </thead>
-                                    </table>
-                                </div>
-                                <div class="col-lg-6 mt-4">
-                                </div>
-                                <div class="col-lg-6 mt-4">
-                                    <table style="width: 100%">
-                                        <tbody>
-                                            <tr>
-                                                <td class="text-right">
-                                                    <label class="form-label font-weight-bold" style="text-align: right; display: block;">Total All Price</label>
-                                                </td>
-                                                <td class="text-right">
-                                                    <label class="form-label" style="text-align: right; display: block;">: Rp. <span id="totalPrice">0</span></label>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <label class="form-label mb-0">Delivery Note Detail</label>
                             </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-lg-6 mb-3"></div>
-                                <div class="col-lg-2 mb-3">
-                                    <label class="form-label mb-0">Tax (%)</label>
-                                    <br><span>{{ $data->tax ?? '-' }}</span>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label mb-0">Delivery Note</label>
+                                        <br><span>{{ $data->dn_number }}</span>
+                                    </div>
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label mb-0">DN Date</label>
+                                        <br><span>{{ $data->dn_date ?? '-' }}</span>
+                                    </div>
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label mb-0">KO / PO Number</label>
+                                        <br><span>{{ $data->ko_number ?? $data->po_number ?? '-' }}</span>
+                                    </div>
                                 </div>
-                                <div class="col-lg-4 mb-3">
-                                    <label class="form-label mb-0">Tax Sales</label>
-                                    <br><span>{{ $data->tax_sales ? number_format($data->tax_sales, 3, ',', '.') : '-' }}</span>
+                                <div class="row">
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label mb-0">Customer Name</label>
+                                        <br><span>{{ $data->customer_name ?? '-' }}</span>
+                                    </div>
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label mb-0">Sales Name</label>
+                                        <br><span>{{ $data->salesman_name ?? '-' }}</span>
+                                    </div>
+                                    <div class="col-lg-4 mb-3"></div>
+
+                                    <div class="col-12">
+                                        <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
+                                            <thead>
+                                                <tr>
+                                                    <th class="align-middle text-center">No.</th>
+                                                    <th class="align-middle text-center">SO Number</th>
+                                                    <th class="align-middle text-center">Product</th>
+                                                    <th class="align-middle text-center">Qty (Unit)</th>
+                                                    <th class="align-middle text-center">Tax</th>
+                                                    <th class="align-middle text-center">Price</th>
+                                                    <th class="align-middle text-center">Total Price</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                    <div class="col-lg-6 mt-4"></div>
+                                    <div class="col-lg-6 mt-4">
+                                        <table style="width: 100%">
+                                            <tbody>
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <label class="form-label fw-bold">PPN Rate :</label>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <label class="form-label"> {{ $data->tax ?? '0' }}%</label>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><br></td><td><br></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <label class="form-label fw-bold">Total Nilai Jual :</label>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <label class="form-label"> Rp. 
+                                                            @php
+                                                                $formatted = number_format($data->sales_value, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <label class="form-label fw-bold">DPP Lain-lain :</label>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <label class="form-label"> Rp. 
+                                                            @php
+                                                                $formatted = number_format($data->dpp, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <label class="form-label fw-bold">PPN :</label>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <label class="form-label"> Rp. 
+                                                            @php
+                                                                $formatted = number_format($data->tax_sales, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <label class="form-label fw-bold">Total Nilai Jual + PPN :</label>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <label class="form-label"> Rp. 
+                                                            @php
+                                                                $formatted = number_format($data->total, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-lg-12 mt-3">
+                            <div class="col-lg-12">
                                 <div class="card">
-                                    <div class="card-header text-center">
-                                        <h6 class="mb-0">Transaction</h6>
+                                    <div class="card-header">
+                                        <label class="form-label mb-0">Transaction</label>
                                     </div>
                                     <div class="card-body">
                                         <div class="table-repsonsive">
                                             <table class="table table-bordered" id="dynamicTable">
                                                 <thead>
                                                     <tr>
-                                                        <th>Account Code</th>
-                                                        <th>Nominal</th>
-                                                        <th>Debit / Kredit</th>
+                                                        <th class="text-center">Account Code</th>
+                                                        <th class="text-center">Nominal</th>
+                                                        <th class="text-center">Debit / Kredit</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -150,10 +195,14 @@
                                                         <td>
                                                             {{ $item->account_code." - ".$item->account_name }}
                                                         </td>
-                                                        <td>
-                                                            {{ number_format($item->amount, 3, ',', '.') }}
+                                                        <td class="text-end">
+                                                            @php
+                                                                $formatted = number_format($item->amount, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
                                                         </td>
-                                                        <td>
+                                                        <td class="text-center">
                                                             @if($item->transaction == 'D')
                                                                 <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
                                                             @else
@@ -217,15 +266,10 @@
                     name: 'so_number',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
                     render: function(data, type, row) {
-                        var html;
-                        if (row.so_number == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = '<span class="text-bold">' + row.so_number + '</span>';
-                        }
-                        return html;
+                        return row.so_number 
+                            ? `<span class="text-bold">${row.so_number}</span>` 
+                            : `<span class="badge bg-secondary">Null</span>`;
                     },
                 },
                 {
@@ -268,12 +312,17 @@
                     name: 'price',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
-                    render: function (data, type, row) {
-                        if (row.price == null) {
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return formatPrice(row.price);
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
                 {
@@ -281,42 +330,22 @@
                     name: 'total_price',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
-                    render: function (data, type, row) {
-                        if (row.total_price == null) {
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return formatPrice(row.total_price);
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
             ]
         });
-
-        let urlTotal = '{{ route("transsales.gettotalprice", ":id") }}'.replace(':id', data.id_delivery_notes);
-        if (data.id_delivery_notes) {
-            $.ajax({
-                url: urlTotal,
-                type: "GET",
-                dataType: "json",
-                success: function(totalPrice) {
-                    // show total price
-                    $('#totalPrice').html(totalPrice ? formatPrice(totalPrice) : 0);
-                }
-            });
-        }
     });
-
-    function formatPrice(value) {
-        if (!value) return '0';
-        // format with 3 decimals first
-        let formatted = Number(value).toLocaleString('id-ID', {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
-        });
-        // remove trailing zeros after comma
-        formatted = formatted.replace(/,?0+$/, '');
-        return formatted;
-    }
 </script>
 
 @endsection

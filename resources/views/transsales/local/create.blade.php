@@ -42,11 +42,12 @@
                                 </div>
                                 <div class="col-lg-3 mb-3">
                                     <label class="form-label">Invoice Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="date_invoice" value="" required>
+                                    <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Tanggal yang akan ditampilkan pada lembar invoice"></i>
+                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" required>
                                 </div>
                                 <div class="col-lg-3 mb-3">
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="date_transaction" value="" required>
+                                    <input type="date" class="form-control" name="date_transaction" value="{{ date('Y-m-d') }}" required>
                                 </div>
                                 <div class="col-lg-3 mb-3">
                                     <label class="form-label">Due Date</label><label style="color: darkred">*</label>
@@ -60,10 +61,16 @@
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Daftar Delivery Note (DN) berstatus Posted yang belum dibuatkan invoice"></i>
                                             <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
-                                                <option value="" selected>-- Select --</option>
+                                                <option value="" selected disabled>-- Select --</option>
                                                 @foreach($deliveryNotes as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->dn_number." - ". $item->status }}</option>
+                                                    <option value="{{ $item->id }}">
+                                                        {{ $item->dn_number }} || 
+                                                        {{ $item->date }} || 
+                                                        {{ ucfirst($item->status) }} || 
+                                                        KO/PO: {{ $item->ko_number ?? $item->po_number ?? '-' }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -71,11 +78,13 @@
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Customer Name</label>
-                                            <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
+                                            <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Sales Name</label>
-                                            <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
+                                            <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
                                         </div>
                                         
                                         <div class="col-12">
@@ -96,36 +105,66 @@
 
                                         <div class="col-lg-6 mt-4">
                                         </div>
-                                        <div class="col-lg-6 mt-4">
+                                        <div class="col-lg-6 mt-4">                                          
                                             <table style="width: 100%">
                                                 <tbody>
                                                     <tr>
-                                                        <td class="text-right">
-                                                            <label class="form-label font-weight-bold" style="text-align: right; display: block;">Total All Price</label>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Set PPN Rate <br><small>(default {{ $tax }}%)</small> :</label>
                                                         </td>
-                                                        <td class="text-right">
-                                                            <label class="form-label" style="text-align: right; display: block;">: Rp. <span id="totalPrice">0</span></label>
+                                                        <td class="text-end" style="width: 50%;">
+                                                            <div class="input-group" style="width: 150px; margin-left: auto;">
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonMinus" disabled>-</button>
+                                                                <input type="text" name="tax" class="form-control text-center" value="{{ $tax }}" id="quantity" style="background-color:#EAECF4" required readonly>
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonPlus" disabled>+</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><br></td><td><br></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Total Nilai Jual :</label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="text-muted">Rp. </span><span id="njPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">
+                                                                DPP Lain-lain 
+                                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Total Nilai Jual X (11/12)"></i>
+                                                                :
+                                                            </label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="text-muted">Rp. </span><span id="dppPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">
+                                                                PPN
+                                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="DPP Lain-lain X PPN Rate"></i>
+                                                                :
+                                                            </label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="text-muted">Rp. </span><span id="ppnPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Total Nilai Jual + PPN :</label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> Rp. <span id="totalPrice">0</span></label>
                                                         </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-lg-6 mb-3"></div>
-                                        <div class="col-lg-2 mb-3">
-                                            <label class="form-label" for="tax">Tax (%)</label><label style="color: darkred">*</label>
-                                            <div class="input-group">
-                                                <input type="number" class="form-control" name="tax" id="tax" value="" placeholder="Tax.." style="background-color:#EAECF4" required readonly>
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text" style="background-color:#EAECF4">%</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-4 mb-3">
-                                            <label class="form-label">Tax Amount</label><label style="color: darkred">*</label>
-                                            <input type="text" class="form-control rupiah-input" placeholder="Input Amount.." name="tax_sales" value="" style="width: 100%; background-color:#EAECF4" required readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -135,7 +174,10 @@
                                 <div class="col-lg-12 mt-3">
                                     <div class="card">
                                         <div class="card-header text-center">
-                                            <h6 class="mb-0">Transaction</h6>
+                                            <h6 class="mb-0">
+                                                Transaction
+                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Aturan Transaksi: Total Debit harus sama dengan Total Kredit, serta sama dengan Total Nilai Jual + PPN"></i>
+                                            </h6>
                                         </div>
                                         <div class="card-body">
                                             <div class="table-repsonsive">
@@ -217,6 +259,15 @@
 
 {{-- Validation Form --}}
 <script>
+    function normalizeNumber(value) {
+        if (typeof value === "string") {
+            return parseFloat(
+                value.replace(/\./g, "").replace(",", ".")
+            );
+        }
+        return Number(value);
+    }
+
     function parseCurrency(value) {
         return parseFloat(value.replace(/\./g, '').replace(',', '.'));
     }
@@ -273,7 +324,9 @@
             var myModal = new bootstrap.Modal(document.getElementById('alert'));
             myModal.show();
         } else {
-            if(totals.debitTotal == totalPriceGlobal){
+            let numDebit = normalizeNumber(totals.debitTotal);
+            let numPrice = normalizeNumber(totalPriceGlobal);
+            if(numDebit == numPrice){
                 var submitButton = this.querySelector('button[name="sb"]');
                 submitButton.disabled = true;
                 submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
@@ -390,15 +443,10 @@
                     name: 'so_number',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
                     render: function(data, type, row) {
-                        var html;
-                        if (row.so_number == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = '<span class="text-bold">' + row.so_number + '</span>';
-                        }
-                        return html;
+                        return row.so_number 
+                            ? `<span class="text-bold">${row.so_number}</span>` 
+                            : `<span class="badge bg-secondary">Null</span>`;
                     },
                 },
                 {
@@ -441,12 +489,17 @@
                     name: 'price',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
-                    render: function (data, type, row) {
-                        if (row.price == null) {
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return formatPrice(row.price);
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
                 {
@@ -454,101 +507,108 @@
                     name: 'total_price',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
-                    render: function (data, type, row) {
-                        if (row.total_price == null) {
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return formatPrice(row.total_price);
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
             ]
         });
 
-        let initiateppn = parseFloat('{{ $tax }}') || 0;
         $('select[name="id_delivery_notes"]').on('change', function() {
+            let initiateppn = parseFloat('{{ $tax }}') || 0;
+            $('#quantity').val(initiateppn);
+
+            // To Update Datatable Display
             data.id_delivery_notes = $(this).val();
             dataTable.ajax.reload();
 
             $('#customer_name').val("");
             $('#sales_name').val("");
+            
+            $('#buttonMinus').prop('disabled', true);
+            $('#buttonPlus').prop('disabled', true);
+            $('input[name="tax"]').css('background-color', '#EAECF4');
+
+            $('#customer_name').val("");
+            $('#sales_name').val("");
+            $('#njPrice').html(0);
+            $('#dppPrice').html(0);
+            $('#ppnPrice').html(0);
             $('#totalPrice').html(0);
+
             var id_delivery_notes = $(this).val();
-            if(id_delivery_notes == ""){
-                $('#customer_name').val("");
-                $('#sales_name').val("");
-                $('#totalPrice').html(0);
-
-                $('input[name="tax"]').val("N/A")
-                    .prop('readonly', true).css('background-color', '#EAECF4')
-                    .attr('placeholder', 'N/A');
-                $('input[name="tax_sales"]').val(0)
-                    .prop('readonly', true).css('background-color', '#EAECF4')
-                    .attr('placeholder', 'N/A');
-            } else {
-                let urlTotal = '{{ route("transsales.gettotalprice", ":id") }}'.replace(':id', id_delivery_notes);
-                let urlDN    = '{{ route("transsales.getdeliverynote", ":id") }}'.replace(':id', id_delivery_notes);
-
-                if (id_delivery_notes) {
-                    $.ajax({
-                        url: urlTotal,
-                        type: "GET",
-                        dataType: "json",
-                        success: function(totalPrice) {
-                            totalPriceGlobal = parseFloat(totalPrice) || 0;
-                            // show total price
-                            $('#totalPrice').html(totalPrice ? formatPrice(totalPrice) : 0);
-
-                            // now get delivery note after we know totalPrice
-                            $.ajax({
-                                url: urlDN,
-                                type: "GET",
-                                dataType: "json",
-                                success: function(data) {
-                                    $('#customer_name').val(data.customer_name ?? '-');
-                                    $('#sales_name').val(data.salesman_name ?? '-');
-
-                                    if (data.ppn === "Include") {
-                                        let initiateAmount = (initiateppn / 100) * (totalPrice ?? 0);
-                                        $('input[name="tax"]').val(initiateppn)
-                                            .prop('readonly', false).css('background-color', '')
-                                            .attr('placeholder', 'Tax..');
-                                        $('input[name="tax_sales"]').val(formatPrice(initiateAmount))
-                                            .prop('readonly', false).css('background-color', '')
-                                            .attr('placeholder', 'Input Amount..');
-                                    } else {
-                                        $('input[name="tax"]').val("N/A")
-                                            .prop('readonly', true).css('background-color', '#EAECF4')
-                                            .attr('placeholder', 'N/A');
-                                        $('input[name="tax_sales"]').val(0)
-                                            .prop('readonly', true).css('background-color', '#EAECF4')
-                                            .attr('placeholder', 'N/A');
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
+            if(id_delivery_notes) {
+                let urlDN = '{{ route("transsales.getdeliverynote", ":id") }}'.replace(':id', id_delivery_notes);
+                $.ajax({
+                    url: urlDN,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#customer_name').val(data.customer_name ?? '-');
+                        $('#sales_name').val(data.salesman_name ?? '-');
+                    }
+                });
+                setFieldPrice(id_delivery_notes,initiateppn);
             }
         });
     });
-    
-    function formatPrice(value) {
-        if (!value) return '0';
-        // format with 3 decimals first
-        let formatted = Number(value).toLocaleString('id-ID', {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
-        });
-        // remove trailing zeros after comma
-        formatted = formatted.replace(/,?0+$/, '');
-        return formatted;
+
+    function setFieldPrice(id_delivery_notes, ppnRate){
+        let urlTotal = '{{ route("transsales.gettotalprice", [":id", ":ppnRate", ":type"]) }}'
+            .replace(':id', id_delivery_notes)
+            .replace(':ppnRate', ppnRate)
+            .replace(':type', 'Local');
+
+        if (id_delivery_notes) {
+            $.ajax({
+                url: urlTotal,
+                type: "GET",
+                dataType: "json",
+                success: function(resultPrice) {
+                    totalPriceGlobal = parseFloat(resultPrice.total) || 0;
+                    totalPriceGlobal = formatPrice(resultPrice.total) || 0;
+                    // show total price
+                    $('#njPrice').html(resultPrice.nj ? formatPriceWithStyle(resultPrice.nj) : 0);
+                    $('#dppPrice').html(resultPrice.dpp ? formatPriceWithStyle(resultPrice.dpp) : 0);
+                    $('#ppnPrice').html(resultPrice.ppn ? formatPriceWithStyle(resultPrice.ppn) : 0);
+                    $('#totalPrice').html(resultPrice.total ? formatPriceWithStyle(resultPrice.total) : 0);
+                    
+                    $('#buttonMinus').prop('disabled', false);
+                    $('#buttonPlus').prop('disabled', false);
+                    $('input[name="tax"]').css('background-color', '');
+                }
+            });
+        }
     }
 
-    $('input[name="tax"]').on('input', function () {
-        let ppn = parseFloat($(this).val()) || 0;
-        let newAmount = (ppn / 100) * totalPriceGlobal;
-        $('input[name="tax_sales"]').val(formatPrice(newAmount));
+    // plus
+    $('#buttonPlus').on('click', function() {
+        let id_delivery_notes = $('select[name="id_delivery_notes"]').val();
+        let tax = parseFloat($('#quantity').val()) || 0;
+        if(tax < 100) {
+            tax++;
+            $('#quantity').val(tax);
+            setFieldPrice(id_delivery_notes, tax);
+        }
+    });
+    // minus
+    $('#buttonMinus').on('click', function() {
+        let id_delivery_notes = $('select[name="id_delivery_notes"]').val();
+        let tax = parseFloat($('#quantity').val()) || 0;
+        if (tax > 0) { // prevent negative
+            tax--;
+            $('#quantity').val(tax);
+            setFieldPrice(id_delivery_notes, tax);
+        }
     });
 </script>
 
