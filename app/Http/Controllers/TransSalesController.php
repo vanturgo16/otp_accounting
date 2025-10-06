@@ -427,15 +427,16 @@ class TransSalesController extends Controller
         $tax = MstPpn::where('tax_name', 'Trans. Sales (Export)')->where('is_active', 1)->first()->value;
         $bankaccount = MstBankAccount::where('is_active', 1)->first();
 
-        $approvalInfo = MstApproval::select('master_employees.name', 'master_employees.email')
+        $approvalInfo = MstApproval::select('master_employees.name', 'master_employees.email', 'master_departements.name as dept_name')
             ->leftJoin('master_employees', 'master_approvals.id_master_employees', 'master_employees.id')
-            ->where('master_approvals.type', 'PO')
+            ->leftJoin('master_departements', 'master_employees.id_master_departements', 'master_departements.id')
+            ->where('master_approvals.type', 'Accounting')
             ->where('master_approvals.status', 'Active')
             ->first();
         $approvalInfo = [
             'name'      => $approvalInfo->name ?? null,
             'email'     => $approvalInfo->email ?? null,
-            'position'  => 'General Manager'
+            'position'  => $approvalInfo->dept_name ?? null
         ];
 
         //Audit Log
