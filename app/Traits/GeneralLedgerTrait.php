@@ -5,9 +5,10 @@ use App\Models\GeneralLedger;
 use App\Models\MstAccountCodes;
 
 trait GeneralLedgerTrait {
-    public function storeGeneralLedger($ref_number, $date_transaction, $id_account_code, $transaction, $amount, $source)
+    public function storeGeneralLedger($id_ref, $ref_number, $date_transaction, $id_account_code, $transaction, $amount, $source)
     {
         return GeneralLedger::create([
+            'id_ref' => $id_ref,
             'ref_number' => $ref_number,
             'date_transaction' => $date_transaction,
             'id_account_code' => $id_account_code,

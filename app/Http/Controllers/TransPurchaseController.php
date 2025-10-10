@@ -78,7 +78,7 @@ class TransPurchaseController extends Controller
 
         $datas = TransPurchase::select(
                 'trans_purchase.*', 'purchase_orders.po_number',
-                DB::raw('(SELECT COUNT(*) FROM general_ledgers WHERE general_ledgers.ref_number = trans_purchase.ref_number) as count')
+                DB::raw("'Purchase Transaction' as source")
             )
             ->leftjoin('good_receipt_notes', 'trans_purchase.id_good_receipt_notes', 'good_receipt_notes.id')
             ->leftjoin('purchase_orders', 'good_receipt_notes.id_purchase_orders', 'purchase_orders.id')
@@ -154,8 +154,9 @@ class TransPurchaseController extends Controller
 
         DB::beginTransaction();
         try{
-            TransPurchase::create([
+            $refParent = TransPurchase::create([
                 'ref_number' => $refNumber,
+                'total_transaction' => $request->addmore ? count($request->addmore) : 0,
                 'date_transaction' => $request->date_transaction,
                 'id_good_receipt_notes' => $request->id_good_receipt_notes,
                 'delivery_note_date' => $request->delivery_note_date,
@@ -175,7 +176,7 @@ class TransPurchaseController extends Controller
                         $nominal = str_replace(',', '.', $nominal);
 
                         // Create General Ledger
-                        $this->storeGeneralLedger($refNumber, $request->date_transaction, $item['account_code'], $item['type'], $nominal, 'Purchase Transaction');
+                        $this->storeGeneralLedger($refParent->id, $refNumber, $request->date_transaction, $item['account_code'], $item['type'], $nominal, 'Purchase Transaction');
                         // Update & Calculate Balance Account Code
                         $this->updateBalanceAccount($item['account_code'], $nominal, $item['type']);
                     }
@@ -207,7 +208,9 @@ class TransPurchaseController extends Controller
         
         $general_ledgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
             ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
+            ->where('general_ledgers.id_ref', $id)
             ->where('general_ledgers.ref_number', $data->ref_number)
+            ->where('general_ledgers.source', 'Purchase Transaction')
             ->get();
         
         $transaction_date = date('Y-m-d', strtotime($general_ledgers[0]->date_transaction));

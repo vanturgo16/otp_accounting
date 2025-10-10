@@ -52,7 +52,7 @@ class TransImportController extends Controller
 
         $datas = TransImport::select(
                 'trans_import.*',
-                DB::raw('(SELECT COUNT(*) FROM general_ledgers WHERE general_ledgers.ref_number = trans_import.ref_number) as count')
+                DB::raw("'Import Transaction' as source")
             )
             ->orderBy('trans_import.created_at','desc');
 
@@ -115,8 +115,9 @@ class TransImportController extends Controller
 
         DB::beginTransaction();
         try{
-            TransImport::create([
+            $refParent = TransImport::create([
                 'ref_number' => $refNumber,
+                'total_transaction' => $request->addmore ? count($request->addmore) : 0,
                 'tax_invoice_number' => $request->tax_invoice_number,
                 'ext_doc_number' => $request->ext_doc_number,
                 'inv_received_date' => $request->inv_received_date,
@@ -131,7 +132,7 @@ class TransImportController extends Controller
                         $nominal = str_replace(',', '.', $nominal);
 
                         // Create General Ledger
-                        $this->storeGeneralLedger($refNumber, $request->date_transaction, $item['account_code'], $item['type'], $nominal, 'Import Transaction');
+                        $this->storeGeneralLedger($refParent->id, $refNumber, $request->date_transaction, $item['account_code'], $item['type'], $nominal, 'Import Transaction');
                         // Update & Calculate Balance Account Code
                         $this->updateBalanceAccount($item['account_code'], $nominal, $item['type']);
                     }
@@ -158,7 +159,9 @@ class TransImportController extends Controller
         
         $general_ledgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
             ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
+            ->where('general_ledgers.id_ref', $id)
             ->where('general_ledgers.ref_number', $data->ref_number)
+            ->where('general_ledgers.source', 'Import Transaction')
             ->get();
         
         $transaction_date = date('Y-m-d', strtotime($general_ledgers[0]->date_transaction));
