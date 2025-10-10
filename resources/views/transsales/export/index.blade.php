@@ -1,11 +1,11 @@
 @extends('layouts.master')
-
 @section('konten')
 
 <div class="page-content">
     <div class="container-fluid">
 
         @include('layouts.alert')
+        @include('generalledger.show_modal')
 
         <!-- Modal Search -->
         <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -25,12 +25,7 @@
                                 </div>
                                 <div class="col-6 mb-2">
                                     <label class="form-label">Delivery Note</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes">
-                                        <option value="" selected>--Select Type--</option>
-                                        @foreach($deliveryNotes as $item)
-                                            <option value="{{ $item->id }}" @if($id_delivery_notes == $item->id) selected="selected" @endif>{{ $item->dn_number." - ". $item->status }}</option>
-                                        @endforeach
-                                    </select>
+                                    <input class="form-control" name="dn_number" type="text" value="{{ $dn_number }}" placeholder="Filter DN Number..">
                                 </div>
                                 <hr class="mt-2">
                                 <div class="col-4 mb-2">
@@ -112,8 +107,11 @@
                             <div class="col-lg-12">
                                 <div class="text-center">
                                     List of 
-                                    @if($ref_number != null)
+                                    @if($ref_number)
                                         (Ref. Number<b> - {{ $ref_number }}</b>)
+                                    @endif
+                                    @if($dn_number)
+                                        (DN. Number<b> - {{ $dn_number }}</b>)
                                     @endif
                                     @if($searchDate == 'Custom')
                                         (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
@@ -126,16 +124,14 @@
                     </div>
                     <div class="card-body">
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
-                                    {{-- <th class="align-middle text-center">
-                                        <input type="checkbox" id="checkAllRows">
-                                    </th> --}}
                                     <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Ref. Number</th>
-                                    <th class="align-middle text-center">Transaction Date</th>
-                                    <th class="align-middle text-center">DN Number</th>
-                                    <th class="align-middle text-center">Total Transaction</th>
+                                    <th class="align-middle text-center">Invoice Date</th>
+                                    <th class="align-middle text-center">DN Number (Customer)</th>
+                                    <th class="align-middle text-center">Transaction Count</th>
+                                    <th class="align-middle text-center">Total Amount</th>
                                     <th class="align-middle text-center">Created By</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -158,7 +154,7 @@
         var fileName = "Sales Transaction Export - " + formattedDate + ".xlsx";
         var data = {
                 ref_number: '{{ $ref_number }}',
-                id_delivery_notes: '{{ $id_delivery_notes }}',
+                dn_number: '{{ $dn_number }}',
                 searchDate: '{{ $searchDate }}',
                 startdate: '{{ $startdate }}',
                 enddate: '{{ $enddate }}'
@@ -173,18 +169,6 @@
                 '<button class="btn btn-sm btn-light me-1" type="button" id="custom-button" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Sort & Filter</button>' +
                 '<input class="form-control me-1" id="custom-search-input" type="text" placeholder="Search...">' +
                 '</div>');
-                // $('.top').prepend(
-                //     `<div class='pull-left'>
-                //         <div class="btn-group mb-2" style="margin-right: 10px;"> <!-- Added inline style for margin -->
-                //             <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                //                 <i class="mdi mdi-checkbox-multiple-marked-outline"></i> Bulk Actions <i class="fas fa-caret-down"></i>
-                //             </button>
-                //             <ul class="dropdown-menu">
-                //                 <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteselected"><i class="mdi mdi-trash-can"></i> Delete Selected</button></li>
-                //             </ul>
-                //         </div>
-                //     </div>`
-                // );
             },
             buttons: [
                 {
@@ -238,15 +222,8 @@
                 data: data
             },
             columns: [
-                // {
-                //     data: 'bulk-action',
-                //     name: 'bulk-action',
-                //     className: 'text-center',
-                //     orderable: false,
-                //     searchable: false
-                // },
                 {
-                data: null,
+                    data: null,
                     render: function(data, type, row, meta) {
                         return meta.row + meta.settings._iDisplayStart + 1;
                     },
@@ -262,7 +239,7 @@
                     className: 'text-bold'
                 },
                 {
-                    data: 'date_transaction',
+                    data: 'date_invoice',
                     searchable: true,
                     orderable: true,
                     className: 'text-center',
@@ -276,16 +253,36 @@
                     name: 'dn_number',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center'
+                    render: function(data, type, row) {
+                        let dn = data ?? '';
+                        let customer = row.customer_name ? `<br>${row.customer_name}` : '';
+                        return `<b>${dn}</b>${customer}`;
+                    },
                 },
                 {
-                    data: 'count',
-                    name: 'count',
+                    data: 'total_transaction',
+                    name: 'total_transaction',
                     orderable: true,
                     searchable: true,
                     className: 'text-center',
+                },
+                {
+                    data: 'total',
+                    name: 'total',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-end',
                     render: function(data, type, row) {
-                        return '<h5><span class="badge bg-info">'+ row.count +'</span></h5>';
+                        if (data == null) {
+                            return '<span class="badge bg-secondary">Null</span>';
+                        }
+                        var currency = '<span class="text-muted">' + row.currency + '</span>'; 
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return currency + ' <span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return currency + ' <span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
                 {
@@ -304,12 +301,13 @@
                     searchable: false,
                     className: 'align-top text-center',
                 },
+                {
+                    data: 'customer_name',
+                    name: 'customer_name',
+                    searchable: true,
+                    visible: false
+                },
             ],
-            // bAutoWidth: false,
-            // columnDefs: [{
-            //     width: "1%",
-            //     targets: [0]
-            // }]
         });
 
         $(document).on('keyup', '#custom-search-input', function () {

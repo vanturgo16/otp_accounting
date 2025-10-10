@@ -80,7 +80,7 @@
                     </div>
                     <div class="card-body">
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
                                     <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">PPN Name</th>

@@ -1,11 +1,11 @@
 @extends('layouts.master')
-
 @section('konten')
 
 <div class="page-content">
     <div class="container-fluid">
 
         @include('layouts.alert')
+        @include('generalledger.show_modal')
 
         <!-- Modal Search -->
         <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -117,7 +117,7 @@
                     </div>
                     <div class="card-body">
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
                                     {{-- <th class="align-middle text-center">
                                         <input type="checkbox" id="checkAllRows">
@@ -125,7 +125,7 @@
                                     <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Ref. Number</th>
                                     <th class="align-middle text-center">Tax Number</th>
-                                    <th class="align-middle text-center">Total Transaction</th>
+                                    <th class="align-middle text-center">Transaction Count</th>
                                     <th class="align-middle text-center">Created By</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -257,14 +257,11 @@
                     className: 'align-top'
                 },
                 {
-                    data: 'count',
-                    name: 'count',
+                    data: 'total_transaction',
+                    name: 'total_transaction',
                     orderable: true,
                     searchable: true,
-                    className: 'align-top text-center',
-                    render: function(data, type, row) {
-                        return '<h5><span class="badge bg-info">'+ row.count +'</span></h5>';
-                    },
+                    className: 'text-center',
                 },
                 {
                     data: 'created_by',

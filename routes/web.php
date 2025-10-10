@@ -103,8 +103,9 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
     Route::controller(TransSalesController::class)->group(function () {
         Route::prefix('transsales')->middleware('permission:Akunting_sales')->group(function () {
             Route::get('/getdeliverynote/{id}', 'getDeliveryNote')->name('transsales.getdeliverynote');
-            Route::get('/getsalesorder', 'getSalesOrder')->name('transsales.getsalesorder');
+            Route::get('/getsoprice-from-dn', 'getSOPriceFromDN')->name('transsales.getSOPriceFromDN');
             Route::get('/gettotalprice/{id}/{ppnRate}/{type}', 'getTotalPrice')->name('transsales.gettotalprice');
+            Route::get('/getcustomer-from-dn/{id}', 'getCustomerFromDN')->name('transsales.getCustomerFromDN');
 
             // Local
             Route::get('local', 'indexLocal')->name('transsales.local.index');
@@ -156,6 +157,7 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
             Route::post('/', 'index')->name('generalledger.index');
             Route::get('/create', 'create')->name('generalledger.create');
             Route::post('/store', 'store')->name('generalledger.store');
+            Route::get('/getData', 'getData')->name('generalledger.getData');
         });
     });
 

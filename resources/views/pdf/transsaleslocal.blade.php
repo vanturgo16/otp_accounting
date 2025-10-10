@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Sales Transaction - {{ $transSales->ref_number }}</title>
+    <title>Sales Transaction - {{ $detail->ref_number }}</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
 
@@ -75,29 +75,29 @@
                     </td>
                     <td style="width:30%; font-size: 8px; padding: 0; position: relative;">
                         <div style="position: absolute; top: 0; right: 0; font-size: 10px;">
-                            {{ $docNo }}
+                            {{ $detail->doc_no ?? '-' }}
                         </div>
                         <div style="font-size: 10px;" class="mt-4">
                             Kepada Yth,
                         </div>
                         <div class="card p-1" style="border: 1px solid black; width: 100%;">
                             <div style="font-size: 10px;">
-                                <b>{{ $deliveryNote->customer_name ?? '-' }}</b>
+                                <b>{{ $detailCust->customer_name ?? '-' }}</b>
                             </div>  
                             <div style="font-size: 8px;">
-                                @if($deliveryNote->address)
-                                    {{  $deliveryNote->address . ', ' . 
-                                        ($deliveryNote->postal_code ?? '-') . ', ' . 
-                                        ($deliveryNote->city ?? '-') . ', ' . 
-                                        ($deliveryNote->province ?? '-') . ', ' . 
-                                        ($deliveryNote->country ?? '-') }}
+                                @if($detailCust->address)
+                                    {{  $detailCust->address . ', ' . 
+                                        ($detailCust->postal_code ?? '-') . ', ' . 
+                                        ($detailCust->city ?? '-') . ', ' . 
+                                        ($detailCust->province ?? '-') . ', ' . 
+                                        ($detailCust->country ?? '-') }}
                                 @else
-                                    Address: -
+                                    -
                                 @endif
                             </div>
                             <br>
                             <div style="font-size: 8px;">
-                                NPWP : {{ $deliveryNote->tax_number ?? '-' }}
+                                NPWP : {{ $detailCust->tax_number ?? '-' }}
                             </div>
                         </div>
                         <div style="font-size: 10px;">
@@ -118,7 +118,7 @@
                             FAKTUR PENJUALAN
                         </div>
                         <small style="font-size: 10px; margin: 0 !important; padding: 0 !important; line-height: 1;">
-                            {{ $transSales->ref_number }}
+                            {{ $detail->ref_number }}
                         </small>
                     </td>
                     <td style="width:30%;"></td>   
@@ -136,14 +136,25 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($datas as $item)
+                @foreach ($detailTransSales as $item)
                     <tr>
-                        <td class="px-2" style="border-left: none;">{{ $item->product }}</td>
-                        <td class="px-2 text-center">{{ $item->qty. ' '. $item->unit }}</td>
-                        <td class="px-2 text-right">{{ number_format($item->price, 2, ',', '.') }}</td>
-                        <td class="px-2 text-right" style="border-right: none;">{{ number_format($item->total_price, 2, ',', '.') }}</td>
+                        <td class="px-2" style="border-left: none; border-bottom: none;">{{ $item->product }}</td>
+                        <td class="px-2 text-center" style="border-bottom: none;">
+                            {{ fmod($item->qty, 1) == 0 
+                                ? number_format($item->qty, 0, ',', '.') 
+                                : number_format(floor($item->qty), 0, ',', '.') . ',' . rtrim(str_replace('.', '', explode('.', (string)$item->qty)[1]), '0') }}
+                            {{ ' '. $item->unit }}
+                        </td>
+                        <td class="px-2 text-right" style="border-bottom: none;">{{ number_format($item->price_before_ppn, 2, ',', '.') }}</td>
+                        <td class="px-2 text-right" style="border-right: none; border-bottom: none;">{{ number_format($item->total_price_before_ppn, 2, ',', '.') }}</td>
                     </tr>
                 @endforeach
+                <tr>
+                    <td style="border-left: none; border-top: none; height: 30px;"></td>
+                    <td style="border-top: none;"></td>
+                    <td style="border-top: none;"></td>
+                    <td style="border-right: none; border-top: none;"></td>
+                </tr>
             </tbody>
         </table>
 
@@ -162,14 +173,14 @@
                             <td class="align-top" style="width:27%;">No. Surat Jalan</td>
                             <td class="align-top" style="width:2%;">:</td>
                             <td class="align-top" style="width:71%;">
-                                {{ $deliveryNote->dn_number ?? '-' }}
+                                {{ $detail->dn_number ?? '-' }}
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:27%;">No. KO / PO</td>
                             <td class="align-top" style="width:2%;">:</td>
                             <td class="align-top" style="width:71%;">
-                                {{ $deliveryNote->ko_number ?? $deliveryNote->po_number ?? '-' }}
+                                {{ $detail->ko_number ?? $detail->po_number ?? '-' }}
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
@@ -183,12 +194,12 @@
                             <td class="align-top" style="width:27%;">Pembayaran Ke</td>
                             <td class="align-top" style="width:2%;">:</td>
                             <td class="align-top" style="width:71%;">
-                                {{ $dataCompany->company_name ?? '-' }}
+                                {{ $bankAccount['account_name'] ?? '-' }}
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
                             <td colspan="3" class="align-top" style="width:100%;">
-                                A/C. 764 188 4999&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BCA KCP Citra Raya Tangerang
+                                A/C. {{ $bankAccount['account_number'] ?? '-' }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $bankAccount['bank_name'] ?? '-' }} {{ $bankAccount['branch'] ?? '-' }}
                             </td>
                         </tr>
                     </table>
@@ -199,25 +210,25 @@
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:50%;">Nilai Jual</td>
                             <td class="text-right align-top" style="width:50%;">
-                                <b>{{ number_format($transSales->sales_value, 2, ',', '.') }}</b>
+                                <b>{{ number_format($detail->sales_value, 2, ',', '.') }}</b>
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:50%;">DPP Lain-lain</td>
                             <td class="text-right align-top" style="width:50%;">
-                                <b>{{ number_format($transSales->dpp, 2, ',', '.') }}</b>
+                                <b>{{ number_format($detail->dpp, 2, ',', '.') }}</b>
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:50%;">PPN</td>
                             <td class="text-right align-top" style="width:50%;">
-                                <b>{{ number_format($transSales->tax_sales, 2, ',', '.') }}</b>
+                                <b>{{ number_format($detail->ppn_value, 2, ',', '.') }}</b>
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:50%;">Total Nilai Jual + PPN</td>
                             <td class="text-right align-top" style="width:50%;">
-                                <b>{{ number_format($transSales->total, 2, ',', '.') }}</b>
+                                <b>{{ number_format($detail->total, 2, ',', '.') }}</b>
                             </td>
                         </tr>
                     </table>
@@ -226,10 +237,10 @@
                         <tbody>
                             <tr>
                                 <td style="width:5%;"></td>
-                                <td style="width:95%; font-size: 11px;">
-                                    PT. OLEFINA TIFAPLAS POLIKEMINDO
+                                <td style="width:95%; font-size: 11px;" class="text-center">
+                                    {{ $dataCompany->company_name ?? '-' }}
                                     
-                                    <div style="margin-top: 90px"></div>
+                                    <div style="margin-top: 100px"></div>
                                     <hr style="border: 1px solid black;">   
                                 </td>
                             </tr>

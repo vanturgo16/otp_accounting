@@ -126,7 +126,7 @@ class GeneralLedgersController extends Controller
                         $nominal = str_replace(',', '.', $nominal);
     
                         // Create General Ledger
-                        $this->storeGeneralLedger($request->transaction_number, $request->transaction_date,$item['account_code'], $item['type'], $nominal, $source);
+                        $this->storeGeneralLedger(null, $request->transaction_number, $request->transaction_date,$item['account_code'], $item['type'], $nominal, $source);
                         // Update & Calculate Balance Account Code
                         $this->updateBalanceAccount($item['account_code'], $nominal, $item['type']);
                     }
@@ -142,5 +142,21 @@ class GeneralLedgersController extends Controller
             DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Transaction!']);
         }
+    }
+
+    public function getData(Request $request)
+    {
+        $id_ref     = $request->id_ref;
+        $ref_number = $request->ref_number;
+        $source     = $request->source;
+        
+        $data = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
+            ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
+            ->where('general_ledgers.id_ref', $id_ref)
+            ->where('general_ledgers.ref_number', $ref_number)
+            ->where('general_ledgers.source', $source)
+            ->get();
+
+        return response()->json($data);
     }
 }
