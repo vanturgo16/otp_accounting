@@ -31,11 +31,12 @@ class GeneralLedgersController extends Controller
         $acccodes = MstAccountCodes::get();
 
         $datas = GeneralLedger::select(
-                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
-                'general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name'
+                'general_ledgers.ref_number', 'general_ledgers.source', 'general_ledgers.date_transaction', 'master_account_codes.account_code', 
+                'master_account_codes.account_name',  'general_ledgers.amount',  'general_ledgers.transaction',  'general_ledgers.created_at',
             )
             ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
-            ->orderBy('general_ledgers.created_at','desc');
+            ->orderBy('general_ledgers.date_transaction','desc')
+            ->orderBy('general_ledgers.ref_number');
 
         if($ref_number != null){
             $datas = $datas->where('ref_number', 'like', '%'.$ref_number.'%');
@@ -44,10 +45,18 @@ class GeneralLedgersController extends Controller
             $datas = $datas->where('id_account_code', $id_account_code);
         }
         if($source != null){
-            $datas = $datas->where('source', $source);
+            if ($source === "Manual") {
+                $datas = $datas->whereNotIn('source', [
+                    'Sales Transaction',
+                    'Purchase Transaction',
+                    'Import Transaction',
+                ]);
+            } else {
+                $datas = $datas->where('source', $source);
+            }
         }
         if($startdate != null && $enddate != null){
-            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+            $datas = $datas->whereDate('general_ledgers.created_at','>=',$startdate)->whereDate('general_ledgers.created_at','<=',$enddate);
         }
         
         if($request->flag != null){
@@ -60,11 +69,11 @@ class GeneralLedgersController extends Controller
         // Datatables
         if ($request->ajax()) {
             return DataTables::of($datas)
-                ->addColumn('bulk-action', function ($data) {
-                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
-                    return $checkBox;
-                })
-                ->rawColumns(['bulk-action'])
+                // ->addColumn('bulk-action', function ($data) {
+                //     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                //     return $checkBox;
+                // })
+                // ->rawColumns(['bulk-action'])
                 ->make(true);
         }
         
@@ -78,7 +87,7 @@ class GeneralLedgersController extends Controller
     public function create(Request $request)
     {
         $source = MstDropdowns::where('category', 'Source Accounting')->get();
-        $accountcodes = MstAccountCodes::get();
+        $accountcodes = MstAccountCodes::where('is_active', 1)->get();
 
         //Audit Log
         $this->auditLogsShort('View Create New Transaction General Ledger');
@@ -117,7 +126,7 @@ class GeneralLedgersController extends Controller
                         $nominal = str_replace(',', '.', $nominal);
     
                         // Create General Ledger
-                        $this->storeGeneralLedger($request->transaction_number, $request->transaction_date,$item['account_code'], $item['type'], $nominal, $source);
+                        $this->storeGeneralLedger(null, $request->transaction_number, $request->transaction_date,$item['account_code'], $item['type'], $nominal, $source);
                         // Update & Calculate Balance Account Code
                         $this->updateBalanceAccount($item['account_code'], $nominal, $item['type']);
                     }
@@ -133,5 +142,21 @@ class GeneralLedgersController extends Controller
             DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Transaction!']);
         }
+    }
+
+    public function getData(Request $request)
+    {
+        $id_ref     = $request->id_ref;
+        $ref_number = $request->ref_number;
+        $source     = $request->source;
+        
+        $data = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
+            ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
+            ->where('general_ledgers.id_ref', $id_ref)
+            ->where('general_ledgers.ref_number', $ref_number)
+            ->where('general_ledgers.source', $source)
+            ->get();
+
+        return response()->json($data);
     }
 }

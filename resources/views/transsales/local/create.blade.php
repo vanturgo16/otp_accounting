@@ -35,18 +35,14 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-lg-3 mb-3">
+                                <div class="col-lg-6 mb-3">
                                     <label class="form-label">Ref Number</label><label style="color: darkred">*</label>
-                                    <br>
-                                    <span class="badge bg-info text-white">Auto Generate</span>
+                                    <br><span class="badge bg-info text-white">Auto Generate</span>
                                 </div>
                                 <div class="col-lg-3 mb-3">
                                     <label class="form-label">Invoice Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="date_invoice" value="" required>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="date_transaction" value="" required>
+                                    <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Tanggal yang akan ditampilkan pada lembar invoice"></i>
+                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" required max="<?= date('Y-m-d'); ?>">
                                 </div>
                                 <div class="col-lg-3 mb-3">
                                     <label class="form-label">Due Date</label><label style="color: darkred">*</label>
@@ -60,35 +56,59 @@
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Daftar Delivery Note (DN) berstatus Posted yang belum dibuatkan invoice"></i>
                                             <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
-                                                <option value="" selected>-- Select --</option>
+                                                <option value="" selected disabled>-- Select --</option>
                                                 @foreach($deliveryNotes as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->dn_number." - ". $item->status }}</option>
+                                                    <option value="{{ $item->id }}"
+                                                        data-dn-number="{{ $item->dn_number }}"
+                                                        data-dn-date="{{ $item->date }}"
+                                                        data-po-number="{{ $item->po_number }}"
+                                                        data-ko-number="{{ $item->ko_number }}">
+                                                        {{ $item->dn_number }} || 
+                                                        {{ $item->date }} || 
+                                                        {{ ucfirst($item->status) }} || 
+                                                        KO/PO: {{ $item->ko_number ?? $item->po_number ?? '-' }}
+                                                    </option>
                                                 @endforeach
                                             </select>
+                                            <input type="hidden" name="dn_number" value="">
+                                            <input type="hidden" name="dn_date" value="">
+                                            <input type="hidden" name="po_number" value="">
+                                            <input type="hidden" name="ko_number" value="">
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Customer Name</label>
-                                            <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
+                                            <input type="hidden" name="id_master_customers" id="id_master_customers" value="">
+                                            <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Sales Name</label>
-                                            <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
+                                            <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
                                         </div>
                                         
                                         <div class="col-12">
                                             <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                                                <thead>
+                                                <thead class="table-light">
                                                     <tr>
-                                                        <th class="align-middle text-center">No.</th>
-                                                        <th class="align-middle text-center">SO Number</th>
-                                                        <th class="align-middle text-center">Product</th>
-                                                        <th class="align-middle text-center">Qty (Unit)</th>
-                                                        <th class="align-middle text-center">Tax</th>
-                                                        <th class="align-middle text-center">Price</th>
-                                                        <th class="align-middle text-center">Total Price</th>
+                                                        <th rowspan="2" class="align-middle text-center">No.</th>
+                                                        <th rowspan="2" class="align-middle text-center">SO Number</th>
+                                                        <th rowspan="2" class="align-middle text-center">Product</th>
+                                                        <th rowspan="2" class="align-middle text-center">Qty (Unit)</th>
+                                                        <th rowspan="2" class="align-middle text-center">Tax Type</th>
+                                                        <th colspan="3" class="align-middle text-center">Price</th>
+                                                        <th colspan="2" class="align-middle text-center">Total Price</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th class="align-middle text-center">Before Tax</th>
+                                                        <th class="align-middle text-center">Tax Value</th>
+                                                        <th class="align-middle text-center">After Tax</th>
+                                                        <th class="align-middle text-center">Before Tax</th>
+                                                        <th class="align-middle text-center">After Tax</th>
                                                     </tr>
                                                 </thead>
                                             </table>
@@ -96,36 +116,66 @@
 
                                         <div class="col-lg-6 mt-4">
                                         </div>
-                                        <div class="col-lg-6 mt-4">
+                                        <div class="col-lg-6 mt-4">                                          
                                             <table style="width: 100%">
                                                 <tbody>
                                                     <tr>
-                                                        <td class="text-right">
-                                                            <label class="form-label font-weight-bold" style="text-align: right; display: block;">Total All Price</label>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Set PPN Rate <br><small>(default {{ $initPPN }}%)</small> :</label>
                                                         </td>
-                                                        <td class="text-right">
-                                                            <label class="form-label" style="text-align: right; display: block;">: Rp. <span id="totalPrice">0</span></label>
+                                                        <td class="text-end" style="width: 50%;">
+                                                            <div class="input-group" style="width: 150px; margin-left: auto;">
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonMinusPPNRate" disabled>-</button>
+                                                                <input type="text" name="ppn_rate" class="form-control text-center" value="{{ $initPPN }}" id="ppn_rate" style="background-color:#EAECF4" required readonly>
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonPlusPPNRate" disabled>+</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><br></td><td><br></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Total Nilai Jual :</label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="text-muted">Rp. </span><span id="njPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">
+                                                                DPP Lain-lain 
+                                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Total Nilai Jual X (11/12)"></i>
+                                                                :
+                                                            </label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="text-muted">Rp. </span><span id="dppPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">
+                                                                PPN (<span id="labelPPNRate">{{ $initPPN }}</span><span>%)</span>
+                                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Total Nilai Jual X PPN Rate"></i>
+                                                                :
+                                                            </label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="text-muted">Rp. </span><span id="ppnPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Total Nilai Jual + PPN :</label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> Rp. <span id="totalPrice">0</span></label>
                                                         </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-lg-6 mb-3"></div>
-                                        <div class="col-lg-2 mb-3">
-                                            <label class="form-label" for="tax">Tax (%)</label><label style="color: darkred">*</label>
-                                            <div class="input-group">
-                                                <input type="number" class="form-control" name="tax" id="tax" value="" placeholder="Tax.." style="background-color:#EAECF4" required readonly>
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text" style="background-color:#EAECF4">%</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-4 mb-3">
-                                            <label class="form-label">Tax Amount</label><label style="color: darkred">*</label>
-                                            <input type="text" class="form-control rupiah-input" placeholder="Input Amount.." name="tax_sales" value="" style="width: 100%; background-color:#EAECF4" required readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -135,7 +185,10 @@
                                 <div class="col-lg-12 mt-3">
                                     <div class="card">
                                         <div class="card-header text-center">
-                                            <h6 class="mb-0">Transaction</h6>
+                                            <h6 class="mb-0">
+                                                Transaction
+                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Aturan Transaksi: Total Debit harus sama dengan Total Kredit, serta sama dengan Total Nilai Jual + PPN"></i>
+                                            </h6>
                                         </div>
                                         <div class="card-body">
                                             <div class="table-repsonsive">
@@ -217,6 +270,15 @@
 
 {{-- Validation Form --}}
 <script>
+    function normalizeNumber(value) {
+        if (typeof value === "string") {
+            return parseFloat(
+                value.replace(/\./g, "").replace(",", ".")
+            );
+        }
+        return Number(value);
+    }
+
     function parseCurrency(value) {
         return parseFloat(value.replace(/\./g, '').replace(',', '.'));
     }
@@ -273,7 +335,9 @@
             var myModal = new bootstrap.Modal(document.getElementById('alert'));
             myModal.show();
         } else {
-            if(totals.debitTotal == totalPriceGlobal){
+            let numDebit = normalizeNumber(totals.debitTotal);
+            let numPrice = normalizeNumber(totalPriceGlobal);
+            if(numDebit == numPrice){
                 var submitButton = this.querySelector('button[name="sb"]');
                 submitButton.disabled = true;
                 submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
@@ -363,16 +427,21 @@
 
 <script>
     let totalPriceGlobal = 0;
+
     $(function() {
-        var data = {id_delivery_notes: ''};
+        var data = {
+            idDN    : '',
+            ppnRate : '{{ $initPPN }}',
+        };
         var dataTable = $('#server-side-table').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
-                url: '{!! route('transsales.getsalesorder') !!}',
+                url: '{!! route('transsales.getSOPriceFromDN') !!}',
                 type: 'GET',
                 data: function(d) {
-                    d.id_delivery_notes = data.id_delivery_notes;
+                    d.idDN      = data.idDN;
+                    d.ppnRate   = data.ppnRate;
                 }
             },
             "columns": [
@@ -390,15 +459,10 @@
                     name: 'so_number',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
                     render: function(data, type, row) {
-                        var html;
-                        if (row.so_number == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = '<span class="text-bold">' + row.so_number + '</span>';
-                        }
-                        return html;
+                        return row.so_number 
+                            ? `<span class="text-bold">${row.so_number}</span>` 
+                            : `<span class="badge bg-secondary">Null</span>`;
                     },
                 },
                 {
@@ -427,8 +491,8 @@
                     },
                 },
                 {
-                    data: 'ppn',
-                    name: 'ppn',
+                    data: 'ppn_type',
+                    name: 'ppn_type',
                     orderable: true,
                     searchable: true,
                     className: 'text-center',
@@ -437,118 +501,184 @@
                     },
                 },
                 {
-                    data: 'price',
-                    name: 'price',
+                    data: 'price_before_ppn',
+                    name: 'price_before_ppn',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
-                    render: function (data, type, row) {
-                        if (row.price == null) {
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return formatPrice(row.price);
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
                 {
-                    data: 'total_price',
-                    name: 'total_price',
+                    data: 'ppn_value',
+                    name: 'ppn_value',
                     orderable: true,
                     searchable: true,
-                    className: 'text-center',
-                    render: function (data, type, row) {
-                        if (row.total_price == null) {
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        return formatPrice(row.total_price);
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span><br>(' + row.ppn_rate + '%)';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span><br>(' + row.ppn_rate + '%)';
+                    },
+                },
+                {
+                    data: 'price_after_ppn',
+                    name: 'price_after_ppn',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
+                            return '<span class="badge bg-secondary">Null</span>';
+                        }
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
+                    },
+                },
+                {
+                    data: 'total_price_before_ppn',
+                    name: 'total_price_before_ppn',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
+                            return '<span class="badge bg-secondary">Null</span>';
+                        }
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
+                    },
+                },
+                {
+                    data: 'total_price_after_ppn',
+                    name: 'total_price_after_ppn',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
+                            return '<span class="badge bg-secondary">Null</span>';
+                        }
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
             ]
         });
 
-        let initiateppn = parseFloat('{{ $tax }}') || 0;
-        $('select[name="id_delivery_notes"]').on('change', function() {
-            data.id_delivery_notes = $(this).val();
-            dataTable.ajax.reload();
-
-            $('#customer_name').val("");
-            $('#sales_name').val("");
-            $('#totalPrice').html(0);
-            var id_delivery_notes = $(this).val();
-            if(id_delivery_notes == ""){
-                $('#customer_name').val("");
-                $('#sales_name').val("");
-                $('#totalPrice').html(0);
-
-                $('input[name="tax"]').val("N/A")
-                    .prop('readonly', true).css('background-color', '#EAECF4')
-                    .attr('placeholder', 'N/A');
-                $('input[name="tax_sales"]').val(0)
-                    .prop('readonly', true).css('background-color', '#EAECF4')
-                    .attr('placeholder', 'N/A');
-            } else {
-                let urlTotal = '{{ route("transsales.gettotalprice", ":id") }}'.replace(':id', id_delivery_notes);
-                let urlDN    = '{{ route("transsales.getdeliverynote", ":id") }}'.replace(':id', id_delivery_notes);
-
-                if (id_delivery_notes) {
-                    $.ajax({
-                        url: urlTotal,
-                        type: "GET",
-                        dataType: "json",
-                        success: function(totalPrice) {
-                            totalPriceGlobal = parseFloat(totalPrice) || 0;
-                            // show total price
-                            $('#totalPrice').html(totalPrice ? formatPrice(totalPrice) : 0);
-
-                            // now get delivery note after we know totalPrice
-                            $.ajax({
-                                url: urlDN,
-                                type: "GET",
-                                dataType: "json",
-                                success: function(data) {
-                                    $('#customer_name').val(data.customer_name ?? '-');
-                                    $('#sales_name').val(data.salesman_name ?? '-');
-
-                                    if (data.ppn === "Include") {
-                                        let initiateAmount = (initiateppn / 100) * (totalPrice ?? 0);
-                                        $('input[name="tax"]').val(initiateppn)
-                                            .prop('readonly', false).css('background-color', '')
-                                            .attr('placeholder', 'Tax..');
-                                        $('input[name="tax_sales"]').val(formatPrice(initiateAmount))
-                                            .prop('readonly', false).css('background-color', '')
-                                            .attr('placeholder', 'Input Amount..');
-                                    } else {
-                                        $('input[name="tax"]').val("N/A")
-                                            .prop('readonly', true).css('background-color', '#EAECF4')
-                                            .attr('placeholder', 'N/A');
-                                        $('input[name="tax_sales"]').val(0)
-                                            .prop('readonly', true).css('background-color', '#EAECF4')
-                                            .attr('placeholder', 'N/A');
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
+        dataTable.on('xhr.dt', function(e, settings, json, xhr) {
+            if (json) {
+                $('#njPrice').html(json.nj ? formatPriceWithStyle(json.nj) : 0);
+                $('#dppPrice').html(json.dpp ? formatPriceWithStyle(json.dpp) : 0);
+                $('#ppnPrice').html(json.ppn ? formatPriceWithStyle(json.ppn) : 0);
+                $('#totalPrice').html(json.total ? formatPriceWithStyle(json.total) : 0);
+                $('#labelPPNRate').html(json.ppn_rate ?? 0);
+                totalPriceGlobal = formatPrice(json.total) || 0;
             }
         });
-    });
-    
-    function formatPrice(value) {
-        if (!value) return '0';
-        // format with 3 decimals first
-        let formatted = Number(value).toLocaleString('id-ID', {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
-        });
-        // remove trailing zeros after comma
-        formatted = formatted.replace(/,?0+$/, '');
-        return formatted;
-    }
 
-    $('input[name="tax"]').on('input', function () {
-        let ppn = parseFloat($(this).val()) || 0;
-        let newAmount = (ppn / 100) * totalPriceGlobal;
-        $('input[name="tax_sales"]').val(formatPrice(newAmount));
+        $('select[name="id_delivery_notes"]').on('change', function() {
+            var selected = $(this).find('option:selected');
+            $('input[name="dn_number"]').val(selected.data('dn-number'));
+            $('input[name="dn_date"]').val(selected.data('dn-date'));
+            $('input[name="po_number"]').val(selected.data('po-number'));
+            $('input[name="ko_number"]').val(selected.data('ko-number'));
+
+            var idDN    = $(this).val();
+            let initPPN = parseFloat('{{ $initPPN }}') || 0;
+
+            $('#customer_name, #sales_name, #id_master_customers').val("");
+            resetPPNRate();
+            resetPrice();
+            
+            if(idDN) {
+                let urlGetCust = '{{ route("transsales.getCustomerFromDN", ":id") }}'.replace(':id', idDN);
+                $.ajax({
+                    url: urlGetCust,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#id_master_customers').val(data.id_master_customers ?? '-');
+                        $('#customer_name').val(data.customer_name ?? '-');
+                        $('#sales_name').val(data.salesman_name ?? '-');
+                    }
+                });
+
+                // To Update Datatable Display
+                reloadDataSO(idDN, initPPN);
+                enablePPNRate();
+            }
+        });
+
+        function resetPPNRate(){
+            let initPPN = parseFloat('{{ $initPPN }}') || 0;
+            $('#buttonMinusPPNRate, #buttonPlusPPNRate').prop('disabled', true);
+            $('#ppn_rate').val(initPPN).css('background-color', '#EAECF4');
+        }
+        function enablePPNRate(){
+            $('#buttonMinusPPNRate, #buttonPlusPPNRate').prop('disabled', false);
+            $('#ppn_rate').css('background-color', '');
+        }
+        function resetPrice(){
+            $('#njPrice, #dppPrice, #ppnPrice, #totalPrice').html(0);
+        }
+
+        function reloadDataSO(idDN, ppnRate){
+            // To Update Datatable Display
+            data.idDN       = idDN;
+            data.ppnRate    = ppnRate;
+            dataTable.ajax.reload();
+        }
+
+        // plus
+        $('#buttonPlusPPNRate').on('click', function() {
+            resetPrice();
+            let idDN    = $('select[name="id_delivery_notes"]').val();
+            let ppnRate = parseFloat($('#ppn_rate').val()) || 0;
+            if(ppnRate < 100) {
+                ppnRate++;
+                $('#ppn_rate').val(ppnRate);
+                reloadDataSO(idDN, ppnRate);
+            }
+        });
+        // minus
+        $('#buttonMinusPPNRate').on('click', function() {
+            resetPrice();
+            let idDN    = $('select[name="id_delivery_notes"]').val();
+            let ppnRate = parseFloat($('#ppn_rate').val()) || 0;
+            if(ppnRate > 0) {
+                ppnRate--;
+                $('#ppn_rate').val(ppnRate);
+                reloadDataSO(idDN, ppnRate);
+            }
+        });
     });
 </script>
 

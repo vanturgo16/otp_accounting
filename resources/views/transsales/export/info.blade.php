@@ -26,141 +26,319 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header text-center py-3">
-                        <h5 class="mb-0">Info</h5>
+                    <div class="card-header text-center">
+                        <h5>Info</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-4 mb-3">
-                                <label class="form-label mb-0">Ref Number</label>
-                                <br><span class="badge bg-info">{{ $data->ref_number }}</span>
+                                <label class="form-label mb-0">Ref. Number</label>
+                                <br><h4><span class="badge bg-info">{{ $detail->ref_number }}</span></h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4 mb-3">
+                                <label class="form-label mb-0">Created By</label>
+                                <br><span>{{ $detail->created_by ?? '-' }}</span>
                             </div>
                             <div class="col-lg-4 mb-3">
                                 <label class="form-label mb-0">Invoice Date</label>
-                                <br><span>{{ $data->date_invoice ? \Carbon\Carbon::parse($data->date_invoice)->format('d-m-Y') : '-' }}</span>
-                            </div>
-                            <div class="col-lg-4 mb-3">
-                                <label class="form-label mb-0">Transaction Date</label>
-                                <br><span>{{ $data->date_transaction ? \Carbon\Carbon::parse($data->date_transaction)->format('d-m-Y') : '-' }}</span>
-                            </div>
-                            <div class="col-lg-12 mb-3">
-                                <label class="form-label mb-0">Term</label>
-                                <br>
-                                <div class="card">
-                                    <div class="card-body">
-                                        <span>{!! $data->term !!}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr>
-                        </div>
-                        <div class="card p-2" style="background-color:#f0f2f7">
-                            <div class="row">
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label mb-0">Delivery Note</label>
-                                    <br><span>{{ $data->dn_number }}</span>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label mb-0">Customer Name</label>
-                                    <br>
-                                    <span>
-                                        @if($data->customer_name == null)
-                                        -
-                                        @else
-                                            {{ $data->customer_name }}
-                                        @endif
-                                    </span>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label mb-0">Sales Name</label>
-                                    <br>
-                                    <span>
-                                        @if($data->salesman_name == null)
-                                        -
-                                        @else
-                                            {{ $data->salesman_name }}
-                                        @endif
-                                    </span>
-                                </div>
-
-                                <div class="col-12">
-                                    <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                                        <thead>
-                                            <tr>
-                                                <th class="align-middle text-center">No.</th>
-                                                <th class="align-middle text-center">SO Number</th>
-                                                <th class="align-middle text-center">Product</th>
-                                                <th class="align-middle text-center">Qty (Unit)</th>
-                                                <th class="align-middle text-center">Tax</th>
-                                                <th class="align-middle text-center">Price</th>
-                                                <th class="align-middle text-center">Total Price</th>
-                                            </tr>
-                                        </thead>
-                                    </table>
-                                </div>
-                                <div class="col-lg-6 mt-4">
-                                </div>
-                                <div class="col-lg-6 mt-4">
-                                    <table style="width: 100%">
-                                        <tbody>
-                                            <tr>
-                                                <td class="text-right">
-                                                    <label class="form-label font-weight-bold" style="text-align: right; display: block;">Total All Price</label>
-                                                    <label class="form-label font-weight-bold" style="text-align: right; display: block;">PPN {{ $ppn }}%</label>
-                                                    <label class="form-label font-weight-bold" style="text-align: right; display: block;">Total</label>
-                                                </td>
-                                                <td class="text-right">
-                                                    <label class="form-label" style="text-align: right; display: block;">: Rp. <span id="totalPrice">{{ number_format($totalAllAmount, 2, ',', '.') }}</span></label>
-                                                    <label class="form-label" style="text-align: right; display: block;">: Rp. <span id="totalPrice">{{ number_format($ppn_val, 2, ',', '.') }}</span></label>
-                                                    <label class="form-label" style="text-align: right; display: block;">: Rp. <span id="totalPrice">{{ number_format($total, 2, ',', '.') }}</span></label>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                <br><span>{{ $detail->date_invoice ? \Carbon\Carbon::parse($detail->date_invoice)->format('d-m-Y') : '-' }}</span>
                             </div>
                         </div>
-
+                        <hr>
                         <div class="row">
-                            <div class="col-lg-12 mt-3">
+                            <div class="col-lg-12">
                                 <div class="card">
-                                    <div class="card-header text-center">
-                                        <h6 class="mb-0">Transaction</h6>
+                                    <div class="card-header">
+                                        <label class="form-label mb-0">Term</label>
                                     </div>
                                     <div class="card-body">
-                                        <div class="table-repsonsive">
-                                            <table class="table table-bordered" id="dynamicTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Account Code</th>
-                                                        <th>Nominal</th>
-                                                        <th>Debit / Kredit</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach($general_ledgers as $item)
-                                                    <tr>
-                                                        <td>
-                                                            {{ $item->account_code." - ".$item->account_name }}
-                                                        </td>
-                                                        <td>
-                                                            {{ number_format($item->amount, 3, ',', '.') }}
-                                                        </td>
-                                                        <td>
-                                                            @if($item->transaction == 'D')
-                                                                <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
-                                                            @else
-                                                                <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>
-                                                            @endif
-                                                        </td>
-                                                    </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
+                                        <span>{!! $detail->term !!}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <label class="form-label mb-0">Additional Info</label>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <table style="width: 100%; border-collapse: collapse;" cellspacing="1">
+                                                    <tbody style="font-size: 10px;">
+                                                        <tr>
+                                                            <td><label class="form-label font-weight-bold">Bank Name</label></td>
+                                                            <td><label class="form-label">:</label></td>
+                                                            <td><label class="form-label">{{ $bankAccount['bank_name'] ?? '-' }}</label></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><label class="form-label font-weight-bold">Account Name</label></td>
+                                                            <td><label class="form-label">:</label></td>
+                                                            <td><label class="form-label">{{ $bankAccount['account_name'] ?? '' }}</label></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><label class="form-label font-weight-bold">Account Number</label></td>
+                                                            <td><label class="form-label">:</label></td>
+                                                            <td><label class="form-label">{{ $bankAccount['account_number'] ?? '-' }} ({{ $bankAccount['currency'] ?? '-' }})</label></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><label class="form-label font-weight-bold">Swift Code</label></td>
+                                                            <td><label class="form-label">:</label></td>
+                                                            <td><label class="form-label">{{ $bankAccount['swift_code'] ?? '-' }}</label></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><label class="form-label font-weight-bold">Branch</label></td>
+                                                            <td><label class="form-label">:</label></td>
+                                                            <td><label class="form-label">{{ $bankAccount['branch'] ?? '-' }}</label></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <table style="width: 100%; border-collapse: collapse;" cellspacing="1">
+                                                    <tbody style="font-size: 10px;">
+                                                        <tr>
+                                                            <td><label class="form-label font-weight-bold">Approval Name</label></td>
+                                                            <td><label class="form-label">:</label></td>
+                                                            <td><label class="form-label">{{ $approvalDetail['name'] ?? '-' }}</label></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><label class="form-label font-weight-bold">Approval Email</label></td>
+                                                            <td><label class="form-label">:</label></td>
+                                                            <td><label class="form-label">{{ $approvalDetail['email'] ?? '' }}</label></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><label class="form-label font-weight-bold">Approval Position</label></td>
+                                                            <td><label class="form-label">:</label></td>
+                                                            <td><label class="form-label">{{ $approvalDetail['position'] ?? '-' }}</label></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5>Delivery Note Detail</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label mb-0">Delivery Note</label>
+                                        <br><span>{{ $detail->dn_number }}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label mb-0">DN Date</label>
+                                        <br><span>{{ $detail->dn_date ?? '-' }}</span>
+                                    </div>
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label mb-0">KO Number</label>
+                                        <br><span>{{ $detail->ko_number ?? '-' }}</span>
+                                    </div>
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label mb-0">PO Number</label>
+                                        <br><span>{{ $detail->po_number ?? '-' }}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label mb-0">Customer Name</label>
+                                        <br><span>{{ $detailCust->customer_name ?? '-' }}</span>
+                                    </div>
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label mb-0">Sales Name</label>
+                                        <br><span>{{ $detailCust->salesman_name ?? '-' }}</span>
+                                    </div>
+                                    <div class="col-lg-4 mb-3"></div>
+
+                                    <div class="col-12">
+                                        <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th rowspan="2" class="align-middle text-center">No.</th>
+                                                    <th rowspan="2" class="align-middle text-center">SO Number</th>
+                                                    <th rowspan="2" class="align-middle text-center">Product</th>
+                                                    <th rowspan="2" class="align-middle text-center">Qty (Unit)</th>
+                                                    <th rowspan="2" class="align-middle text-center">Tax Type</th>
+                                                    <th colspan="3" class="align-middle text-center">Price</th>
+                                                    <th colspan="2" class="align-middle text-center">Total Price</th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="align-middle text-center">Before Tax</th>
+                                                    <th class="align-middle text-center">Tax Value</th>
+                                                    <th class="align-middle text-center">After Tax</th>
+                                                    <th class="align-middle text-center">Before Tax</th>
+                                                    <th class="align-middle text-center">After Tax</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($detailTransSales as $item)
+                                                    <tr>
+                                                        <td class="text-center">{{ $loop->iteration }}</td>
+                                                        <td class="fw-bold">{{ $item->so_number }}</td>
+                                                        <td>
+                                                            {{ $item->product }}
+                                                            <br><b>({{ $item->type_product }})</b>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {{ fmod($item->qty, 1) == 0 
+                                                                ? number_format($item->qty, 0, ',', '.') 
+                                                                : number_format(floor($item->qty), 0, ',', '.') . ',' . rtrim(str_replace('.', '', explode('.', (string)$item->qty)[1]), '0') }} 
+                                                            ({{ $item->unit }})
+                                                        </td>
+                                                        <td class="text-center">{{ $item->ppn_type }}</td>
+                                                        <td class="text-end">
+                                                            @php
+                                                                $formatted = number_format($item->price_before_ppn, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            @php
+                                                                $formatted = number_format($item->ppn_value, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                            <br>({{ $item->ppn_rate }}%)
+                                                        </td>
+                                                        <td class="text-end">
+                                                            @php
+                                                                $formatted = number_format($item->price_after_ppn, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            @php
+                                                                $formatted = number_format($item->total_price_before_ppn, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            @php
+                                                                $formatted = number_format($item->total_price_after_ppn, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-lg-6 mt-4"></div>
+                                    <div class="col-lg-6 mt-4">
+                                        <table style="width: 100%">
+                                            <tbody>
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <label class="form-label fw-bold">PPN Rate :</label>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <label class="form-label"> {{ $detail->ppn_rate ?? '0' }}%</label>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><br></td><td><br></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <label class="form-label fw-bold">Total Nilai Jual :</label>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <label class="form-label"><span class="text-muted">{{ $detail->currency }} </span>
+                                                            @php
+                                                                $formatted = number_format($detail->sales_value, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <label class="form-label fw-bold">PPN :</label>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <label class="form-label"><span class="text-muted">{{ $detail->currency }} </span>
+                                                            @php
+                                                                $formatted = number_format($detail->ppn_value, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <label class="form-label fw-bold">Total Nilai Jual + PPN :</label>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <label class="form-label"><span class="text-muted">{{ $detail->currency }} </span>
+                                                            @php
+                                                                $formatted = number_format($detail->total, 3, ',', '.');
+                                                                [$before, $after] = explode(',', $formatted);
+                                                            @endphp
+                                                            <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5>Transaction</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-repsonsive">
+                                    <table class="table table-bordered" id="dynamicTable">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center">Account Code</th>
+                                                <th class="text-center">Nominal</th>
+                                                <th class="text-center">Debit / Kredit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($generalLedgers as $item)
+                                            <tr>
+                                                <td>
+                                                    {{ $item->account_code." - ".$item->account_name }}
+                                                </td>
+                                                <td class="text-end">
+                                                    @php
+                                                        $formatted = number_format($item->amount, 3, ',', '.');
+                                                        [$before, $after] = explode(',', $formatted);
+                                                    @endphp
+                                                    <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    @if($item->transaction == 'D')
+                                                        <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
+                                                    @else
+                                                        <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -181,124 +359,5 @@
         display: none;
     }
 </style>
-
-<script>
-    $(function() {
-        var data = {
-            id_delivery_notes: '{!! $data->id_delivery_notes !!}'
-        };
-        var dataTable = $('#server-side-table').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: '{!! route('transsales.getsalesorder') !!}',
-                type: 'GET',
-                data: function(d) {
-                    d.id_delivery_notes = data.id_delivery_notes;
-                }
-            },
-            "columns": [
-                {
-                data: null,
-                    render: function(data, type, row, meta) {
-                        return meta.row + meta.settings._iDisplayStart + 1;
-                    },
-                    orderable: false,
-                    searchable: false,
-                    className: 'text-center',
-                },
-                {
-                    data: 'so_number',
-                    name: 'so_number',
-                    orderable: true,
-                    searchable: true,
-                    className: 'text-center',
-                    render: function(data, type, row) {
-                        var html;
-                        if (row.so_number == null) {
-                            html = '<span class="badge bg-secondary">Null</span>';
-                        } else {
-                            html = '<span class="text-bold">' + row.so_number + '</span>';
-                        }
-                        return html;
-                    },
-                },
-                {
-                    data: 'product',
-                    name: 'product',
-                    orderable: true,
-                    searchable: true,
-                    render: function(data, type, row) {
-                        var html;
-                        if (row.product == null) {
-                            html = '<div class="text-center"><span class="badge bg-secondary">Null</span></div>';
-                        } else {
-                            html = row.product + '<br><b>(' + row.type_product + ')</b>';
-                        }
-                        return html;
-                    },
-                },
-                {
-                    data: 'qty',
-                    name: 'qty',
-                    orderable: true,
-                    searchable: true,
-                    className: 'text-center',
-                    render: function(data, type, row) {
-                        return (data ? data : '-') + ' (' + (row.unit ? row.unit : '-') + ')';
-                    },
-                },
-                {
-                    data: 'ppn',
-                    name: 'ppn',
-                    orderable: true,
-                    searchable: true,
-                    className: 'text-center',
-                    render: function(data, type, row) {
-                        return (data ? data : '-');
-                    },
-                },
-                {
-                    data: 'price',
-                    name: 'price',
-                    orderable: true,
-                    searchable: true,
-                    className: 'text-center',
-                    render: function (data, type, row) {
-                        if (row.price == null) {
-                            return '<span class="badge bg-secondary">Null</span>';
-                        }
-                        return formatPrice(row.price);
-                    },
-                },
-                {
-                    data: 'total_price',
-                    name: 'total_price',
-                    orderable: true,
-                    searchable: true,
-                    className: 'text-center',
-                    render: function (data, type, row) {
-                        if (row.total_price == null) {
-                            return '<span class="badge bg-secondary">Null</span>';
-                        }
-                        return formatPrice(row.total_price);
-                    },
-                },
-            ]
-        });
-    });
-    
-    function formatPrice(value) {
-        if (!value) return '0';
-        // format with 3 decimals first
-        let formatted = Number(value).toLocaleString('id-ID', {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
-        });
-        // remove trailing zeros after comma
-        formatted = formatted.replace(/,?0+$/, '');
-        return formatted;
-    }
-</script>
 
 @endsection

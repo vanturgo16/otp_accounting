@@ -51,8 +51,8 @@ class TransImportController extends Controller
         $flag = $request->get('flag');
 
         $datas = TransImport::select(
-                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
-                'trans_import.*'
+                'trans_import.*',
+                DB::raw("'Import Transaction' as source")
             )
             ->orderBy('trans_import.created_at','desc');
 
@@ -69,11 +69,6 @@ class TransImportController extends Controller
         }
         
         $datas = $datas->get();
-
-        foreach($datas as $data){
-            $count = GeneralLedger::where('ref_number', $data->ref_number)->count();
-            $data->count = $count;
-        }
         
         // Datatables
         if ($request->ajax()) {
@@ -81,11 +76,11 @@ class TransImportController extends Controller
                 ->addColumn('action', function ($data){
                     return view('transimport.action', compact('data'));
                 })
-                ->addColumn('bulk-action', function ($data) {
-                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
-                    return $checkBox;
-                })
-                ->rawColumns(['bulk-action'])
+                // ->addColumn('bulk-action', function ($data) {
+                //     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                //     return $checkBox;
+                // })
+                // ->rawColumns(['bulk-action'])
                 ->make(true);
         }
         
@@ -98,7 +93,7 @@ class TransImportController extends Controller
 
     public function create(Request $request)
     {
-        $accountcodes = MstAccountCodes::get();
+        $accountcodes = MstAccountCodes::where('is_active', 1)->get();
 
         //Audit Log
         $this->auditLogsShort('View Create New Import Transaction');
@@ -120,8 +115,9 @@ class TransImportController extends Controller
 
         DB::beginTransaction();
         try{
-            TransImport::create([
+            $refParent = TransImport::create([
                 'ref_number' => $refNumber,
+                'total_transaction' => $request->addmore ? count($request->addmore) : 0,
                 'tax_invoice_number' => $request->tax_invoice_number,
                 'ext_doc_number' => $request->ext_doc_number,
                 'inv_received_date' => $request->inv_received_date,
@@ -136,7 +132,7 @@ class TransImportController extends Controller
                         $nominal = str_replace(',', '.', $nominal);
 
                         // Create General Ledger
-                        $this->storeGeneralLedger($refNumber, $request->date_transaction, $item['account_code'], $item['type'], $nominal, 'Import Transaction');
+                        $this->storeGeneralLedger($refParent->id, $refNumber, $request->date_transaction, $item['account_code'], $item['type'], $nominal, 'Import Transaction');
                         // Update & Calculate Balance Account Code
                         $this->updateBalanceAccount($item['account_code'], $nominal, $item['type']);
                     }
@@ -163,7 +159,9 @@ class TransImportController extends Controller
         
         $general_ledgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
             ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
+            ->where('general_ledgers.id_ref', $id)
             ->where('general_ledgers.ref_number', $data->ref_number)
+            ->where('general_ledgers.source', 'Import Transaction')
             ->get();
         
         $transaction_date = date('Y-m-d', strtotime($general_ledgers[0]->date_transaction));

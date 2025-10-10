@@ -1,22 +1,23 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Sales Transaction - {{ $transSales->ref_number }}</title>
+    <title>Sales Transaction - {{ $detail->ref_number }}</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-
+    
     <style>
+        #totalNTerm {
+            page-break-inside: avoid;
+        }
         #approval {
             page-break-inside: avoid;
         }
-
-        .styled-table-service {
+        .styled-table {
             width: 100%;
             font-size: 9px;
         }
-
-        .styled-table-service th,
-        .styled-table-service td {
+        .styled-table th,
+        .styled-table td {
             border: 0.75px solid black;
             text-align: left;
         }
@@ -29,289 +30,258 @@
         footer { position: fixed; bottom: 0px; left: 0px; right: 0px; background-color: rgb(255, 255, 255); height: 50px; }
         p { page-break-after: always; }
         p:last-child { page-break-after: never; }
-
         .padded-element {
             padding: 10px 20px;
         }
-
         .padded-element-main {
             padding-top: 150px;
             padding-bottom: 25px;
             padding-left: 20px;
             padding-right: 20px;
         }
-
         .page-number::before {
             content: "Page " counter(page);
         }
     </style>
-
+    <style>
+        .header-table {
+            width: 100%;
+            height: 90px;
+            border-collapse: collapse;
+            border-bottom: 3px double black;
+        }
+        .header-table td {
+            vertical-align: middle;
+        }
+        .header-logo {
+            width: 80%;
+            height: auto;
+        }
+        .company-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #010066;
+        }
+        .company-info {
+            font-size: 10px;
+        }
+    </style>
 </head>
 <body class="padded-element-main">
-  <header class="padded-element">
-    <table style="height: 5px; width: 100%; border-collapse: collapse;" cellspacing="1">
-      <tbody>
-        <tr style="height: 5px;">
-          <td style="width:20%; font-size: 12px; text-align: right;">
-            <span class="page-number"></span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <table style="height: 90px; width: 100%; border-collapse: collapse; border-bottom: 3px double black;" cellspacing="1">
-      <tbody>
-          <tr>
-            <td style="width:15%">
-                <img style="width: 80%; height: auto;" src="{{ public_path('img/icon-otp.png') }}" alt="" />
-            </td>
-            <td class="align-middle text-center" style="width:70%; font-size: 8px;">
-                <div class="font-weight-bold" style="font-size: 20px; color:#010066;">
-                    PT. OLEFINA TIFAPLAS POLIKEMINDO
-                </div>
-                <div style="font-size: 10px;">
-                    Jl. Raya Serang KM 16.8, Desa Talaga
-                </div>
-                <div style="font-size: 10px;">
-                    Kec. Cikupa, Kab. Tangerang, Prov. Banten
-                </div>
-                <div style="font-size: 10px;">
-                    Phone : +62 21 5966 3567
-                </div>
-                <div style="font-size: 10px;">
-                    E-mail : budi.triadi@olefinatifaplas.com
-                </div>
-                <br>
-            </td>
-            <td style="width:15%">
-                
-            </td>
-          </tr>
-      </tbody>
-    </table>
-  </header>
-
-  <main>
-
-    <table class="mt-n2 mb-2" style="width: 100%; border-collapse: collapse;" cellspacing="1">
-      <tbody>
-          <tr>
-              <td class="align-middle text-center font-weight-bold" style="width:100%; font-size: 14px; text-decoration: underline;">INVOICE</td>
-          </tr>
-      </tbody>
-    </table>
-    <table class="mt-2 mb-2" style="width: 100%; border-collapse: collapse;" cellspacing="1">
-        <tbody>
-            <tr>
-                <td style="width:4%;">
-                    <div style="font-size: 10px;">
-                        <b>To</b>
-                    </div>
-                </td>
-                <td style="width:1%;">
-                    <div style="font-size: 10px;">
-                        <b>:</b>
-                    </div>
-                </td>
-                <td style="width:40%;">
-                    <div style="font-size: 10px;">
-                        <b>{{ $deliveryNote->customer_name }}</b>
-                    </div>
-                </td>
-                <td style="width:15%;"></td>
-                <td class="text-right align-bottom" style="width:20%; font-size: 10px;">
-                    No.
-                </td>
-                <td class="text-right align-bottom" style="width:1%; font-size: 10px;">
-                    :
-                </td>
-                <td class="text-right align-bottom" style="width:19%; font-size: 10px;">
-                    {{ $transSales->ref_number }}
-                </td>
-            </tr>
-            <tr>
-                <td style="width:4%;">
-                    <div style="font-size: 10px;"></div>
-                </td>
-                <td style="width:1%;">
-                    <div style="font-size: 10px;"></div>
-                </td>
-                <td style="width:40%;">
-                    <div style="font-size: 10px;">
-                        {{ $deliveryNote->address.', '.$deliveryNote->postal_code.', '.$deliveryNote->city.', '.$deliveryNote->province.', '.$deliveryNote->country }}
-                        @if($deliveryNote->telephone != null)
-                            Phone : {{ $deliveryNote->telephone }}
-                        @endif
-                        @if($deliveryNote->mobile_phone != null)
-                            Phone : {{ $deliveryNote->mobile_phone }}
-                        @endif
-                    </div>
-                </td>
-                <td style="width:15%;"></td>
-                <td class="text-right align-top" style="width:20%; font-size: 10px;">
-                    Date
-                </td>
-                <td class="text-right align-top" style="width:1%; font-size: 10px;">
-                    :
-                </td>
-                <td class="text-right align-top" style="width:19%; font-size: 10px;">
-                    {{ $date }}
-                </td>
-            </tr>
-            <tr>
-                <td style="width:4%;">
-                    <div style="font-size: 10px;">
-                        <b>From</b>
-                    </div>
-                </td>
-                <td style="width:1%;">
-                    <div style="font-size: 10px;">
-                        <b>:</b>
-                    </div>
-                </td>
-                <td style="width:40%;">
-                    <div style="font-size: 10px;">
-                        <b>PT. OLEFINA TIFAPLAS POLIKEMINDO</b>
-                    </div>
-                </td>
-                <td style="width:15%;"></td>
-                <td class="text-right align-bottom" style="width:20%; font-size: 10px;"></td>
-                <td class="text-right align-bottom" style="width:1%; font-size: 10px;"></td>
-                <td class="text-right align-bottom" style="width:19%; font-size: 10px;"></td>
-            </tr>
-            <tr>
-                <td style="width:4%;">
-                    <div style="font-size: 10px;"></div>
-                </td>
-                <td style="width:1%;">
-                    <div style="font-size: 10px;"></div>
-                </td>
-                <td style="width:40%;">
-                    <div style="font-size: 10px;">
-                        Jl. Raya Serang KM 16.8 Cikupa
-                        Tangerang - Indonesia
-                        Phone : +62 21 5966 3567
-                    </div>
-                </td>
-                <td style="width:15%;"></td>
-                <td class="text-right align-top" style="width:20%; font-size: 10px;"></td>
-                <td class="text-right align-top" style="width:1%; font-size: 10px;"></td>
-                <td class="text-right align-top" style="width:19%; font-size: 10px;"></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <table class="styled-table-service">
-        <thead>
-            <tr style="font-size: 11px;">
-                <th class="align-middle text-center"><b>No.</b></th>
-                <th class="align-middle text-center"><b>Items</b></th>
-                <th class="align-middle text-center"><b>Qty (ROLL)</b></th>
-                <th class="align-middle text-center"><b>UOM</b></th>
-                <th class="align-middle text-center"><b>Price/ROLL</b></th>
-                <th class="align-middle text-center"><b>Total Price</b></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php $no = 0; ?>
-            @foreach ($datas as $data)
-                <?php $no++; ?>
-                <tr>
-                    <td class="px-2 text-center">{{ $no }}</td>
-                    <td class="px-2">{{ $data->product }}</td>
-                    <td class="px-2 text-center">{{ $data->qty }}</td>
-                    <td class="px-2 text-center">-</td>
-                    <td class="px-2 text-right">{{ $deliveryNote->currency_code.'  ' . number_format($data->price, 2, ',', '.') }}</td>
-                    <td class="px-2 text-right">{{ $deliveryNote->currency_code.'  ' . number_format($data->total_price, 2, ',', '.') }}</td>
-                </tr>
-            @endforeach
-            
-            @if($transSales->is_tax == 1)
-            <tr>
-                <td class="text-center" style="border-right: none; border-bottom: none;border-left: none;"></td>
-                <td class="align-top text-left" style="border-left: none; border-right: none; border-bottom: none;"></td>
-                <td class="text-center" style="border-left: none; border-right: none; border-bottom: none;"></td>
-                <td class="text-center" style="border-left: none; border-right: none; border-bottom: none;"></td>
-                <td class="text-right" style="border-left: none; border-right: none; border-bottom: none;"><b>Amount</b></td>
-                <td class="px-2 text-right" style="border-left: none; border-bottom: none; border-right: none;">{{ $deliveryNote->currency_code.'  ' . number_format($totalAllAmount, 2, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td class="text-center" style="border-right: none; border-bottom: none; border-top: none;border-left: none;"></td>
-                <td class="align-top text-left" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"></td>
-                <td class="text-center" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"></td>
-                <td class="text-center" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"></td>
-                <td class="text-right" style="border-left: none; border-right: none; border-bottom: none; border-top: none;"><b>PPN {{ $ppn }}%</b></td>
-                <td class="px-2 text-right" style="border-left: none; border-bottom: none; border-top: none; border-right: none;">{{ $deliveryNote->currency_code.'  ' . number_format($ppn_val, 2, ',', '.') }}</td>
-            </tr>
-            @endif
-            <tr>
-                <td class="text-center" style="border-right: none; border-top: none; border-left: none; border-bottom: none;"></td>
-                <td class="align-top text-left" style="border-left: none; border-right: none; border-top: none; border-bottom: none;"></td>
-                <td class="text-center" style="border-left: none; border-right: none; border-top: none; border-bottom: none;"></td>
-                <td class="text-center" style="border-left: none; border-right: none; border-top: none; border-bottom: none;"></td>
-                <td class="text-right" style="border-left: none; border-right: none; border-top: none; border-bottom: none;"><b>Total</b></td>
-                <td class="px-2 text-right" style="border-left: none; border-top: none; border-right: none; border-bottom: none;">{{ $deliveryNote->currency_code.'  ' . number_format($total, 2, ',', '.') }}</td>
-            </tr>
-        </tbody>
-    </table>
-    <div class="text-left mt-2" style="font-size: 12px;">TERMS</div>
-    @php 
-        $find = '<p>';
-        $replaceWith = '';
-        $newString = str_replace($find, $replaceWith, $transSales->term);
-        $find = '</p>';
-        $replaceWith = '<br>';
-        $newString = str_replace($find, $replaceWith, $newString);
-    @endphp
-    <div class="text-left" style="font-size: 10px;">{!! $newString !!}</div>
-    
-    <div id="approval">
-        <div class="text-left mt-1" style="font-size: 11px;">Please transferred to our Bank Account as details :</div>
-        <table style="width: 100%; border-collapse: collapse;" cellspacing="1">
+    <header class="padded-element">
+        <table style="height: 5px; width: 100%; border-collapse: collapse;" cellspacing="1">
             <tbody>
-                <tr>
-                    <td class="text-left" style="width:14%; font-size: 10px;">Bank Name</td>
-                    <td class="text-left" style="width:1%; font-size: 10px;">:</td>
-                    <td class="text-left" style="width:85%; font-size: 10px;">{{ $bankAccount['bank_name'] ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="text-left" style="width:14%; font-size: 10px;">Account Name</td>
-                    <td class="text-left" style="width:1%; font-size: 10px;">:</td>
-                    <td class="text-left" style="width:85%; font-size: 10px;">{{ $bankAccount['account_name'] ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="text-left" style="width:14%; font-size: 10px;">Account Number</td>
-                    <td class="text-left" style="width:1%; font-size: 10px;">:</td>
-                    <td class="text-left" style="width:85%; font-size: 10px;">{{ $bankAccount['account_number'] ?? '-' }} ({{ $bankAccount['currency'] ?? '-' }})</td>
-                </tr>
-                <tr>
-                    <td class="text-left" style="width:14%; font-size: 10px;">Swift Code</td>
-                    <td class="text-left" style="width:1%; font-size: 10px;">:</td>
-                    <td class="text-left" style="width:85%; font-size: 10px;">{{ $bankAccount['swift_code'] ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="text-left" style="width:14%; font-size: 10px;">Branch</td>
-                    <td class="text-left" style="width:1%; font-size: 10px;">:</td>
-                    <td class="text-left" style="width:85%; font-size: 10px;">{{ $bankAccount['branch'] ?? '-' }}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <table class="mt-2 mb-2" style="width: 100%; border-collapse: collapse;" cellspacing="1">
-            <tbody>
-                <tr>
-                    <td style="width:75%;"></td>
-                    <td class="text-center" style="width:25%; font-size: 11px;">
-                        Regards,
-                        
-                        <div class="card" style="border:0px; width: 100%; height: 60px;"></div>
-                        <div class="text-center font-weight-bold" style="font-size: 12px; text-decoration: underline;">BUDI TRIADI</div>
-                        <div class="text-center" style="font-size: 12px;">General Manager</div>
+                <tr style="height: 5px;">
+                    <td style="width:20%; font-size: 12px; text-align: right;">
+                        <span class="page-number"></span>
                     </td>
                 </tr>
             </tbody>
         </table>
-    </div>
+        <table class="header-table">
+            <tr>
+                <td style="width:15%">
+                    <img class="header-logo" src="{{ public_path('img/icon-otp.png') }}" alt="Logo">
+                </td>
+                <td style="width:70%; text-align:center; font-size:8px;">
+                    <div class="company-name">{{ $dataCompany->company_name }}</div>
+                    <div class="company-info">{{ $dataCompany->address }}</div>
+                    <div class="company-info">{{ $dataCompany->city }}, {{ $dataCompany->postal_code }}, {{ $dataCompany->province }}, {{ $dataCompany->country }}</div>
+                    <div class="company-info">Phone : {{ $dataCompany->telephone ?? '-' }}</div>
+                    <div class="company-info">E-mail : {{ $approvalInfo['email'] ?? '-' }}</div>
+                    <br>
+                </td>
+                <td style="width:15%"></td>
+            </tr>
+        </table>
+    </header>
 
-  </main>
+    <main>
+        <table class="mt-n2 mb-2" style="width: 100%; border-collapse: collapse;" cellspacing="1">
+            <tbody>
+                <tr>
+                    <td class="align-middle text-center font-weight-bold" style="width:100%; font-size: 14px; text-decoration: underline;">INVOICE</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <table class="py-2" style="width:100%; border-collapse:collapse;">
+            <tr>
+                <td style="width:50%; font-size:10px; vertical-align:top;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <tr style="font-size: 10px;">
+                            <td class="align-top" style="width:8%;"><b>To</b></td>
+                            <td class="text-right align-top" style="width:2%;"><b>:</b></td>
+                            <td class="align-top" style="width:90%;">
+                                <b>{{ $detailCust->customer_name }}</b>
+                                <br>
+                                {{ $detailCust->address.', '.$detailCust->postal_code.', '.$detailCust->city.', '.$detailCust->province.', '.$detailCust->country }}
+                                <br>
+                                Telephone : {{ $detailCust->telephone ?? '-' }},
+                                Mobile Phone : {{ $detailCust->mobile_phone ?? '-' }}
+                            </td>
+                        </tr>
+                        <tr style="font-size: 10px;">
+                            <td class="align-top" style="width:8%;"><b>From</b></td>
+                            <td class="text-right align-top" style="width:2%;"><b>:</b></td>
+                            <td class="align-top" style="width:90%;">
+                                <b>{{ $dataCompany->company_name }}</b>
+                                <br>
+                                {{ $dataCompany->address }}, {{ $dataCompany->city }}, {{ $dataCompany->postal_code }}, {{ $dataCompany->province }}, {{ $dataCompany->country }}
+                                <br>
+                                Phone : {{ $dataCompany->telephone ?? '-' }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width:15%;"></td>
+                <td style="width:35%; font-size:10px; vertical-align:top; text-align:right;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <tr style="font-size: 10px;">
+                            <td class="text-right align-top" style="width:43%;">No.</td>
+                            <td class="text-right align-top" style="width:2%;">:</td>
+                            <td class="text-right align-top" style="width:55%;">
+                                {{ $detail->ref_number }}
+                            </td>
+                        </tr>
+                        <tr style="font-size: 10px;">
+                            <td class="text-right align-top" style="width:43%;">Date</td>
+                            <td class="text-right align-top" style="width:2%;">:</td>
+                            <td class="text-right align-top" style="width:55%;">
+                                {{ $dateInvoice }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+        <table class="styled-table">
+            <thead>
+                <tr style="font-size: 11px;">
+                    <th class="align-middle text-center"><b>No.</b></th>
+                    <th class="align-middle text-center"><b>Items</b></th>
+                    <th class="align-middle text-center"><b>Qty ({{ strtoupper($detailTransSales[0]->unit) }})</b></th>
+                    <th class="align-middle text-center"><b>UOM</b></th>
+                    <th class="align-middle text-center"><b>Price/{{ strtoupper($detailTransSales[0]->unit) }}</b></th>
+                    <th class="align-middle text-center"><b>Total Price</b></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($detailTransSales as $item)
+                    <tr>
+                        <td class="px-2 text-center" style="border-bottom: none;">{{ $loop->iteration }}</td>
+                        <td class="px-2" style="border-bottom: none;">{{ $item->product }}</td>
+                        <td class="px-2 text-center" style="border-bottom: none;">
+                            {{ fmod($item->qty, 1) == 0 
+                                ? number_format($item->qty, 0, ',', '.') 
+                                : number_format(floor($item->qty), 0, ',', '.') . ',' . rtrim(str_replace('.', '', explode('.', (string)$item->qty)[1]), '0') }}
+                        </td>
+                        <td class="px-2 text-center" style="border-bottom: none;">-</td>
+                        <td class="px-2 text-right" style="border-bottom: none;">{{ $detail->currency_code.'  ' . number_format($item->price_before_ppn, 2, ',', '.') }}</td>
+                        <td class="px-2 text-right" style="border-bottom: none;">{{ $detail->currency_code.'  ' . number_format($item->total_price_before_ppn, 2, ',', '.') }}</td>
+                    </tr>
+                @endforeach
+                <tr>
+                    <td style="border-top: none; height: 30px;"></td>
+                    <td style="border-top: none;"></td>
+                    <td style="border-top: none;"></td>
+                    <td style="border-top: none;"></td>
+                    <td style="border-top: none;"></td>
+                    <td style="border-top: none;"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="py-2" style="width:100%; border-collapse:collapse;" id="totalNTerm">
+            <tr>
+                <td style="width:65%; font-size:10px; vertical-align:top;">
+                    <div style="height: 15px;"></div>
+                    <div style="font-size: 12px;">TERMS</div>
+                    @php
+                        $terms = str_replace(['<p>', '</p>'],['', '<br>'],$detail->term);
+                    @endphp
+                    <div style="font-size: 10px;">{!! $terms !!}</div>
+                </td>
+                <td style="width:5%;"></td>
+                <td style="width:30%; font-size:10px; vertical-align:top; text-align:right;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <tr style="font-size: 10px;">
+                            <td class="align-top" style="width:40%;"><b>Amount</b></td>
+                            <td class="text-right align-top" style="width:60%;">
+                                {{ $detail->currency_code.'  ' . number_format($detail->sales_value, 2, ',', '.') }}
+                            </td>
+                        </tr>
+                        <tr style="font-size: 10px;">
+                            <td class="align-top" style="width:40%;"><b>Tax</b></td>
+                            <td class="text-right align-top" style="width:60%;">
+                                {{ $detail->currency_code.'  ' . number_format($detail->ppn_value, 2, ',', '.') }}
+                            </td>
+                        </tr>
+                        <tr style="font-size: 10px;">
+                            <td class="align-top" style="width:40%;"><b>Total</b></td>
+                            <td class="text-right align-top" style="width:60%;">
+                                {{ $detail->currency_code.'  ' . number_format($detail->total, 2, ',', '.') }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        
+        <table class="py-2" style="width:100%; border-collapse:collapse;" id="approval">
+            <tr>
+                <td style="width:50%; font-size:10px; vertical-align:top;">
+                    <div style="font-size: 11px;">Please transferred to our Bank Account as details :</div>
+                    <table style="width:100%; border-collapse:collapse;">
+                        <tr style="font-size: 10px;">
+                            <td class="align-top" style="width:30%;">Bank Name</td>
+                            <td class="text-right align-top" style="width:2%;">:</td>
+                            <td class="align-top" style="width:68%;">
+                                {{ $bankAccount['bank_name'] ?? '-' }}
+                            </td>
+                        </tr>
+                        <tr style="font-size: 10px;">
+                            <td class="align-top" style="width:30%;">Account Name</td>
+                            <td class="text-right align-top" style="width:2%;">:</td>
+                            <td class="align-top" style="width:68%;">
+                                {{ $bankAccount['account_name'] ?? '-' }}
+                            </td>
+                        </tr>
+                        <tr style="font-size: 10px;">
+                            <td class="align-top" style="width:30%;">Account Number</td>
+                            <td class="text-right align-top" style="width:2%;">:</td>
+                            <td class="align-top" style="width:68%;">
+                                {{ $bankAccount['account_number'] ?? '-' }} ({{ $bankAccount['currency'] ?? '-' }})
+                            </td>
+                        </tr>
+                        <tr style="font-size: 10px;">
+                            <td class="align-top" style="width:30%;">Swift Code</td>
+                            <td class="text-right align-top" style="width:2%;">:</td>
+                            <td class="align-top" style="width:68%;">
+                                {{ $bankAccount['swift_code'] ?? '-' }}
+                            </td>
+                        </tr>
+                        <tr style="font-size: 10px;">
+                            <td class="align-top" style="width:30%;">Branch</td>
+                            <td class="text-right align-top" style="width:2%;">:</td>
+                            <td class="align-top" style="width:68%;">
+                                {{ $bankAccount['branch'] ?? '-' }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width:28%;"></td>
+                <td class="text-center" style="width:20%; font-size:11px; vertical-align:top;">
+                    <div style="height: 90px;"></div>
+                    Regards,
+                    <div style="height: 120px;"></div>
+                    <div class="font-weight-bold" style="font-size: 12px; text-decoration: underline;">{{ $approvalInfo['name'] ?? '-' }}</div>
+                    <div style="font-size: 12px;">{{ $approvalInfo['position'] ?? '-' }}</div>
+                </td>
+                <td style="width:2%;"></td>
+            </tr>
+        </table>
+    </main>
 </body>
 </html>

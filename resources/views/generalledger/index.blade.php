@@ -4,22 +4,6 @@
 
 <div class="page-content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <div class="page-title-left">
-                        <a href="{{ route('generalledger.create') }}" type="button" class="btn btn-primary waves-effect btn-label waves-light"><i class="mdi mdi-plus-box label-icon"></i> Add New Transaction</a>
-                    </div>
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Accounting</a></li>
-                            <li class="breadcrumb-item active">General Ledger</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Modal Search -->
         <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
@@ -51,6 +35,8 @@
                                         <option value="" selected>-- Select --</option>
                                         <option value="Sales Transaction"  @if($source == "Sales Transaction") selected="selected" @endif>Sales Transaction</option>
                                         <option value="Purchase Transaction"  @if($source == "Purchase Transaction") selected="selected" @endif>Purchase Transaction</option>
+                                        <option value="Import Transaction"  @if($source == "Import Transaction") selected="selected" @endif>Import Transaction</option>
+                                        <option value="Manual"  @if($source == "Manual") selected="selected" @endif>Manual</option>
                                     </select>
                                 </div>
                                 <hr class="mt-2">
@@ -119,38 +105,50 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header text-center py-3">
-                        <h5 class="mb-0"><b>General Ledgers</b></h5>
-                        List of 
-                        @if($ref_number != null)
-                            (Ref. Number<b> - {{ $ref_number }}</b>)
-                        @endif
-                        @if($id_account_code != null)
-                            (Account Code<b> - {{ $id_account_code }}</b>)
-                        @endif
-                        @if($source != null)
-                            (Source<b> - {{ $source }}</b>)
-                        @endif
-                        @if($searchDate == 'Custom')
-                            (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
-                        @else
-                            (<b>All Date</b>)
-                        @endif 
+                    <div class="card-header py-3">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                {{-- <button class="btn btn-sm btn-secondary waves-effect btn-label waves-light"><i class="mdi mdi-file-excel label-icon"></i> Export Excel</button> --}}
+
+                                <a href="{{ route('generalledger.create') }}" type="button" class="btn btn-primary waves-effect btn-label waves-light"><i class="mdi mdi-plus-box label-icon"></i> Add New Transaction</a>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="text-center">
+                                    <h5 class="fw-bold">General Ledgers</h5>
+                                </div>
+                            </div>
+                            <div class="col-lg-4"></div>
+                            <div class="col-lg-12">
+                                <div class="text-center">
+                                    List of 
+                                    @if($ref_number != null)
+                                        (Ref. Number<b> - {{ $ref_number }}</b>)
+                                    @endif
+                                    @if($id_account_code != null)
+                                        (Account Code<b> - {{ $id_account_code }}</b>)
+                                    @endif
+                                    @if($source != null)
+                                        (Source<b> - {{ $source }}</b>)
+                                    @endif
+                                    @if($searchDate == 'Custom')
+                                        (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
+                                    @else
+                                        (<b>All Date</b>)
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
-                                    <th class="align-middle text-center">
-                                        <input type="checkbox" id="checkAllRows">
-                                    </th>
-                                    {{-- <th class="align-middle text-center">No.</th> --}}
+                                    <th class="align-middle text-center">No.</th>
                                     <th class="align-middle text-center">Ref. Number</th>
-                                    <th class="align-middle text-center">Date</th>
+                                    <th class="align-middle text-center">Transaction Date</th>
                                     <th class="align-middle text-center">Account Code</th>
                                     <th class="align-middle text-center">Nominal</th>
                                     <th class="align-middle text-center">Debit / Kredit</th>
-                                    <th class="align-middle text-center">Source</th>
                                 </tr>
                             </thead>
                         </table>
@@ -179,8 +177,6 @@
         var requestData = Object.assign({}, data);
         requestData.flag = 1;
 
-        // <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteselected"><i class="mdi mdi-trash-can"></i> Delete Selected</button></li>
-
         var dataTable = $('#server-side-table').DataTable({
             dom: '<"top d-flex"<"position-absolute top-0 end-0 d-flex"fl><"pull-left col-sm-12 col-md-5"B>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>><"clear:both">',
             initComplete: function(settings, json) {
@@ -188,23 +184,12 @@
                 '<button class="btn btn-sm btn-light me-1" type="button" id="custom-button" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Sort & Filter</button>' +
                 '<input class="form-control me-1" id="custom-search-input" type="text" placeholder="Search...">' +
                 '</div>');
-                $('.top').prepend(
-                    `<div class='pull-left'>
-                        <div class="btn-group mb-2" style="margin-right: 10px;"> <!-- Added inline style for margin -->
-                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="mdi mdi-checkbox-multiple-marked-outline"></i> Bulk Actions <i class="fas fa-caret-down"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><button class="dropdown-item">No Action</button></li>
-                            </ul>
-                        </div>
-                    </div>`
-                );
             },
             buttons: [
                 {
                     extend: "excel",
-                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
+                    text: '<i class="mdi mdi-file-excel label-icon"></i> Export to Excel',
+                    className: 'btn btn-light waves-effect btn-label waves-light mb-2',
                     action: function (e, dt, button, config) {
                         $.ajax({
                             url: url,
@@ -251,37 +236,34 @@
                 type: 'GET',
                 data: data
             },
-            columns: [{
-                    data: 'bulk-action',
-                    name: 'bulk-action',
-                    className: 'align-middle text-center',
+            columns: [
+                {
+                data: null,
+                    render: function(data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    },
                     orderable: false,
-                    searchable: false
+                    searchable: false,
+                    className: 'align-middle text-center',
                 },
-                // {
-                // data: null,
-                //     render: function(data, type, row, meta) {
-                //         return meta.row + meta.settings._iDisplayStart + 1;
-                //     },
-                //     orderable: false,
-                //     searchable: false,
-                //     className: 'align-middle text-center',
-                // },
                 {
                     data: 'ref_number',
                     name: 'ref_number',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center text-bold'
+                    className: 'align-top',
+                    render: function(data, type, row) {
+                        return '<b>' + data + '</b><br><small>source: <b>' + row.source + '</b></small>';
+                    },
                 },
                 {
-                    data: 'created_at',
+                    data: 'date_transaction',
                     searchable: true,
                     orderable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     render: function(data, type, row) {
-                        var created_at = new Date(row.created_at);
-                        return created_at.toLocaleDateString('es-CL').replace(/\//g, '-');
+                        var date_transaction = new Date(row.date_transaction);
+                        return date_transaction.toLocaleDateString('es-CL').replace(/\//g, '-');
                     },
                 },
                 {
@@ -295,16 +277,20 @@
                 {
                     data: 'amount',
                     orderable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-end',
                     render: function(data, type, row) {
-                        var formattedAmount = numberFormat(row.amount, 3, ',', '.');
-                        return formattedAmount;
+                        var formattedAmount = numberFormat(row.amount, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
                 {
                     data: 'transaction',
                     orderable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     render: function(data, type, row) {
                         var html
                         if(row.transaction == 'D'){
@@ -315,19 +301,28 @@
                         return html;
                     },
                 },
-                {
-                    data: 'source',
-                    name: 'source',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-middle text-center'
-                },
             ],
-            bAutoWidth: false,
-            columnDefs: [{
-                width: "1%",
-                targets: [0]
-            }]
+            drawCallback: function(settings) {
+                var api = this.api();
+                var rows = api.rows({ page: 'current' }).nodes();
+                var lastCategory = null;
+                var rowspan = 1;
+                api.column(1, { page: 'current' }).data().each(function(category, i) {
+                    if (lastCategory === category) {
+                        rowspan++;
+                        $(rows).eq(i).find('td:eq(1)').remove();
+                    } else {
+                        if (lastCategory !== null) {
+                            $(rows).eq(i - rowspan).find('td:eq(1)').attr('rowspan', rowspan);
+                        }
+                        lastCategory = category;
+                        rowspan = 1;
+                    }
+                });
+                if (lastCategory !== null) {
+                    $(rows).eq(api.column(1, { page: 'current' }).data().length - rowspan).find('td:eq(1)').attr('rowspan', rowspan);
+                }
+            },
         });
 
         $(document).on('keyup', '#custom-search-input', function () {

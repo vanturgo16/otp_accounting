@@ -42,7 +42,7 @@
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="date_transaction" value="" required>
+                                    <input type="date" class="form-control" name="date_transaction" value="{{ date('Y-m-d') }}" required>
                                 </div>
                                 <hr>
                                 <div class="col-lg-6 mb-3">

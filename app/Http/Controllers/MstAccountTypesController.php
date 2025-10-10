@@ -9,6 +9,7 @@ use Yajra\DataTables\Facades\DataTables;
 
 // Model
 use App\Models\MstAccountTypes;
+use App\Models\MstAccountCodes;
 
 class MstAccountTypesController extends Controller
 {
@@ -25,10 +26,8 @@ class MstAccountTypesController extends Controller
         $flag = $request->get('flag');
 
         $datas = MstAccountTypes::select(
-            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_account_types.*'
-        )
-        ->orderBy('master_account_types.created_at','desc');
+        );
 
         if($account_type_code != null){
             $datas = $datas->where('account_type_code', 'like', '%'.$account_type_code.'%');
@@ -44,11 +43,11 @@ class MstAccountTypesController extends Controller
         }
         
         if($request->flag != null){
-            $datas = $datas->get()->makeHidden(['id', 'is_active']);
+            $datas = $datas->orderBy('master_account_types.created_at','asc')->get()->makeHidden(['id']);
             return $datas;
         }
 
-        $datas = $datas->get();
+        $datas = $datas->orderBy('master_account_types.created_at','desc')->get();
         
         // Datatables
         if ($request->ajax()) {
@@ -56,11 +55,11 @@ class MstAccountTypesController extends Controller
                 ->addColumn('action', function ($data){
                     return view('accounttype.action', compact('data'));
                 })
-                ->addColumn('bulk-action', function ($data) {
-                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
-                    return $checkBox;
-                })
-                ->rawColumns(['bulk-action'])
+                // ->addColumn('bulk-action', function ($data) {
+                //     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                //     return $checkBox;
+                // })
+                // ->rawColumns(['bulk-action'])
                 ->make(true);
         }
         
@@ -154,21 +153,18 @@ class MstAccountTypesController extends Controller
         $id = decrypt($id);
 
         DB::beginTransaction();
-        try{
-            $data = MstAccountTypes::where('id', $id)->update([
-                'is_active' => 1
-            ]);
+        try {
+            $accountType = MstAccountTypes::findOrFail($id);
+            $accountType->update(['is_active' => 1]);
 
-            $name = MstAccountTypes::where('id', $id)->first();
-
-            //Audit Log
-            $this->auditLogsShort('Activate Account Type ('. $name->account_type_name . ')');
+            // Audit Log
+            $this->auditLogsShort('Activate Account Type (' . $accountType->account_type_name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Account Type ' . $name->account_type_name]);
-        } catch (Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Account Type ' . $name->account_type_name .'!']);
+            return redirect()->back()->with('success', 'Success Activate Account Type ' . $accountType->account_type_name);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail', 'Failed to Activate Account Type!');
         }
     }
 
@@ -177,21 +173,18 @@ class MstAccountTypesController extends Controller
         $id = decrypt($id);
 
         DB::beginTransaction();
-        try{
-            $data = MstAccountTypes::where('id', $id)->update([
-                'is_active' => 0
-            ]);
+        try {
+            $accountType = MstAccountTypes::findOrFail($id);
+            $accountType->update(['is_active' => 0]);
 
-            $name = MstAccountTypes::where('id', $id)->first();
-            
-            //Audit Log
-            $this->auditLogsShort('Deactivate Account Type ('. $name->account_type_name . ')');
+            // Audit Log
+            $this->auditLogsShort('Activate Account Type (' . $accountType->account_type_name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Account Type ' . $name->account_type_name]);
-        } catch (Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Account Type ' . $name->account_type_name .'!']);
+            return redirect()->back()->with('success', 'Success Deactivate Account Type ' . $accountType->account_type_name);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail', 'Failed to Deactivate Account Type!');
         }
     }
 
@@ -200,60 +193,91 @@ class MstAccountTypesController extends Controller
         $id = decrypt($id);
 
         DB::beginTransaction();
-        try{
-            $data = MstAccountTypes::where('id', $id)->delete();
-            
-            //Audit Log
-            $this->auditLogsShort('Delete Mst Account Type');
+        try {
+            $accountType = MstAccountTypes::findOrFail($id);
+
+            // Check if used in MstAccountCodes
+            $isUsed = MstAccountCodes::where('id_master_account_types', $id)->exists();
+            if ($isUsed) {
+                return redirect()->back()->with('info', 'Cannot delete, Account Type "' . $accountType->account_type_name . '" is still used in Account Codes.');
+            }
+
+            $accountType->delete();
+
+            // Audit Log
+            $this->auditLogsShort('Delete Account Type (' . $accountType->account_type_name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Delete Account Type']);
-        } catch (Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Delete Account Type!']);
+            return redirect()->back()->with('success', 'Success Delete Account Type ' . $accountType->account_type_name);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail', 'Failed to Delete Account Type!');
         }
     }
 
     public function deleteselected(Request $request)
     {
-        $idselected = $request->input('idChecked');
+        $idSelected = $request->input('idChecked', []);
 
         DB::beginTransaction();
-        try{
-            $account_type_code = MstAccountTypes::whereIn('id', $idselected)->pluck('account_type_code')->toArray();
-            $delete = MstAccountTypes::whereIn('id', $idselected)->delete();
+        try {
+            // Get account types with codes
+            $accountTypes = MstAccountTypes::whereIn('id', $idSelected)->get(['id', 'account_type_code', 'account_type_name']);
 
-            //Audit Log
-            $this->auditLogsShort('Delete Master Account Type Selected : ' . implode(', ', $account_type_code));
+            if ($accountTypes->isEmpty()) {
+                return response()->json(['message' => 'No data selected', 'type' => 'info'], 200);
+            }
+
+            // Check if any are used in MstAccountCodes
+            $used = MstAccountCodes::whereIn('id_master_account_types', $accountTypes->pluck('id'))->exists();
+            if ($used) {
+                return response()->json(['message' => 'Cannot delete, one or more Account Types are still used in Account Codes.', 'type' => 'info'], 200);
+            }
+
+            // Proceed with delete
+            MstAccountTypes::whereIn('id', $accountTypes->pluck('id'))->delete();
+
+            // Audit Log
+            $this->auditLogsShort('Delete Account Types Selected: ' . $accountTypes->pluck('account_type_code')->implode(', '));
 
             DB::commit();
-            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $account_type_code), 'type' => 'success'], 200);
-        } catch (Exception $e) {
-            DB::rollback();
+            return response()->json([
+                'message' => 'Successfully Deleted Data: ' . $accountTypes->pluck('account_type_code')->implode(', '),
+                'type'    => 'success'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 
     public function deactiveselected(Request $request)
     {
-        $idselected = $request->input('idChecked');
+        $idSelected = $request->input('idChecked', []);
 
         DB::beginTransaction();
-        try{
-            $account_type_code = MstAccountTypes::whereIn('id', $idselected)->pluck('account_type_code')->toArray();
-            $update = MstAccountTypes::whereIn('id', $idselected)
-                ->update([
-                    'is_active' => 0
-                ]);
+        try {
+            $accountTypes = MstAccountTypes::whereIn('id', $idSelected)->get(['id', 'account_type_code']);
 
-            //Audit Log
-            $this->auditLogsShort('Deactive Master Account Type Selected : ' . implode(', ', $account_type_code));
+            if ($accountTypes->isEmpty()) {
+                return response()->json(['message' => 'No data selected', 'type' => 'info'], 200);
+            }
+
+            // Bulk deactivate
+            MstAccountTypes::whereIn('id', $accountTypes->pluck('id'))
+                ->update(['is_active' => 0]);
+
+            // Audit Log
+            $this->auditLogsShort('Deactivate Account Types Selected: ' . $accountTypes->pluck('account_type_code')->implode(', '));
 
             DB::commit();
-            return response()->json(['message' => 'Successfully Deactivate Data : ' . implode(', ', $account_type_code), 'type' => 'success'], 200);
-        } catch (Exception $e) {
-            DB::rollback();
-            return response()->json(['error' => 'Failed to Deactive Data', 'type' => 'error'], 500);
+            return response()->json([
+                'message' => 'Successfully Deactivated Data: ' . $accountTypes->pluck('account_type_code')->implode(', '),
+                'type'    => 'success'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Failed to Deactivate Data', 'type' => 'error'], 500);
         }
     }
 }

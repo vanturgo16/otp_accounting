@@ -117,3 +117,11 @@ input[id="checkAllRows"]:disabled {
 .modal-header button.btn-close {
     background-color: #ffffff;
 }
+
+mark.highlight {
+    background-color: yellow;
+    padding: 0 2px;
+}
+mark.current-match {
+    background-color: orange;
+}

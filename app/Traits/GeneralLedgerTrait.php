@@ -5,9 +5,10 @@ use App\Models\GeneralLedger;
 use App\Models\MstAccountCodes;
 
 trait GeneralLedgerTrait {
-    public function storeGeneralLedger($ref_number, $date_transaction, $id_account_code, $transaction, $amount, $source)
+    public function storeGeneralLedger($id_ref, $ref_number, $date_transaction, $id_account_code, $transaction, $amount, $source)
     {
         return GeneralLedger::create([
+            'id_ref' => $id_ref,
             'ref_number' => $ref_number,
             'date_transaction' => $date_transaction,
             'id_account_code' => $id_account_code,
@@ -19,47 +20,38 @@ trait GeneralLedgerTrait {
 
     public function updateBalanceAccount($id_account_code, $amount, $type)
     {
-        // Get First Balance in Account
-        $account = MstAccountCodes::where('id', $id_account_code)->first();
-        $accountAmount = floatval($account->balance);
-        $accountType = $account->balance_type; 
-        
-        // Initiate Incoming
-        $incomingAmount = floatval($amount);
-        // Reverse Type
-        $incomingType = ($type == "D") ? "K" : "D";
+        $account = MstAccountCodes::findOrFail($id_account_code);
 
-        if ($accountType === "D" && $incomingType === "K") {
-            $result = $accountAmount - $incomingAmount;
-            if ($result >= 0) {
-                $accountAmount = $result;
-                $accountType = "D";
-            } else {
-                $accountAmount = abs($result);
-                $accountType = "K";
-            }
-        } elseif ($accountType === "K" && $incomingType === "D") {
-            $result = $accountAmount - $incomingAmount;
+        $balance = (float) $account->balance;
+        $balanceType = $account->balance_type;
+        $incoming = (float) $amount;
+        $incomingType = $type;
+
+        // if same type, just add
+        if ($balanceType === $incomingType) {
+            $balance += $incoming;
+        } else {
+            // different type → subtract
+            $result = $balance - $incoming;
+
             if ($result > 0) {
-                $accountAmount = $result;
-                $accountType = "K";
+                $balance = $result; // keep original type (it "wins")
+            } elseif ($result < 0) {
+                $balance = abs($result);
+                $balanceType = $incomingType; // incoming "wins"
             } else {
-                $accountAmount = abs($result);
-                $accountType = "D";
+                $balance = 0;
+                $balanceType = "D"; // default when zero (or set to null if you prefer)
             }
-        } elseif ($accountType === $incomingType) {
-            $accountAmount += $incomingAmount;
         }
-        
-        // Format account amount to 3 decimal places
-        $accountAmount = number_format($accountAmount, 3, '.', '');
 
-        // Return Update Account Balance
-        return MstAccountCodes::where('id', $id_account_code)
-            ->update([
-                'balance' => $accountAmount,
-                'balance_type' => $accountType,
-                'is_used' => 1,
-            ]);
+        // round to 3 decimals
+        $balance = round($balance, 3);
+
+        return $account->update([
+            'balance' => $balance,
+            'balance_type' => $balanceType,
+            'is_used' => 1,
+        ]);
     }
 }

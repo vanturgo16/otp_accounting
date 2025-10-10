@@ -5,17 +5,15 @@
     </button>
     <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $data->id }}">
         <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
+        <li><a class="dropdown-item drpdwn" href="{{ route('accountcode.edit', encrypt($data->id)) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
+        @if($data->is_active == 0)
+            <li><a class="dropdown-item drpdwn-scs" href="#" data-bs-toggle="modal" data-bs-target="#activate{{ $data->id }}"><span class="mdi mdi-check-circle"></span> | Activate</a></li>
+        @else
+            <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#deactivate{{ $data->id }}"><span class="mdi mdi-close-circle"></span> | Deactivate</a></li>
+        @endif
+
         @if($data->is_used == null)
-            <li><a class="dropdown-item drpdwn" href="{{ route('accountcode.edit', encrypt($data->id)) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
-            {{-- @if($data->is_active == 0)
-                <li><a class="dropdown-item drpdwn-scs" href="#" data-bs-toggle="modal" data-bs-target="#activate{{ $data->id }}"><span class="mdi mdi-check-circle"></span> | Activate</a></li>
-            @else
-                <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#deactivate{{ $data->id }}"><span class="mdi mdi-close-circle"></span> | Deactivate</a></li>
-            @endif --}}
-            
-            @if(Auth::user()->role == 'Super Admin')
-                <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#delete{{ $data->id }}"><span class="mdi mdi-delete-alert"></span> | Delete</a></li>
-            @endif
+            <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#delete{{ $data->id }}"><span class="mdi mdi-delete-alert"></span> | Delete</a></li>
         @endif
     </ul>
 </div>
@@ -32,9 +30,21 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-lg-12 mb-2">
+                        <div class="col-lg-6 mb-2">
                             <div class="form-group">
                                 <div><span class="fw-bold">Status :</span></div>
+                                <span>
+                                    @if($data->is_active == 1)
+                                        <span class="badge bg-success text-white">Active</span>
+                                    @else
+                                        <span class="badge bg-danger text-white">Inactive</span>
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-2">
+                            <div class="form-group">
+                                <div><span class="fw-bold">Used :</span></div>
                                 <span>
                                     @if($data->is_used == 1)
                                         <span class="badge bg-warning text-white">Running</span>
@@ -44,11 +54,14 @@
                                 </span>
                             </div>
                         </div>
+                    </div>
+                    <hr>
+                    <div class="row">
                         <div class="col-lg-12 mb-2">
                             <div class="form-group">
                                 <div><span class="fw-bold">Type :</span></div>
                                 <span>
-                                    <span>{{ $data->account_type_name }}</span>
+                                    <span>{{ $data->account_type_code }} - <b>{{ $data->account_type_name }}</b></span>
                                 </span>
                             </div>
                         </div>
@@ -73,7 +86,12 @@
                                 <div><span class="fw-bold">Opening Balance :</span></div>
                                 <span>
                                     <span>
-                                        {{ number_format($data->opening_balance, 3, ',', '.') }}
+                                        @php
+                                            $formatted = number_format($data->opening_balance, 3, ',', '.');
+                                            [$before, $after] = explode(',', $formatted);
+                                        @endphp
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+
                                         @if($data->opening_balance_type == "D")
                                             <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
                                         @else
@@ -88,7 +106,12 @@
                                 <div><span class="fw-bold">Balance :</span></div>
                                 <span>
                                     <span>
-                                        {{ number_format($data->balance, 3, ',', '.') }}
+                                        @php
+                                            $formatted = number_format($data->balance, 3, ',', '.');
+                                            [$before, $after] = explode(',', $formatted);
+                                        @endphp
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+
                                         @if($data->balance_type == "D")
                                             <span class="badge bg-success text-white"><span class="mdi mdi-plus-circle"></span> | Debit</span>
                                         @else
@@ -98,11 +121,22 @@
                                 </span>
                             </div>
                         </div>
+                    </div>
+                    <hr>
+                    <div class="row">
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <div><span class="fw-bold">Created At :</span></div>
                                 <span>
                                     <span>{{ $data->created_at }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <div><span class="fw-bold">Last Updated At :</span></div>
+                                <span>
+                                    <span>{{ $data->updated_at }}</span>
                                 </span>
                             </div>
                         </div>
@@ -115,81 +149,82 @@
         </div>
     </div>
 
+    {{-- Modal Activate --}}
+    <div class="modal fade" id="activate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-top" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Activate Account Code</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('accountcode.activate', encrypt($data->id)) }}" id="formactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="text-center">
+                            Are You Sure to <b>Activate</b> This Account Code?
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success waves-effect btn-label waves-light" id="sb-activate{{ $data->id }}"><i class="mdi mdi-check-circle label-icon"></i>Activate</button>
+                    </div>
+                </form>
+                <script>
+                    $(document).ready(function() {
+                        let idList = "{{ $data->id }}";
+                        $('#formactivate' + idList).submit(function(e) {
+                            if (!$('#formactivate' + idList).valid()){
+                                e.preventDefault();
+                            } else {
+                                $('#sb-activate' + idList).attr("disabled", "disabled");
+                                $('#sb-activate' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
+                            }
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal Deactivate --}}
+    <div class="modal fade" id="deactivate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-top" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Deactivate Account Code</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('accountcode.deactivate', encrypt($data->id)) }}" id="formdeactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="text-center">
+                            Are You Sure to <b>Deactivate</b> This Account Code?
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deactivate{{ $data->id }}"><i class="mdi mdi-close-circle label-icon"></i>Deactivate</button>
+                    </div>
+                </form>
+                <script>
+                    $(document).ready(function() {
+                        let idList = "{{ $data->id }}";
+                        $('#formdeactivate' + idList).submit(function(e) {
+                            if (!$('#formdeactivate' + idList).valid()){
+                                e.preventDefault();
+                            } else {
+                                $('#sb-deactivate' + idList).attr("disabled", "disabled");
+                                $('#sb-deactivate' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
+                            }
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+
+
     @if($data->is_used == null)
-        {{-- Modal Activate --}}
-        <div class="modal fade" id="activate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-top" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">Activate Account Code</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="{{ route('accountcode.activate', encrypt($data->id)) }}" id="formactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="modal-body">
-                            <div class="text-center">
-                                Are You Sure to <b>Activate</b> This Account Code?
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" id="sb-activate{{ $data->id }}"><i class="mdi mdi-check-circle label-icon"></i>Activate</button>
-                        </div>
-                    </form>
-                    <script>
-                        $(document).ready(function() {
-                            let idList = "{{ $data->id }}";
-                            $('#formactivate' + idList).submit(function(e) {
-                                if (!$('#formactivate' + idList).valid()){
-                                    e.preventDefault();
-                                } else {
-                                    $('#sb-activate' + idList).attr("disabled", "disabled");
-                                    $('#sb-activate' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
-                                }
-                            });
-                        });
-                    </script>
-                </div>
-            </div>
-        </div>
-
-        {{-- Modal Deactivate --}}
-        <div class="modal fade" id="deactivate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-top" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">Deactivate Account Code</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="{{ route('accountcode.deactivate', encrypt($data->id)) }}" id="formdeactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="modal-body">
-                            <div class="text-center">
-                                Are You Sure to <b>Deactivate</b> This Account Code?
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deactivate{{ $data->id }}"><i class="mdi mdi-close-circle label-icon"></i>Deactivate</button>
-                        </div>
-                    </form>
-                    <script>
-                        $(document).ready(function() {
-                            let idList = "{{ $data->id }}";
-                            $('#formdeactivate' + idList).submit(function(e) {
-                                if (!$('#formdeactivate' + idList).valid()){
-                                    e.preventDefault();
-                                } else {
-                                    $('#sb-deactivate' + idList).attr("disabled", "disabled");
-                                    $('#sb-deactivate' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
-                                }
-                            });
-                        });
-                    </script>
-                </div>
-            </div>
-        </div>
-
         {{-- Modal Delete --}}
         <div class="modal fade" id="delete{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-top" role="document">
