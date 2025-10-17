@@ -69,7 +69,7 @@
 </head>
 <body class="padded-element-main">
     <header class="padded-element">
-        <table style="height: 5px; width: 100%; border-collapse: collapse;" cellspacing="1">
+        {{-- <table style="height: 5px; width: 100%; border-collapse: collapse;" cellspacing="1">
             <tbody>
                 <tr style="height: 5px;">
                     <td style="width:20%; font-size: 12px; text-align: right;">
@@ -77,7 +77,7 @@
                     </td>
                 </tr>
             </tbody>
-        </table>
+        </table> --}}
         <table class="header-table">
             <tr>
                 <td style="width:15%">
@@ -170,16 +170,16 @@
             <tbody>
                 @foreach ($detailTransSales as $item)
                     <tr>
-                        <td class="px-2 text-center" style="border-bottom: none;">{{ $loop->iteration }}</td>
-                        <td class="px-2" style="border-bottom: none;">{{ $item->product }}</td>
-                        <td class="px-2 text-center" style="border-bottom: none;">
+                        <td class="px-2 text-center" style="border-bottom: none; border-top: none;">{{ $loop->iteration }}</td>
+                        <td class="px-2" style="border-bottom: none; border-top: none;">{{ $item->product }}</td>
+                        <td class="px-2 text-center" style="border-bottom: none; border-top: none;">
                             {{ fmod($item->qty, 1) == 0 
                                 ? number_format($item->qty, 0, ',', '.') 
                                 : number_format(floor($item->qty), 0, ',', '.') . ',' . rtrim(str_replace('.', '', explode('.', (string)$item->qty)[1]), '0') }}
                         </td>
-                        <td class="px-2 text-center" style="border-bottom: none;">-</td>
-                        <td class="px-2 text-right" style="border-bottom: none;">{{ $detail->currency_code.'  ' . number_format($item->price_before_ppn, 2, ',', '.') }}</td>
-                        <td class="px-2 text-right" style="border-bottom: none;">{{ $detail->currency_code.'  ' . number_format($item->total_price_before_ppn, 2, ',', '.') }}</td>
+                        <td class="px-2 text-center" style="border-bottom: none; border-top: none;">-</td>
+                        <td class="px-2 text-right" style="border-bottom: none; border-top: none;">{{ $detail->currency_code.'  ' . number_format($item->price_before_ppn, 2, ',', '.') }}</td>
+                        <td class="px-2 text-right" style="border-bottom: none; border-top: none;">{{ $detail->currency_code.'  ' . number_format($item->total_price_before_ppn, 2, ',', '.') }}</td>
                     </tr>
                 @endforeach
                 <tr>

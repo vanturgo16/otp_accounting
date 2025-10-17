@@ -13,8 +13,7 @@
                     <div class="card-header py-3">
                         <div class="row">
                             <div class="col-lg-4">
-                                <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-update label-icon"></i> Update Bank Account</button>
-                                {{-- Modal Add --}}
+                                {{-- <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-update label-icon"></i> Update Bank Account</button>
                                 <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-top" role="document">
                                         <div class="modal-content">
@@ -91,7 +90,7 @@
                                             </script>
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                             <div class="col-lg-4">
                                 <div class="text-center">
@@ -107,6 +106,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th class="align-middle text-center">No.</th>
+                                    <th class="align-middle text-center">Type</th>
                                     <th class="align-middle text-center">Bank Name</th>
                                     <th class="align-middle text-center">Account Name</th>
                                     <th class="align-middle text-center">Account Number</th>
@@ -114,6 +114,7 @@
                                     <th class="align-middle text-center">Branch</th>
                                     <th class="align-middle text-center">Status</th>
                                     <th class="align-middle text-center">Created By</th>
+                                    <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
                         </table>
@@ -145,6 +146,12 @@
                     orderable: false,
                     searchable: false,
                     className: 'text-center',
+                },
+                {
+                    data: 'type',
+                    name: 'type',
+                    orderable: true,
+                    searchable: true,
                 },
                 {
                     data: 'bank_name',
@@ -204,6 +211,13 @@
                         var created_at = new Date(row.created_at);
                         return row.created_by + '<br><b>At. </b>' + created_at.toLocaleDateString('es-CL').replace(/\//g, '-');
                     },
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    className: 'align-top',
                 },
             ]
         });

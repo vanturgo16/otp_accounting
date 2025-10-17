@@ -24,7 +24,10 @@ class MstBankAccountController extends Controller
         
         // Datatables
         if ($request->ajax()) {
-            return DataTables::of($datas)->make(true);
+            return DataTables::of($datas)
+            ->addColumn('action', function ($data) use ($currencies){
+                return view('bankaccount.action', compact('data', 'currencies'));
+            })->make(true);
         }
         
         //Audit Log
@@ -37,6 +40,46 @@ class MstBankAccountController extends Controller
     {
         // dd($request->all());
 
+        $request->validate([
+            'bank_name' => 'required',
+            'account_name' => 'required',
+            'account_number' => 'required',
+            'currency' => 'required',
+            'swift_code' => 'required',
+            'branch' => 'required',
+        ]);
+
+        DB::beginTransaction();
+        try{
+            MstBankAccount::where('is_active', 1)->update(['is_active' => 0]);
+            MstBankAccount::create([
+                'bank_name' => $request->bank_name,
+                'account_name' => $request->account_name,
+                'account_number' => $request->account_number,
+                'currency' => $request->currency,
+                'swift_code' => $request->swift_code,
+                'branch' => $request->branch,
+                'is_active' => 1,
+                'created_by' => auth()->user()->email
+            ]);
+
+            //Audit Log
+            $this->auditLogsShort('Update Bank Account');
+
+            DB::commit();
+
+            return redirect()->back()->with(['success' => 'Success Update Bank Account']);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Update!']);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        // dd($request->all());
+        $id = decrypt($id);
+        
         $request->validate([
             'bank_name' => 'required',
             'account_name' => 'required',

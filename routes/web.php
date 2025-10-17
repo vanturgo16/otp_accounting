@@ -45,6 +45,7 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
             Route::get('/', 'index')->name('bankaccount.index');
             Route::post('/', 'index')->name('bankaccount.index');
             Route::post('/store', 'store')->name('bankaccount.store');
+            Route::post('/update/{id}', 'update')->name('bankaccount.update');
         });
     });
 
