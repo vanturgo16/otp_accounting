@@ -163,13 +163,13 @@
             className: 'text-bold'
         },
         {
-            data: 'date_transaction',
+            data: 'date_invoice',
             searchable: true,
             orderable: true,
             className: 'text-center',
             render: function(data, type, row) {
-                var date_transaction = new Date(data);
-                return date_transaction.toLocaleDateString('es-CL').replace(/\//g, '-');
+                var date_invoice = new Date(data);
+                return date_invoice.toLocaleDateString('es-CL').replace(/\//g, '-');
             },
         },
         {

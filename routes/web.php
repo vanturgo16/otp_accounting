@@ -178,25 +178,25 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
         Route::prefix('transpurchase')->middleware('permission:Akunting_purchase')->group(function () {
             Route::get('/getprice-from-grn', 'getPriceFromGRN')->name('transpurchase.getPriceFromGRN');
             Route::get('/getdetail-grn/{id}', 'getDetailGRN')->name('transpurchase.getDetailGRN');
+            Route::get('/getdetail-trans/{id}', 'getDetail')->name('transpurchase.getDetail');
+            
+            // Modal
+            Route::prefix('modal')->group(function () {
+                Route::get('/total-transaction/{id}', 'modalTransaction')->name('transpurchase.modal.listTT');
+                Route::get('/info/{id}', 'modalInfo')->name('transpurchase.modal.info');
+                Route::get('/delete/{id}', 'modalDelete')->middleware('permission:Akunting_master_data')->name('transpurchase.modal.delete');
+            });
 
             Route::get('/', 'index')->name('transpurchase.index');
             Route::get('/create', 'create')->name('transpurchase.create');
             Route::post('/store', 'store')->name('transpurchase.store');
+            Route::middleware('permission:Akunting_master_data')->group(function () {
+                Route::get('edit/{id}', 'edit')->name('transpurchase.edit');
+                Route::post('update/{id}', 'update')->name('transpurchase.update');
+                Route::post('delete/{id}', 'delete')->name('transpurchase.delete');
+            });
         });
     });
-
-    // Route::controller(TransPurchaseController::class)->group(function () {
-    //     Route::prefix('transpurchase')->middleware('permission:Akunting_purchase')->group(function () {
-    //         Route::get('/getpurchaseorder/{id}', 'getpurchaseorder')->name('transpurchase.getpurchaseorder');
-    //         Route::get('/getgoodreceiptnote/{id}', 'getgoodReceiptNote')->name('transpurchase.getgoodReceiptNote');
-
-    //         Route::get('/', 'index')->name('transpurchase.index');
-    //         Route::post('/', 'index')->name('transpurchase.index');
-    //         Route::get('/create', 'create')->name('transpurchase.create');
-    //         Route::post('/store', 'store')->name('transpurchase.store');
-    //         Route::get('/info/{id}', 'info')->name('transpurchase.info');
-    //     });
-    // });
 
     //Cash Book
     Route::controller(CashBookController::class)->group(function () {

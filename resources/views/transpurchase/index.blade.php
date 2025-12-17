@@ -30,12 +30,12 @@
                                     <input class="form-control" name="po_number" type="text" value="{{ $po_number }}" placeholder="Filter PO Number..">
                                 </div>
                                 <div class="col-6 mb-2">
-                                    <label class="form-label">Tax Invoice Number</label>
-                                    <input class="form-control" name="tax_invoice_number" type="text" value="{{ $tax_invoice_number }}" placeholder="Filter Tax Invoice Number..">
+                                    <label class="form-label">Invoice Number</label>
+                                    <input class="form-control" name="invoice_number" type="text" value="{{ $invoice_number }}" placeholder="Filter Invoice Number..">
                                 </div>
                                 <div class="col-6 mb-2">
-                                    <label class="form-label">No. Faktur</label>
-                                    <input class="form-control" name="invoice_number" type="text" value="{{ $invoice_number }}" placeholder="Filter No. Faktur..">
+                                    <label class="form-label">Tax Invoice Number / No. Faktur</label>
+                                    <input class="form-control" name="tax_invoice_number" type="text" value="{{ $tax_invoice_number }}" placeholder="Filter Tax Invoice Number..">
                                 </div>
                             </div>
                             <div class="row">
@@ -112,11 +112,11 @@
                                         @if($po_number)
                                             (PO Number<b> - {{ $po_number }}</b>)
                                         @endif
-                                        @if($tax_invoice_number)
-                                            (Tax Inv Number<b> - {{ $tax_invoice_number }}</b>)
-                                        @endif
                                         @if($invoice_number)
                                             (No. Faktur<b> - {{ $invoice_number }}</b>)
+                                        @endif
+                                        @if($tax_invoice_number)
+                                            (Tax Inv Number<b> - {{ $tax_invoice_number }}</b>)
                                         @endif
                                         @if($searchDate == 'Custom')
                                             (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
@@ -141,10 +141,10 @@
                                     <th class="align-middle text-center">GRN Number</th>
                                     <th class="align-middle text-center">Ref. Number</th>
                                     <th class="align-middle text-center">PO Number</th>
-                                    <th class="align-middle text-center">Invoice Date</th>
-                                    <th class="align-middle text-center">Tax Invoice Number</th>
-                                    <th class="align-middle text-center">No. Faktur</th>
                                     <th class="align-middle text-center">Qty Item</th>
+                                    <th class="align-middle text-center">Invoice Date</th>
+                                    <th class="align-middle text-center">Invoice Number</th>
+                                    <th class="align-middle text-center">No. Faktur</th>
                                     <th class="align-middle text-center">Transaction Count</th>
                                     <th class="align-middle text-center">Created By</th>
                                     <th class="align-middle text-center">Action</th>
@@ -164,8 +164,8 @@
         grn_number: '{{ $grn_number }}',
         ref_number: '{{ $ref_number }}',
         po_number: '{{ $po_number }}',
-        tax_invoice_number: '{{ $tax_invoice_number }}',
         invoice_number: '{{ $invoice_number }}',
+        tax_invoice_number: '{{ $tax_invoice_number }}',
         searchDate: '{{ $searchDate }}',
         startdate: '{{ $startdate }}',
         enddate: '{{ $enddate }}'
@@ -197,7 +197,20 @@
             data: 'po_number',
             name: 'po_number',
             orderable: true,
-            searchable: true
+            searchable: true,
+            render: function(data, type, row) {
+                if (data == null) {
+                    return '<span class="badge bg-secondary">Null</span>';
+                }
+                return data;
+            }
+        },
+        {
+            data: 'qty_item',
+            name: 'qty_item',
+            orderable: true,
+            searchable: true,
+            className: 'text-center text-bold'
         },
         {
             data: 'date_invoice',
@@ -205,15 +218,9 @@
             orderable: true,
             className: 'text-center',
             render: function(data, type, row) {
-                var date_transaction = new Date(row.date_transaction);
-                return date_transaction.toLocaleDateString('es-CL').replace(/\//g, '-');
+                var date_invoice = new Date(data);
+                return date_invoice.toLocaleDateString('es-CL').replace(/\//g, '-');
             },
-        },
-        {
-            data: 'tax_invoice_number',
-            name: 'tax_invoice_number',
-            orderable: true,
-            searchable: true
         },
         {
             data: 'invoice_number',
@@ -222,42 +229,18 @@
             searchable: true
         },
         {
-            data: 'qty_item',
-            name: 'qty_item',
+            data: 'tax_invoice_number',
+            name: 'tax_invoice_number',
             orderable: true,
             searchable: true
         },
         {
-            data: 'total_transaction',
-            name: 'total_transaction',
+            data: 'count',
+            name: 'count',
             orderable: true,
-            searchable: true
+            searchable: true,
+            className: 'text-center',
         },
-        // {
-        //     data: 'currency',
-        //     name: 'currency',
-        //     orderable: true,
-        //     searchable: true,
-        //     className: 'text-center',
-        // },
-        // {
-        //     data: 'total',
-        //     name: 'total',
-        //     orderable: true,
-        //     searchable: true,
-        //     className: 'text-end',
-        //     render: function(data, type, row) {
-        //         if (data == null) {
-        //             return '<span class="badge bg-secondary">Null</span>';
-        //         }
-        //         var formattedAmount = numberFormat(data, 2, ',', '.'); 
-        //         var parts = formattedAmount.split(',');
-        //         if (parts.length > 1) {
-        //             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
-        //         }
-        //         return '<span class="text-bold">' + parts[0] + '</span>';
-        //     },
-        // },
         {
             data: 'created_by',
             searchable: true,
@@ -289,7 +272,7 @@
         $(document).on('click', '#btnExport', function () {
             var currentDate = new Date();
             var formattedDate = currentDate.toISOString().split('T')[0];
-            var fileName = "Sales (Export) Export - " + formattedDate + ".xlsx";
+            var fileName = "Purchase Export - " + formattedDate + ".xlsx";
             var requestData = Object.assign({}, data);
             requestData.flag = 1;
             handleExport(url, requestData, fileName);

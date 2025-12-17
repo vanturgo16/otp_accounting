@@ -40,8 +40,17 @@
             <div class="toast-body" style="max-height: 80vh; overflow-y: auto;">{{ session('warning') }}</div>
         </div>
     @endif
-    @if (count($errors)>0)
     @if (session('error'))
+        <div class="toast fade show" role="alert" aria-live="assertive" data-bs-autohide="false" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <span class="badge bg-white text-primary"><i class="mdi mdi-alert-circle-outline label-icon"></i></span>&nbsp;
+                <strong class="me-auto">Error</strong><small>just now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" style="max-height: 80vh; overflow-y: auto;">{{ session('error') }}</div>
+        </div>
+    @endif
+    @if (count($errors)>0)
         <div class="toast fade show" role="alert" aria-live="assertive" data-bs-autohide="false" aria-atomic="true">
             <div class="toast-header bg-danger text-white">
                 <span class="badge bg-white text-primary"><i class="mdi mdi-alert-outline label-icon"></i></span>&nbsp;
@@ -56,7 +65,6 @@
                 </ul>
             </div>
         </div>
-    @endif
     @endif
 </div>
 <!-- TOAST JS -->

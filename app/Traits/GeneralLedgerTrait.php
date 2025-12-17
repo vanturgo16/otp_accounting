@@ -93,4 +93,14 @@ trait GeneralLedgerTrait {
         $value = str_replace(['.', ','], ['', '.'], $value);
         return number_format((float) $value, 2, '.', '');
     }
+
+    function normalizePrice($value)
+    {
+        $value = str_replace(['.', ','], ['', '.'], $value);
+        return number_format((float) $value, 2, '.', '');
+    }
+
+    function decimal3($value) {
+        return number_format((float) $value, 3, '.', '');
+    }
 }

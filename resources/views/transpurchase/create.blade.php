@@ -47,6 +47,16 @@
                                     <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-01') }}" max="{{ date('Y-m-d') }}" required>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label required-label">Invoice Number</label>
+                                    <input type="text" class="form-control" name="invoice_number" placeholder="Input Invoice Number.." required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label required-label">Tax Invoice Number / No Faktur</label>
+                                    <input type="text" class="form-control" name="tax_invoice_number" placeholder="Input Tax Invoice Number.." required>
+                                </div>
+                            </div>
                             <hr>
 
                             <div class="row">
@@ -170,7 +180,7 @@
                                                     </tr>
                                                     <tr>
                                                         <td class="text-end">
-                                                            <label class="form-label fw-bold">Total Nilai Jual + PPN - Diskon :</label>
+                                                            <label class="form-label fw-bold">(Total Nilai Jual + PPN) - Diskon :</label>
                                                         </td>
                                                         <td class="text-end">
                                                             <label class="form-label"> <span class="currency text-muted">IDR</span> <span id="totalPrice">0</span></label>
@@ -355,6 +365,8 @@
                 dataTable.rows().every(function () {
                     let d = this.data();
                     listProduct.push({
+                        idGRNDetail  : d.id,
+                        idPRDetail   : d.id_purchase_requisition_details,
                         lot_number   : d.lot_number,
                         type_product : d.type_product,
                         product      : d.product,
