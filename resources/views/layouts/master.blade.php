@@ -1,47 +1,44 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>Accounting | PT. OTP</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('assets/images/icon-otp.png') }}">
-    <!-- plugin css -->
-    <link href="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css') }}" rel="stylesheet" type="text/css" />
-    <!-- DataTables -->
-    <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
-    <!-- Responsive datatable examples -->
-    <link href="{{ asset('assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" /> 
-    <!-- preloader css -->
-    <link rel="stylesheet" href="{{ asset('assets/css/preloader.min.css') }}" type="text/css" />
-    <!-- Bootstrap Css -->
-    <link href="{{ asset('assets/css/bootstrap.min.css') }}" id="bootstrap-style" rel="stylesheet" type="text/css" />
-    <!-- Icons Css -->
-    <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
-    <!-- App Css-->
-    <link href="{{ asset('assets/css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css" />
-    {{-- Jquery --}}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
-    {{-- SummerNote --}}
-    <link href="{{ asset('assets/css/summernote-bs4.min.css') }}" rel="stylesheet">
-    <script src="{{ asset('assets/js/summernote-bs4.min.js') }}"></script>
-    {{-- select 2 --}}
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    {{-- Custom --}}
-    <link href="{{ asset('assets/css/custom.css') }}" id="app-style" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/css/custom2.css') }}" id="app-style" rel="stylesheet" type="text/css" />
-</head>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Accounting | PT. OTP</title>
+    <link rel="shortcut icon" href="{{ asset('assets/images/icon-otp.png') }}" />
 
+    <!-- JQUERY SCRIPT -->
+    <script type="text/javascript" src="{{ asset('assets/libs/jquery/jquery.min.js') }}"></script>
+
+    <!-- PRELOADER CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/preloader.min.css') }}"/>
+    <!-- DATATABLES CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css') }}"/>
+    <!-- BOOTSTRAP CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/bootstrap.min.css') }}"/>
+    <!-- ICONS CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/icons.min.css') }}"/>
+    <!-- APP CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/app.min.css') }}"/>
+    <!-- CHOICES SELECT CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/choices.js/public/assets/styles/choices.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/css/select2.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/css/select2.min.css') }}"/>
+    <!-- SUMMERNOTE -->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/summernote-bs4.min.css') }}"/>
+    <!-- ADDITIONAL CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom2.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/floating-dropdown.css') }}"/>
+</head>
 <body>
-<!-- <body data-layout="horizontal"> -->
-    
-    <!-- Loading -->
     @include('layouts.loading')
+    @include('layouts.toast')
+
+    <!-- General Modal -->
+    @include('layouts.modal.dynamic')
+
     <!-- Begin page -->
     <div id="layout-wrapper">
         <header id="page-topbar">
@@ -174,30 +171,18 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <form action="{{ route('logout') }}" id="formlogout" method="POST" enctype="multipart/form-data">
+                        <form class="formLoad" action="{{ route('logout') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-logout label-icon"></i>Logout</button>
+                            <button type="submit" class="btn btn-danger waves-effect btn-label waves-light">
+                                <i class="mdi mdi-logout label-icon"></i>Logout
+                            </button>
                         </form>
-                        <script>
-                            document.getElementById('formlogout').addEventListener('submit', function(event) {
-                                if (!this.checkValidity()) {
-                                    event.preventDefault(); // Prevent form submission if it's not valid
-                                    return false;
-                                }
-                                var submitButton = this.querySelector('button[name="sb"]');
-                                submitButton.disabled = true;
-                                submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
-                                return true; // Allow form submission
-                            });
-                        </script>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- END layout-wrapper -->
 
-    
     <!-- Right Sidebar -->
     <div class="right-bar">
         <div data-simplebar class="h-100">
@@ -331,85 +316,42 @@
 
         </div> <!-- end slimscroll-menu-->
     </div>
-    <!-- /Right-bar -->
-
+    
     <!-- Right bar overlay-->
     <div class="rightbar-overlay"></div>
 
     <!-- JAVASCRIPT -->
-    {{-- <script src="{{ asset('assets/libs/jquery/jquery.min.js') }}"></script> --}}
     <script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('assets/libs/metismenu/metisMenu.min.js') }}"></script>
     <script src="{{ asset('assets/libs/simplebar/simplebar.min.js') }}"></script>
     <script src="{{ asset('assets/libs/node-waves/waves.min.js') }}"></script>
     <script src="{{ asset('assets/libs/feather-icons/feather.min.js') }}"></script>
-    <!-- pace js -->
-    <script src="{{ asset('assets/libs/pace-js/pace.min.js') }}"></script>
-
-    <!-- Required datatable js -->
+    <!-- DATATABLE -->
     <script src="{{ asset('assets/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
-    <!-- Buttons examples -->
-    <script src="{{ asset('assets/libs/datatables.net-buttons/js/dataTables.buttons.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/jszip/jszip.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/pdfmake/build/pdfmake.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/pdfmake/build/vfs_fonts.js') }}"></script>
-    <script src="{{ asset('assets/libs/datatables.net-buttons/js/buttons.html5.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/datatables.net-buttons/js/buttons.print.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/datatables.net-buttons/js/buttons.colVis.min.js') }}"></script>
-    <!-- Responsive examples -->
-    <script src="{{ asset('assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js') }}"></script>
-    <!-- Datatable init js -->
     <script src="{{ asset('assets/js/pages/datatables.init.js') }}"></script>
-
-    <!-- apexcharts -->
-    <script src="{{ asset('assets/libs/apexcharts/apexcharts.min.js') }}"></script>
-    <!-- Plugins js-->
-    <script src="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/admin-resources/jquery.vectormap/maps/jquery-jvectormap-world-mill-en.js') }}"></script>
-    <!-- dashboard init -->
+    <!-- XLSX -->
+    <script src="{{ asset('assets/libs/xlsx/0.17.4/xlsx.full.min.js') }}"></script>
+    <!-- CHOICHES SELECT JS -->
+    <script src="{{ asset('assets/libs/choices.js/public/assets/scripts/choices.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/form-advanced.init.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/js/select2.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/js/select2.init.js') }}"></script>
+    <!-- SUMMERNOTE -->
+    <script src="{{ asset('assets/js/summernote-bs4.min.js') }}"></script>
+    <script src="{{ asset('assets/js/summernote.init.js') }}"></script>
+    <!-- DASHBOARD INIT -->
     <script src="{{ asset('assets/js/pages/dashboard.init.js') }}"></script>
     <script src="{{ asset('assets/js/app.js') }}"></script>
-    <!-- custom -->
+    <script src="{{ asset('assets/libs/jquery-validation/jquery.validate.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/dayjs@1/dayjs.min.js') }}"></script>
+    <!-- FORM LOAD JS -->
+    <script src="{{ asset('assets/js/formLoad.js') }}"></script>
+    <!-- ADDITION JS -->
     <script src="{{ asset('assets/js/custom.js') }}"></script>
-    <script src="{{ asset('assets/js/bulkaction.js') }}"></script>
     <script src="{{ asset('assets/js/searchInput.js') }}"></script>
-
-    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
-    <script>
-        function formatPrice(value) {
-            if (!value) return '0';
-            // format with 3 decimals first
-            let formatted = Number(value).toLocaleString('id-ID', {
-                minimumFractionDigits: 3,
-                maximumFractionDigits: 3
-            });
-            // remove trailing zeros after comma
-            formatted = formatted.replace(/,?0+$/, '');
-            return formatted;
-        }
-        function formatPriceWithStyle(value) {
-            // Format with 3 decimals, comma as decimal sep, dot as thousand sep
-            let formatted = new Intl.NumberFormat('de-DE', {
-                minimumFractionDigits: 3,
-                maximumFractionDigits: 3
-            }).format(value);
-            // Split integer and decimal part
-            let parts = formatted.split(',');
-            let before = parts[0]; // integer part with thousand separator
-            let after = parts[1] ? ',' + parts[1] : '';
-            return `<span class="fw-bold">${before}</span><span class="text-muted">${after}</span>`;
-        }
-    </script>
-    <script>
-        $(document).ready(function() {
-            $('.summernote-editor').each(function() {
-                $(this).summernote();
-            });
-        });
-    </script>
+    <script src="{{ asset('assets/js/floating-dropdown.js') }}"></script>
+    <script src="{{ asset('assets/js/helperDT.js') }}"></script>
+    <script src="{{ asset('assets/js/currencyFormat.js') }}"></script>
 </body>
-
 </html>

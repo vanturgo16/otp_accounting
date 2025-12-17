@@ -1,5 +1,4 @@
 @extends('layouts.master')
-
 @section('konten')
 
 <div class="page-content">
@@ -9,24 +8,28 @@
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
                         <a href="{{ route('transpurchase.index') }}" class="btn btn-light waves-effect btn-label waves-light">
-                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Purchase Transaction
+                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Sales Purchase
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Accounting</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('transpurchase.index') }}">Purchase Transaction</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('transpurchase.index') }}">Sales Purchase</a></li>
                             <li class="breadcrumb-item active">Create</li>
                         </ol>
                     </div>
                 </div>
             </div>
         </div>
-        
-        @include('layouts.alert')
 
         <form action="{{ route('transpurchase.store') }}" id="formstore" method="POST" enctype="multipart/form-data">
             @csrf
+            <input type="hidden" name="currency" value="IDR">
+            <input type="hidden" name="listProduct">
+            <input type="hidden" name="njPrice">
+            <input type="hidden" name="ppnPrice">
+            <input type="hidden" name="totalPrice">
+
             <div class="row">
                 <div class="col-12">
                     <div class="card">
@@ -36,101 +39,164 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Ref Number</label><label style="color: darkred">*</label>
-                                    <br>
-                                    <span class="badge bg-info text-white">Auto Generate</span>
+                                    <label class="form-label required-label">Invoice Date</label>
+                                    <i class="mdi mdi-information-outline"
+                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Tanggal hanya dapat dipilih dari awal bulan ini hingga hari ini.">
+                                    </i>
+                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-01') }}" max="{{ date('Y-m-d') }}" required>
                                 </div>
+                            </div>
+                            <hr>
+
+                            <div class="row">
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="date_transaction" value="{{ date('Y-m-d') }}" required>
-                                </div>
-                                <hr>
-                                <div class="col-6 mb-2">
-                                    <label class="form-label">Good Receipt Note</label><label style="color: darkred">*</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_good_receipt_notes" required>
-                                        <option value="" selected>--Select Type--</option>
-                                        @foreach($goodReceiptNote as $item)
-                                            <option value="{{ $item->id }}">{{ $item->receipt_number." - ". $item->status }}</option>
+                                    <label class="form-label required-label">Good Receipt Notes</label>
+                                    <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Daftar Good Receipt Notes (GRN) berstatus Posted yang belum dibuatkan invoice"></i>
+                                    <select class="form-select select2" style="width: 100%" name="id_good_receipt_notes" required>
+                                        <option value="" selected disabled>-- Select --</option>
+                                        @foreach($grns as $item)
+                                            <option value="{{ $item->id }}"
+                                                data-grn-number="{{ $item->grn_number }}"
+                                                data-grn-date="{{ $item->grn_date }}">
+                                                {{ $item->grn_number }} || 
+                                                {{ $item->grn_date }}
+                                            </option>
                                         @endforeach
                                     </select>
-                                </div>
-                                <div class="col-6 mb-2"></div>
-                                
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">PO Date</label>
-                                    <input class="form-control" id="po_date" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Supplier</label>
-                                    <input class="form-control" id="supplier" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Reference Number</label>
-                                    <input class="form-control" id="reference_number" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Status</label>
-                                    <input class="form-control" id="po_status" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
+                                    <input type="hidden" name="grn_number" value="">
+                                    <input type="hidden" name="grn_date" value="">
+                                    
+                                    <input type="hidden" name="ref_number" value="">
+                                    <input type="hidden" name="po_number" value="">
+                                    <input type="hidden" name="suppliers" value="">
+                                    <input type="hidden" name="requester" value="">
                                 </div>
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Own Remark</label>
-                                    <textarea class="form-control" rows="2" type="text" id="own_remarks" placeholder="Select Purchase Orders.." value="" style="background-color:#EAECF4" readonly></textarea>
                                 </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Supplier Remark</label>
-                                    <textarea class="form-control" rows="2" type="text" id="supplier_remarks" placeholder="Select Purchase Orders.." value="" style="background-color:#EAECF4" readonly></textarea>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Sub Total</label>
-                                    <input class="form-control" id="sub_total" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Total Discount</label>
-                                    <input class="form-control" id="total_discount" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Total Tax</label>
-                                    <input class="form-control" id="total_ppn" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Total Amount</label>
-                                    <input class="form-control" id="total_amount" type="text" value="" placeholder="Select Purchase Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <br>
+                            </div>
 
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Delivery Note Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="delivery_note_date" value="" required>
+                            <div class="card">
+                                <div class="card-body" style="background-color:ghostwhite">
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">Ref Number / PR</label>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
+                                            <input class="form-control" id="ref_number" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">PO Number</label>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
+                                            <input class="form-control" id="po_number" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">Suppliers</label>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
+                                            <input class="form-control" id="suppliers" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">Requester</label>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
+                                            <input class="form-control" id="requester" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <label class="form-label">List Product</label>
+                                            <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th class="align-middle text-center">No.</th>
+                                                        <th class="align-middle text-center">Lot Number</th>
+                                                        <th class="align-middle text-center">Product</th>
+                                                        <th class="align-middle text-center">Receipt Qty (Unit)</th>
+                                                        <th class="align-middle text-center">Price</th>
+                                                        <th class="align-middle text-center">Total Price</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+                                        <div class="col-lg-6 mt-4"></div>
+                                        <div class="col-lg-6 mt-4">                                          
+                                            <table style="width: 100%">
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Set PPN Rate <br><small>(default {{ $initPPN }}%)</small> :</label>
+                                                        </td>
+                                                        <td class="text-end" style="width: 50%;">
+                                                            <div class="input-group" style="width: 150px; margin-left: auto;">
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonMinusPPNRate" disabled>-</button>
+                                                                <input type="text" name="ppn_rate" class="form-control text-center" value="{{ $initPPN }}" id="ppn_rate" style="background-color:#EAECF4" required readonly>
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonPlusPPNRate" disabled>+</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><br></td><td><br></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Total Nilai Jual :</label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="currency text-muted">IDR</span> <span id="njPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">
+                                                                PPN (<span id="labelPPNRate">{{ $initPPN }}</span><span>%)</span>
+                                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Total Nilai Jual X PPN Rate"></i>
+                                                                :
+                                                            </label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="currency text-muted">IDR</span> <span id="ppnPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Diskon :</label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> 
+                                                                <input type="text" name="discount" class="form-control form-control-sm text-end currency-input" value="0">
+                                                            </label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Total Nilai Jual + PPN - Diskon :</label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="currency text-muted">IDR</span> <span id="totalPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Delivery Note Number</label><label style="color: darkred">*</label>
-                                    <input type="text" class="form-control" name="delivery_note_number" value="" placeholder="Input Delivery Note Number.." required>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Invoice Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="invoice_date" value="" required>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Invoice Number</label><label style="color: darkred">*</label>
-                                    <input type="text" class="form-control" name="invoice_number" value="" placeholder="Input Invoice Number.." required>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Tax Invoice Number</label>
-                                    <input type="text" class="form-control" name="tax_invoice_number" value="" placeholder="Input Tax Invoice Number..">
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Quantity</label><label style="color: darkred">*</label>
-                                    <input type="number" class="form-control" name="quantity" value="" placeholder="Input Quantity.." required>
-                                </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-lg-12 mb-3">
-                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
-                                    <textarea class="form-control" rows="3" type="text" name="description" placeholder="Input Description.." value="" required></textarea>
+                                    <label class="form-label">Note</label>
+                                    <textarea class="summernote-editor-simple" name="note" placeholder="Input Note (Opsional)..."></textarea>
                                 </div>
+                            </div>
 
+                            <div class="row">
                                 <div class="col-lg-12 mt-3">
                                     <div class="card">
                                         <div class="card-header text-center">
-                                            <h6 class="mb-0">Transaction</h6>
+                                            <h6 class="mb-0">
+                                                Transaction
+                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Aturan Transaksi: Total Debit harus sama dengan Total Kredit, serta sama dengan Total Nilai Jual + PPN"></i>
+                                            </h6>
                                         </div>
                                         <div class="card-body">
                                             <div class="table-repsonsive">
@@ -140,13 +206,14 @@
                                                             <th>Account Code</th>
                                                             <th>Nominal</th>
                                                             <th>Debit / Kredit</th>
+                                                            <th>Note</th>
                                                             <th style="text-align:center">Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
                                                             <td>
-                                                                <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[0][account_code]" required>
+                                                                <select class="form-select select2 addpayment" style="width: 100%" name="addmore[0][account_code]" required>
                                                                     <option value="">- Select Account Code -</option>
                                                                     @foreach( $accountcodes as $item )
                                                                         <option value="{{ $item->id }}">{{ $item->account_code }} - {{ $item->account_name }}</option>
@@ -157,11 +224,14 @@
                                                                 <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="" required>
                                                             </td>
                                                             <td>
-                                                                <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[0][type]" required>
+                                                                <select class="form-select select2 addpayment" style="width: 100%" name="addmore[0][type]" required>
                                                                     <option value="">- Select Type -</option>
                                                                     <option value="D">Debit</option>
                                                                     <option value="K">Kredit</option>
                                                                 </select>
+                                                            </td>
+                                                            <td>
+                                                                <textarea class="form-control" name="addmore[0][note]" cols="20" rows="3" placeholder="Input Note (Optional).."></textarea>
                                                             </td>
                                                             <td style="text-align:center"><button type="button" name="add" id="adds" class="btn btn-success"><i class="fas fa-plus"></i></button></td>
                                                         </tr>
@@ -188,6 +258,7 @@
                 </div>
             </div>
         </form>
+        
     </div>
 </div>
 
@@ -199,9 +270,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="row" id="modalBodyContent">
-                    <!-- Content will be populated by JavaScript -->
-                </div>
+                <div class="row" id="modalBodyContent"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
@@ -210,8 +279,18 @@
     </div>
 </div>
 
+
 {{-- Validation Form --}}
 <script>
+    function normalizeNumber(value) {
+        if (typeof value === "string") {
+            return parseFloat(
+                value.replace(/\./g, "").replace(",", ".")
+            );
+        }
+        return Number(value);
+    }
+
     function parseCurrency(value) {
         return parseFloat(value.replace(/\./g, '').replace(',', '.'));
     }
@@ -268,11 +347,62 @@
             var myModal = new bootstrap.Modal(document.getElementById('alert'));
             myModal.show();
         } else {
-            var submitButton = this.querySelector('button[name="sb"]');
-            submitButton.disabled = true;
-            submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
-            this.submit();
-            return true;
+            let numDebit = normalizeNumber(totals.debitTotal);
+            let numPrice = normalizeNumber(totalPriceGlobal);
+            if(numDebit == numPrice){
+                // Add listProduct to hidden input
+                let listProduct = [];
+                dataTable.rows().every(function () {
+                    let d = this.data();
+                    listProduct.push({
+                        lot_number   : d.lot_number,
+                        type_product : d.type_product,
+                        product      : d.product,
+                        receipt_qty  : d.receipt_qty,
+                        unit         : d.unit,
+                        price_origin : d.price_origin ?? d.price,
+                        price_edit   : d.price_edit   ?? d.price,
+                        total_price  : d.total_price
+                    });
+                });
+                $('input[name="listProduct"]').val(JSON.stringify(listProduct));
+                $('input[name="njPrice"]').val(normalizeNumber($('#njPrice').text()));
+                $('input[name="ppnPrice"]').val(normalizeNumber($('#ppnPrice').text()));
+                $('input[name="totalPrice"]').val(normalizeNumber($('#totalPrice').text()));
+
+
+                var submitButton = this.querySelector('button[name="sb"]');
+                submitButton.disabled = true;
+                submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
+                $("#processing").removeClass("hidden");
+                $("body").addClass("no-scroll");
+                this.submit();
+                return true;
+            } 
+            else {
+                let modalBodyContent = `
+                    <div class="col-12">
+                        <table class="table dt-responsive w-100">
+                            <thead>
+                                <tr>
+                                    <th class="align-top text-center text-bold">Total Debit</th>
+                                    <th class="align-top text-center text-bold">?</th>
+                                    <th class="align-top text-center text-bold">Total Purchase Price</th>
+                                </tr>
+                                <tr>
+                                    <th class="align-top text-center">${totals.debitTotal.toLocaleString('id-ID')}</th>
+                                    <th class="align-top text-center text-danger">!=</th>
+                                    <th class="align-top text-center">${totalPriceGlobal.toLocaleString('id-ID')}</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                `;
+
+                document.getElementById('modalBodyContent').innerHTML = modalBodyContent;
+                var myModal = new bootstrap.Modal(document.getElementById('alert'));
+                myModal.show();
+            }
         }
     });
 </script>
@@ -281,12 +411,12 @@
 <script>
     var i = 0;
     $("#adds").click(function() {
-        $(".js-example-basic-single").select2();
+        $(".select2").select2();
         ++i;
         $("#dynamicTable").append(
             `<tr>
                 <td>
-                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[`+i+`][account_code]" required>
+                    <select class="form-select select2 addpayment" style="width: 100%" name="addmore[`+i+`][account_code]" required>
                         <option value="">- Select Account Code -</option>
                         @foreach( $accountcodes as $item )
                             <option value="{{ $item->id }}">{{ $item->account_code }} - {{ $item->account_name }}</option>
@@ -297,18 +427,21 @@
                     <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
                 </td>
                 <td>
-                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
+                    <select class="form-select select2 addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
                         <option value="">- Select Type -</option>
                         <option value="D">Debit</option>
                         <option value="K">Kredit</option>
                     </select>
+                </td>
+                <td>
+                    <textarea class="form-control" name="addmore[`+i+`][note]" cols="20" rows="3" placeholder="Input Note (Optional).."></textarea>
                 </td>
                 <td style="text-align:center">
                     <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>
                 </td>
             </tr>`);
 
-        $(".js-example-basic-single").select2();
+        $(".select2").select2();
 
         document.querySelectorAll(".rupiah-input").forEach((input) => {
             input.addEventListener("input", formatCurrencyInput);
@@ -319,56 +452,247 @@
     });
 </script>
 
-{{-- Purchase Order Choose --}}
-<script>
-    $('select[name="id_good_receipt_notes"]').on('change', function() {
-        $('#po_date').val("");
-        $('#supplier').val("");
-        $('#reference_number').val("");
-        $('#po_status').val("");
-        $('#own_remarks').val("");
-        $('#supplier_remarks').val("");
-        $('#sub_total').val("");
-        $('#total_discount').val("");
-        $('#total_ppn').val("");
-        $('#total_amount').val("");
+{{-- Delivery Notes Choose --}}
+<style>
+    /* Hide DataTable header and footer */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        display: none;
+    }
+</style>
 
-        var id_good_receipt_notes = $(this).val();
-        if(id_good_receipt_notes == ""){
-            $('#po_date').val("");
-            $('#supplier').val("");
-            $('#reference_number').val("");
-            $('#po_status').val("");
-            $('#own_remarks').val("");
-            $('#supplier_remarks').val("");
-            $('#sub_total').val("");
-            $('#total_discount').val("");
-            $('#total_ppn').val("");
-            $('#total_amount').val("");
-        } else {
-            var url = '{{ route("transpurchase.getgoodReceiptNote", ":id") }}';
-            url = url.replace(':id', id_good_receipt_notes);
-            if (id_good_receipt_notes) {
-                $.ajax({
-                    url: url,
-                    type: "GET",
-                    dataType: "json",
-                    success: function(data) {
-                        $('#po_date').val(data.date ? data.date : 'Not set');
-                        $('#supplier').val(data.supplier ? data.supplier : 'Not set');
-                        $('#reference_number').val(data.reference_number ? data.reference_number : 'Not set');
-                        $('#po_status').val(data.status ? data.status : 'Not set');
-                        $('#own_remarks').val(data.own_remarks ? data.own_remarks : 'Not set');
-                        $('#supplier_remarks').val(data.supplier_remarks ? data.supplier_remarks : 'Not set');
-                        $('#sub_total').val(data.sub_total ? data.sub_total : 'Not set');
-                        $('#total_discount').val(data.total_discount ? data.total_discount : 'Not set');
-                        $('#total_ppn').val(data.total_ppn ? data.total_ppn : 'Not set');
-                        $('#total_amount').val(data.total_amount ? data.total_amount : 'Not set');
+<script>
+    let totalPriceGlobal = 0;
+    let dataTable;
+
+    $(function() {
+        let data = {
+            idGRN   : '',
+            ppnRate : '{{ $initPPN }}',
+        };
+        dataTable = $('#server-side-table').DataTable({
+            processing: true,
+            serverSide: true,
+            paging: false,
+            searching: false,
+            ordering: false,
+            info: false,
+            ajax: {
+                url: '{!! route('transpurchase.getPriceFromGRN') !!}',
+                type: 'GET',
+                data: function(d) {
+                    d.idGRN   = data.idGRN;
+                    d.ppnRate = data.ppnRate;
+                }
+            },
+            columns: [
+                {
+                    data: null,
+                    className: 'text-center',
+                    render: function (data, type, row, meta) {
+                        return meta.row + 1;
                     }
+                },
+                {
+                    data: 'lot_number',
+                    name: 'lot_number',
+                    orderable: true,
+                    searchable: true,
+                    render: function(data, type, row) {
+                        return data
+                            ? `<span class="text-bold">${data}</span>` 
+                            : `<span class="badge bg-secondary">Null</span>`;
+                    },
+                },
+                {
+                    data: 'product',
+                    render: function(data, type, row) {
+                        if(!data) return '<span class="badge bg-secondary">Null</span>';
+                        return data + '<br><b>(' + row.type_product + ')</b>';
+                    }
+                },
+                {
+                    data: 'receipt_qty',
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        return data + ' (' + row.unit + ')';
+                    }
+                },
+                // PRICE (EDITABLE)
+                {
+                    data: 'price',
+                    className: 'text-end',
+                    render: function(data, type, row, meta) {
+                        let price = data ?? 0;
+                        return `
+                            <input type="text"
+                                class="form-control form-control-sm text-end editable-price currency-input"
+                                value="${numberFormat(price,2,',','.')}"
+                                data-row="${meta.row}"
+                                data-qty="${row.receipt_qty}">
+                        `;
+                    }
+                },
+                {
+                    data: 'total_price',
+                    className: 'text-end',
+                    render: function(data, type, row, meta) {
+                        let total = data ?? 0;
+                        return `
+                            <span class="row-total-price" data-row="${meta.row}">
+                                ${formatPriceWithStyle(total)}
+                            </span>
+                        `;
+                    }
+                }
+            ]
+        });
+
+        // ===============================
+        // SUMMARY FROM SERVER (INITIAL)
+        // ===============================
+        dataTable.on('xhr.dt', function(e, settings, json) {
+            if (!json) return;
+
+            $('#njPrice').html(formatPriceWithStyle(json.nj ?? 0));
+            $('#ppnPrice').html(formatPriceWithStyle(json.ppn ?? 0));
+            $('#totalPrice').html(formatPriceWithStyle(json.total ?? 0));
+            $('#labelPPNRate').html(json.ppn_rate ?? 0);
+            $('.currency').html(json.currency ?? 'IDR');
+            $('input[name="currency').val(json.currency ?? 'IDR');
+
+            totalPriceGlobal = json.total ?? 0;
+        });
+
+        // ===============================
+        // EDIT PRICE EVENT
+        // ===============================
+        $('#server-side-table').on('keyup', '.editable-price', function () {
+            let $this = $(this);
+            let rowIndex = $this.data('row');
+            let qty      = parseFloat($this.data('qty')) || 0;
+
+            let priceEdit = formatPrice($this.val());
+            let totalRow  = priceEdit * qty;
+
+            let rowData = dataTable.row(rowIndex).data();
+
+            rowData.price_edit  = priceEdit;
+            rowData.price       = priceEdit;
+            rowData.total_price = totalRow;
+
+            $('.row-total-price[data-row="'+rowIndex+'"]').html(formatPriceWithStyle(totalRow));
+            recalculateSummary();
+        });
+
+
+        $('input[name="discount').on('keyup', function () {
+            recalculateSummary();
+        });
+
+        // ===============================
+        // SELECT GRN
+        // ===============================
+        $('select[name="id_good_receipt_notes"]').on('change', function() {
+            var selected = $(this).find('option:selected'); 
+            $('input[name="grn_number"]').val(selected.data('grn-number')); 
+            $('input[name="grn_date"]').val(selected.data('grn-date'));
+            
+            let idGRN = $(this).val();
+            let initPPN = parseFloat('{{ $initPPN }}') || 0;
+            resetPPNRate();
+            resetPrice();
+            $('#ref_number,#po_number,#suppliers,#requester').val('🔃');
+            $('input[name="ref_number"], input[name="po_number"], input[name="suppliers"], input[name="requester"]').val('');
+            $('input[name="discount"]').val(0);
+
+            if(idGRN) {
+                let url = '{{ route("transpurchase.getDetailGRN", ":id") }}'.replace(':id', idGRN);
+
+                $.get(url, function(res) {
+                    $('#ref_number').val(res.prNumber ?? '-');
+                    $('#po_number').val(res.poNumber ?? '-');
+                    $('#suppliers').val(res.supplierName ?? '-');
+                    $('#requester').val(res.requester ?? '-');
+                    
+                    $('input[name="ref_number"]').val(res.prNumber ?? '');
+                    $('input[name="po_number"]').val(res.poNumber ?? '');
+                    $('input[name="suppliers"]').val(res.supplierName ?? '');
+                    $('input[name="requester"]').val(res.requester ?? '');
                 });
+                reloadDataSO(idGRN, initPPN);
+                enablePPNRate();
             }
+        });
+
+        // ===============================
+        // PPN BUTTONS
+        // ===============================
+        $('#buttonPlusPPNRate').on('click', function() {
+            let rate = parseFloat($('#ppn_rate').val()) || 0;
+            if(rate < 100){
+                rate++;
+                $('#labelPPNRate').html(rate);
+                $('#ppn_rate').val(rate);
+                recalculateSummary();
+            }
+        });
+        $('#buttonMinusPPNRate').on('click', function() {
+            let rate = parseFloat($('#ppn_rate').val()) || 0;
+            if(rate > 0){
+                rate--;
+                $('#labelPPNRate').html(rate);
+                $('#ppn_rate').val(rate);
+                recalculateSummary();
+            }
+        });
+
+        // ===============================
+        // FUNCTIONS
+        // ===============================
+        function reloadDataSO(idGRN, ppnRate){
+            data.idGRN = idGRN;
+            data.ppnRate = ppnRate;
+            dataTable.ajax.reload();
+        }
+        function resetPPNRate(){
+            let initPPN = parseFloat('{{ $initPPN }}') || 0;
+            $('#ppn_rate').val(initPPN);
+            $('#buttonMinusPPNRate,#buttonPlusPPNRate').prop('disabled', true);
+        }
+        function enablePPNRate(){
+            $('#buttonMinusPPNRate,#buttonPlusPPNRate').prop('disabled', false);
+        }
+        function resetPrice(){
+            $('#njPrice,#ppnPrice,#totalPrice').html(0);
+        }
+        function recalculateSummary(){
+            let totalNJ = 0;
+            dataTable.rows().every(function(){
+                let d = this.data();
+                totalNJ += parseFloat(d.total_price) || 0;
+            });
+            let ppnRate = parseFloat($('#ppn_rate').val()) || 0;
+            let ppn     = totalNJ * (ppnRate / 100);
+            let discount = parseCurrency(
+                $('input[name="discount"]').val() || 0
+            );
+            let total   = totalNJ + ppn - discount;
+            $('#njPrice').html(formatPriceWithStyle(totalNJ));
+            $('#ppnPrice').html(formatPriceWithStyle(ppn));
+            $('#totalPrice').html(formatPriceWithStyle(total));
+            totalPriceGlobal = total ?? 0;
+        }
+        function formatPrice(value){
+            if(!value) return 0;
+            return parseFloat(
+                value.toString().replace(/\./g,'').replace(',','.')
+            ) || 0;
         }
     });
 </script>
+
 
 @endsection

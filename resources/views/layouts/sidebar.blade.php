@@ -15,28 +15,29 @@
                 <li>
                     <a href="{{ route('ppn.index') }}" class="{{ request()->is('ppn*') ? 'bg-light text-primary active' : '' }}">
                         <i class="mdi mdi-percent"></i>
-                        <span>Manage Default PPN</span>
+                        <span>Default PPN</span>
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('bankaccount.index') }}" class="{{ request()->is('bankaccount*') ? 'bg-light text-primary active' : '' }}">
                         <i class="mdi mdi-bank"></i>
-                        <span>Manage Bank Account</span>
+                        <span>Bank Account</span>
                     </a>
                 </li>
+                <li class="menu-title" data-key="t-menu">Manage</li>
                 <li>
                     <a href="{{ route('accounttype.index') }}" class="{{ request()->is('accounttype*') ? 'bg-light text-primary active' : '' }}">
                         <i class="mdi mdi-format-list-bulleted-type"></i>
-                        <span>Manage Account Type</span>
+                        <span>Account Type</span>
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('accountcode.index') }}" class="{{ request()->is('accountcode*') ? 'bg-light text-primary active' : '' }}">
                         <i class="mdi mdi-barcode-scan"></i>
-                        <span>Manage Account Code</span>
+                        <span>Account Code</span>
                     </a>
                 </li>
-                <li class="{{ request()->is('entitylist*') ? 'mm-active' : '' }}">
+                {{-- <li class="{{ request()->is('entitylist*') ? 'mm-active' : '' }}">
                     <a href="javascript: void(0);" class="has-arrow">
                         <i class="mdi mdi-format-list-group"></i>
                         <span>Entity List Formula</span>
@@ -61,7 +62,7 @@
                             </a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
             @endcan
             
             <li class="menu-title" data-key="t-menu">Accounting</li>
@@ -104,16 +105,24 @@
                     </a>
                 </li>
             @endcan
-            @can('Akunting_import') 
+            @can('Akunting_generalledger') 
+                <li>
+                    <a href="{{ route('cashbook.index') }}" class="{{ request()->is('cashbook*') ? 'bg-light text-primary active' : '' }}">
+                        <i class="mdi mdi-cash-multiple"></i>
+                        <span>Cash Book</span>
+                    </a>
+                </li>
+            @endcan
+            {{-- @can('Akunting_import') 
                 <li>
                     <a href="{{ route('transimport.index') }}" class="{{ request()->is('transimport*') ? 'bg-light text-primary active' : '' }}">
                         <i class="mdi mdi-import"></i>
                         <span>Import</span>
                     </a>
                 </li>
-            @endcan
+            @endcan --}}
 
-            @can('Akunting_report') 
+            {{-- @can('Akunting_report') 
                 <li class="menu-title" data-key="t-menu">Report</li>
                 <li>
                     <a href="{{ route('report.neraca') }}" class="{{ request()->is('report/neraca*') ? 'bg-light text-primary active' : '' }}">
@@ -133,7 +142,7 @@
                         <span>Laba Rugi</span>
                     </a>
                 </li>
-            @endcan
+            @endcan --}}
 
             {{-- <li>
                 <a href="{{ route('transdatakas.index') }}">

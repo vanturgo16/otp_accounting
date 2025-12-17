@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CashBookController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GeneralLedgersController;
 use App\Http\Controllers\EntityListController;
@@ -34,8 +35,10 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
     Route::controller(MstPpnController::class)->group(function () {
         Route::prefix('ppn')->middleware('permission:Akunting_master_data')->group(function () {
             Route::get('/', 'index')->name('ppn.index');
-            Route::post('/', 'index')->name('ppn.index');
-            Route::post('/store', 'store')->name('ppn.store');
+            Route::post('/update/{id}', 'update')->name('ppn.update');
+            Route::prefix('modal')->group(function () {
+                Route::get('/edit/{id}', 'modalEdit')->name('ppn.modal.edit');
+            });
         });
     });
 
@@ -43,9 +46,17 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
     Route::controller(MstBankAccountController::class)->group(function () {
         Route::prefix('bankaccount')->middleware('permission:Akunting_master_data')->group(function () {
             Route::get('/', 'index')->name('bankaccount.index');
-            Route::post('/', 'index')->name('bankaccount.index');
             Route::post('/store', 'store')->name('bankaccount.store');
             Route::post('/update/{id}', 'update')->name('bankaccount.update');
+            Route::post('/activate/{id}', 'activate')->name('bankaccount.activate');
+            Route::post('/deactivate/{id}', 'deactivate')->name('bankaccount.deactivate');
+            Route::prefix('modal')->group(function () {
+                Route::get('/new', 'modalAdd')->name('bankaccount.modal.new');
+                Route::get('/info/{id}', 'modalInfo')->name('bankaccount.modal.info');
+                Route::get('/edit/{id}', 'modalEdit')->name('bankaccount.modal.edit');
+                Route::get('/activate/{id}', 'modalActivate')->name('bankaccount.modal.activate');
+                Route::get('/deactivate/{id}', 'modalDeactivate')->name('bankaccount.modal.deactivate');
+            });
         });
     });
 
@@ -53,15 +64,20 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
     Route::controller(MstAccountTypesController::class)->group(function () {
         Route::prefix('accounttype')->middleware('permission:Akunting_master_data')->group(function () {
             Route::get('/', 'index')->name('accounttype.index');
-            Route::post('/', 'index')->name('accounttype.index');
             Route::post('/store', 'store')->name('accounttype.store');
-            Route::get('/edit/{id}', 'edit')->name('accounttype.edit');
             Route::post('/update/{id}', 'update')->name('accounttype.update');
             Route::post('/activate/{id}', 'activate')->name('accounttype.activate');
             Route::post('/deactivate/{id}', 'deactivate')->name('accounttype.deactivate');
             Route::post('/delete/{id}', 'delete')->name('accounttype.delete');
-            Route::post('/deleteselected', 'deleteselected')->name('accounttype.deleteselected');
-            Route::post('/deactiveselected', 'deactiveselected')->name('accounttype.deactiveselected');
+
+            Route::prefix('modal')->group(function () {
+                Route::get('/new', 'modalAdd')->name('accounttype.modal.new');
+                Route::get('/info/{id}', 'modalInfo')->name('accounttype.modal.info');
+                Route::get('/edit/{id}', 'modalEdit')->name('accounttype.modal.edit');
+                Route::get('/activate/{id}', 'modalActivate')->name('accounttype.modal.activate');
+                Route::get('/deactivate/{id}', 'modalDeactivate')->name('accounttype.modal.deactivate');
+                Route::get('/delete/{id}', 'modalDelete')->name('accounttype.modal.delete');
+            });
         });
     });
     
@@ -76,8 +92,15 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
             Route::post('/activate/{id}', 'activate')->name('accountcode.activate');
             Route::post('/deactivate/{id}', 'deactivate')->name('accountcode.deactivate');
             Route::post('/delete/{id}', 'delete')->name('accountcode.delete');
-            Route::post('/deleteselected', 'deleteselected')->name('accountcode.deleteselected');
-            Route::post('/deactiveselected', 'deactiveselected')->name('accountcode.deactiveselected');
+
+            Route::prefix('modal')->group(function () {
+                Route::get('/new', 'modalAdd')->name('accountcode.modal.new');
+                Route::get('/info/{id}', 'modalInfo')->name('accountcode.modal.info');
+                Route::get('/edit/{id}', 'modalEdit')->name('accountcode.modal.edit');
+                Route::get('/activate/{id}', 'modalActivate')->name('accountcode.modal.activate');
+                Route::get('/deactivate/{id}', 'modalDeactivate')->name('accountcode.modal.deactivate');
+                Route::get('/delete/{id}', 'modalDelete')->name('accountcode.modal.delete');
+            });
         });
     });
 
@@ -109,47 +132,92 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
             Route::get('/getcustomer-from-dn/{id}', 'getCustomerFromDN')->name('transsales.getCustomerFromDN');
 
             // Local
-            Route::get('local', 'indexLocal')->name('transsales.local.index');
-            Route::post('local', 'indexLocal')->name('transsales.local.index');
-            Route::get('local/create', 'createLocal')->name('transsales.local.create');
-            Route::post('local/store', 'storeLocal')->name('transsales.local.store');
-            Route::get('local/info/{id}', 'infoLocal')->name('transsales.local.info');
-            Route::get('local/print/{id}', 'printLocal')->name('transsales.local.print');
+            Route::prefix('local')->group(function () {
+                // Modal
+                Route::prefix('modal')->group(function () {
+                    Route::get('/total-transaction/{id}', 'modalTransactionLocal')->name('transsales.local.modal.listTT');
+                    Route::get('/info/{id}', 'modalInfoLocal')->name('transsales.local.modal.info');
+                    Route::get('/delete/{id}', 'modalDeleteLocal')->middleware('permission:Akunting_master_data')->name('transsales.local.modal.delete');
+                });
+                Route::get('/', 'indexLocal')->name('transsales.local.index');
+                Route::get('create', 'createLocal')->name('transsales.local.create');
+                Route::post('store', 'storeLocal')->name('transsales.local.store');
+                Route::get('info/{id}', 'infoLocal')->name('transsales.local.info');
+                Route::middleware('permission:Akunting_master_data')->group(function () {
+                    Route::get('edit/{id}', 'editLocal')->name('transsales.local.edit');
+                    Route::post('update/{id}', 'updateLocal')->name('transsales.local.update');
+                    Route::post('delete/{id}', 'deleteLocal')->name('transsales.local.delete');
+                });
+                Route::get('print/{id}', 'printLocal')->name('transsales.local.print');
+            });
 
             // Export
-            Route::get('export', 'indexExport')->name('transsales.export.index');
-            Route::post('export', 'indexExport')->name('transsales.export.index');
-            Route::get('export/create', 'createExport')->name('transsales.export.create');
-            Route::post('export/store', 'storeExport')->name('transsales.export.store');
-            Route::get('export/info/{id}', 'infoExport')->name('transsales.export.info');
-            Route::get('export/print/{id}', 'printExport')->name('transsales.export.print');
+            Route::prefix('export')->group(function () {
+                // Modal
+                Route::prefix('modal')->group(function () {
+                    Route::get('/total-transaction/{id}', 'modalTransactionExport')->name('transsales.export.modal.listTT');
+                    Route::get('/info/{id}', 'modalInfoExport')->name('transsales.export.modal.info');
+                    Route::get('/delete/{id}', 'modalDeleteExport')->middleware('permission:Akunting_master_data')->name('transsales.export.modal.delete');
+                });
+                Route::get('/', 'indexExport')->name('transsales.export.index');
+                Route::get('create', 'createExport')->name('transsales.export.create');
+                Route::post('store', 'storeExport')->name('transsales.export.store');
+                Route::get('info/{id}', 'infoExport')->name('transsales.export.info');
+                Route::middleware('permission:Akunting_master_data')->group(function () {
+                    Route::get('edit/{id}', 'editExport')->name('transsales.export.edit');
+                    Route::post('update/{id}', 'updateExport')->name('transsales.export.update');
+                    Route::post('delete/{id}', 'deleteExport')->name('transsales.export.delete');
+                });
+                Route::get('print/{id}', 'printExport')->name('transsales.export.print');
+            });
         });
     });
 
     //TransPurchase
     Route::controller(TransPurchaseController::class)->group(function () {
         Route::prefix('transpurchase')->middleware('permission:Akunting_purchase')->group(function () {
-            Route::get('/getpurchaseorder/{id}', 'getpurchaseorder')->name('transpurchase.getpurchaseorder');
-            Route::get('/getgoodreceiptnote/{id}', 'getgoodReceiptNote')->name('transpurchase.getgoodReceiptNote');
+            Route::get('/getprice-from-grn', 'getPriceFromGRN')->name('transpurchase.getPriceFromGRN');
+            Route::get('/getdetail-grn/{id}', 'getDetailGRN')->name('transpurchase.getDetailGRN');
 
             Route::get('/', 'index')->name('transpurchase.index');
-            Route::post('/', 'index')->name('transpurchase.index');
             Route::get('/create', 'create')->name('transpurchase.create');
             Route::post('/store', 'store')->name('transpurchase.store');
-            Route::get('/info/{id}', 'info')->name('transpurchase.info');
         });
     });
 
-    //TransImport
-    Route::controller(TransImportController::class)->group(function () {
-        Route::prefix('transimport')->middleware('permission:Akunting_import')->group(function () {
-            Route::get('/', 'index')->name('transimport.index');
-            Route::post('/', 'index')->name('transimport.index');
-            Route::get('/create', 'create')->name('transimport.create');
-            Route::post('/store', 'store')->name('transimport.store');
-            Route::get('/info/{id}', 'info')->name('transimport.info');
+    // Route::controller(TransPurchaseController::class)->group(function () {
+    //     Route::prefix('transpurchase')->middleware('permission:Akunting_purchase')->group(function () {
+    //         Route::get('/getpurchaseorder/{id}', 'getpurchaseorder')->name('transpurchase.getpurchaseorder');
+    //         Route::get('/getgoodreceiptnote/{id}', 'getgoodReceiptNote')->name('transpurchase.getgoodReceiptNote');
+
+    //         Route::get('/', 'index')->name('transpurchase.index');
+    //         Route::post('/', 'index')->name('transpurchase.index');
+    //         Route::get('/create', 'create')->name('transpurchase.create');
+    //         Route::post('/store', 'store')->name('transpurchase.store');
+    //         Route::get('/info/{id}', 'info')->name('transpurchase.info');
+    //     });
+    // });
+
+    //Cash Book
+    Route::controller(CashBookController::class)->group(function () {
+        Route::prefix('cashbook')->middleware('permission:Akunting_purchase')->group(function () {
+            Route::get('/', 'index')->name('cashbook.index');
+            Route::get('/create', 'create')->name('cashbook.create');
+            Route::post('/store', 'store')->name('cashbook.store');
+            Route::get('/info/{id}', 'info')->name('cashbook.info');
         });
     });
+
+    // //TransImport
+    // Route::controller(TransImportController::class)->group(function () {
+    //     Route::prefix('transimport')->middleware('permission:Akunting_import')->group(function () {
+    //         Route::get('/', 'index')->name('transimport.index');
+    //         Route::post('/', 'index')->name('transimport.index');
+    //         Route::get('/create', 'create')->name('transimport.create');
+    //         Route::post('/store', 'store')->name('transimport.store');
+    //         Route::get('/info/{id}', 'info')->name('transimport.info');
+    //     });
+    // });
 
     //GeneralLedger
     Route::controller(GeneralLedgersController::class)->group(function () {
@@ -159,35 +227,39 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
             Route::get('/create', 'create')->name('generalledger.create');
             Route::post('/store', 'store')->name('generalledger.store');
             Route::get('/getData', 'getData')->name('generalledger.getData');
+
+            Route::prefix('modal')->group(function () {
+                Route::get('/info/{id}', 'modalInfo')->name('generalledger.modal.info');
+            });
         });
     });
 
-    //ENTITY LIST
-    Route::controller(EntityListController::class)->group(function () {
-        Route::prefix('entitylist')->middleware('permission:Akunting_master_data')->group(function () {
-            Route::get('/neraca', 'neraca')->name('entitylist.neraca');
-            Route::get('/hpp', 'hpp')->name('entitylist.hpp');
-            Route::get('/labarugi', 'labarugi')->name('entitylist.labarugi');
-        });
-    });
+    // //ENTITY LIST
+    // Route::controller(EntityListController::class)->group(function () {
+    //     Route::prefix('entitylist')->middleware('permission:Akunting_master_data')->group(function () {
+    //         Route::get('/neraca', 'neraca')->name('entitylist.neraca');
+    //         Route::get('/hpp', 'hpp')->name('entitylist.hpp');
+    //         Route::get('/labarugi', 'labarugi')->name('entitylist.labarugi');
+    //     });
+    // });
 
-    //REPORT
-    Route::controller(ReportController::class)->group(function () {
-        Route::prefix('report')->middleware('permission:Akunting_report')->group(function () {
-            //Neraca
-            Route::get('/neraca', 'neraca')->name('report.neraca');
-            Route::get('/neraca/detail/{id}', 'neracaDetail')->name('report.neraca.detail');
-            Route::get('/neraca/view', 'neracaView')->name('report.neraca.view');
-            Route::post('/neraca/generate', 'neracaGenerate')->name('report.neraca.generate');
-            //Hpp
-            Route::get('/hpp', 'hpp')->name('report.hpp');
-            Route::get('/hpp/detail/{id}', 'hppDetail')->name('report.hpp.detail');
-            Route::get('/hpp/view', 'hppView')->name('report.hpp.view');
-            Route::post('/hpp/generate', 'hppGenerate')->name('report.hpp.generate');
-            //LabaRugi
-            Route::get('/labarugi', 'labarugi')->name('report.labarugi');
-        });
-    });
+    // //REPORT
+    // Route::controller(ReportController::class)->group(function () {
+    //     Route::prefix('report')->middleware('permission:Akunting_report')->group(function () {
+    //         //Neraca
+    //         Route::get('/neraca', 'neraca')->name('report.neraca');
+    //         Route::get('/neraca/detail/{id}', 'neracaDetail')->name('report.neraca.detail');
+    //         Route::get('/neraca/view', 'neracaView')->name('report.neraca.view');
+    //         Route::post('/neraca/generate', 'neracaGenerate')->name('report.neraca.generate');
+    //         //Hpp
+    //         Route::get('/hpp', 'hpp')->name('report.hpp');
+    //         Route::get('/hpp/detail/{id}', 'hppDetail')->name('report.hpp.detail');
+    //         Route::get('/hpp/view', 'hppView')->name('report.hpp.view');
+    //         Route::post('/hpp/generate', 'hppGenerate')->name('report.hpp.generate');
+    //         //LabaRugi
+    //         Route::get('/labarugi', 'labarugi')->name('report.labarugi');
+    //     });
+    // });
 
 });
 

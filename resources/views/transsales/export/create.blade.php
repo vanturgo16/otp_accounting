@@ -1,5 +1,4 @@
 @extends('layouts.master')
-
 @section('konten')
 
 <div class="page-content">
@@ -22,8 +21,6 @@
                 </div>
             </div>
         </div>
-        
-        @include('layouts.alert')
 
         <form action="{{ route('transsales.export.store') }}" id="formstore" method="POST" enctype="multipart/form-data">
             @csrf
@@ -36,70 +33,49 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-lg-4 mb-3">
-                                    <label class="form-label">Ref Number</label><label style="color: darkred">*</label>
-                                    <br>
-                                    <span class="badge bg-info text-white">Auto Generate</span>
-                                </div>
-                                <div class="col-lg-4 mb-3">
-                                    <label class="form-label">Invoice Date</label><label style="color: darkred">*</label>
-                                    <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Tanggal yang akan ditampilkan pada lembar invoice"></i>
-                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" required max="<?= date('Y-m-d'); ?>">
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label">Reference Number</label>
+                                    <input class="form-control" type="text" value="" placeholder="Auto Generate" style="background-color:#EAECF4" readonly>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-lg-12 mb-3">
-                                    <label class="form-label">Term</label><label style="color: darkred">*</label>
-                                    <textarea class="summernote-editor" name="term" placeholder="Input Term..." required></textarea>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label required-label">Invoice Date</label>
+                                    <i class="mdi mdi-information-outline"
+                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Pilih tanggal yang akan ditampilkan pada invoice. Tanggal hanya dapat dipilih dari awal bulan ini hingga hari ini.">
+                                    </i>
+                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-01') }}" max="{{ date('Y-m-d') }}" required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label required-label">Bank Account</label>
+                                    <i class="mdi mdi-information-outline"
+                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Pilih akun bank yang akan ditampilkan pada invoice. Informasi ini akan muncul sebagai detail pembayaran.">
+                                    </i>
+                                    <select class="form-select select2" style="width: 100%" name="id_master_bank_account" required>
+                                        <option value="" selected disabled>Select Bank</option>
+                                        @foreach($bankAccounts as $item)
+                                            <option value="{{ $item->id }}">
+                                                {{ $item->account_number }} || {{ $item->bank_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                                 
                             <div class="card w-100 bg-light">
                                 <div class="card-header">
                                     <h6 class="mb-0">
-                                        Additional Info
-                                        <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Tambahan informasi yang akan ditampikan pada lembar invoice, dapat di perbaharui melalui (Master Bank Account & Master Approval)"></i>
+                                        Approval Info
+                                        <i class="mdi mdi-information-outline"
+                                            data-bs-toggle="tooltip" data-bs-placement="top"
+                                            title="Informasi approval yang akan ditampilkan pada invoice. Data diambil dari menu Master Approval dan mencakup nama, email, serta posisi approver.">
+                                        </i>
                                     </h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-lg-6 mb-3">
-                                            <table style="width: 100%">
-                                                <input type="hidden" class="form-control" name="bank_name" value="{{ $bankaccount->bank_name ?? '' }}" required>
-                                                <input type="hidden" class="form-control" name="account_name" value="{{ $bankaccount->account_name ?? '' }}" required>
-                                                <input type="hidden" class="form-control" name="account_number" value="{{ $bankaccount->account_number ?? '' }}" required>
-                                                <input type="hidden" class="form-control" name="currency" value="{{ $bankaccount->currency ?? '' }}" required>
-                                                <input type="hidden" class="form-control" name="swift_code" value="{{ $bankaccount->swift_code ?? '' }}" required>
-                                                <input type="hidden" class="form-control" name="branch" value="{{ $bankaccount->branch ?? '' }}" required>
-                                                <tbody>
-                                                    <tr>
-                                                        <td><label class="form-label font-weight-bold">Bank Name</label></td>
-                                                        <td><label class="form-label">:</label></td>
-                                                        <td><label class="form-label">{{ $bankaccount->bank_name ?? '' }}</label></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><label class="form-label font-weight-bold">Account Name</label></td>
-                                                        <td><label class="form-label">:</label></td>
-                                                        <td><label class="form-label">{{ $bankaccount->account_name ?? '' }}</label></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><label class="form-label font-weight-bold">Account Number</label></td>
-                                                        <td><label class="form-label">:</label></td>
-                                                        <td><label class="form-label">{{ $bankaccount->account_number ?? '' }} ({{ $bankaccount->currency ?? '' }})</label></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><label class="form-label font-weight-bold">Swift Code</label></td>
-                                                        <td><label class="form-label">:</label></td>
-                                                        <td><label class="form-label">{{ $bankaccount->swift_code ?? '' }}</label></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><label class="form-label font-weight-bold">Branch</label></td>
-                                                        <td><label class="form-label">:</label></td>
-                                                        <td><label class="form-label">{{ $bankaccount->branch ?? '' }}</label></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
                                         <div class="col-lg-6 mb-3">
                                             <table style="width: 100%">
                                                 <input type="hidden" class="form-control" name="app_name" value="{{ $approvalInfo['name'] ?? '' }}" required>
@@ -131,9 +107,9 @@
 
                             <div class="row">
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
+                                    <label class="form-label required-label">Delivery Note</label>
                                     <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Daftar Delivery Note (DN) berstatus Posted yang belum dibuatkan invoice"></i>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
+                                    <select class="form-select select2" style="width: 100%" name="id_delivery_notes" required>
                                         <option value="" selected disabled>-- Select --</option>
                                         @foreach($deliveryNotes as $item)
                                             <option value="{{ $item->id }}"
@@ -161,17 +137,38 @@
                                 <div class="card-body" style="background-color:ghostwhite">
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
+                                            <label class="form-label">PO Number</label>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
+                                            <input class="form-control" id="po_number" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3">
                                             <label class="form-label">Customer Name</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
                                             <input type="hidden" name="id_master_customers" id="id_master_customers" value="">
-                                            <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Sales Name</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
-                                            <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
                                         </div>
-                                        
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">Customer Address</label>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
+                                            <input class="form-control" id="customer_address" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label required-label">Destination</label>
+                                            <input class="form-control" id="destination" name="destination" type="text" value="" placeholder="Input Destination Invoice.." required>
+                                        </div>
+                                    </div>
+                                    
+
+                                    <div class="row">
                                         <div class="col-12">
                                             <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
                                                 <thead class="table-light">
@@ -196,6 +193,8 @@
                                         </div>
 
                                         <div class="col-lg-6 mt-4">
+                                            <label class="form-label">Note</label>
+                                            <textarea class="summernote-editor-simple" name="note" placeholder="Input Note (Optional)..."></textarea>
                                         </div>
                                         <div class="col-lg-6 mt-4">                                          
                                             <table style="width: 100%">
@@ -249,6 +248,15 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-lg-12 mb-3">
+                                    <label class="form-label required-label">Term</label>
+                                    <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Isi bagian ini dengan syarat dan ketentuan yang akan ditampilkan pada invoice. Informasi ini akan tampil sebagai catatan atau kebijakan pembayaran.">
+                                    </i>
+                                    <textarea class="summernote-editor-simple" name="term" placeholder="Input Term..."></textarea>
+                                </div>
+                            </div>
 
                             <div class="row">
                                 <div class="col-lg-12 mt-3">
@@ -267,13 +275,14 @@
                                                             <th>Account Code</th>
                                                             <th>Nominal</th>
                                                             <th>Debit / Kredit</th>
+                                                            <th>Note</th>
                                                             <th style="text-align:center">Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
                                                             <td>
-                                                                <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[0][account_code]" required>
+                                                                <select class="form-select select2 addpayment" style="width: 100%" name="addmore[0][account_code]" required>
                                                                     <option value="">- Select Account Code -</option>
                                                                     @foreach( $accountcodes as $item )
                                                                         <option value="{{ $item->id }}">{{ $item->account_code }} - {{ $item->account_name }}</option>
@@ -284,11 +293,14 @@
                                                                 <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="" required>
                                                             </td>
                                                             <td>
-                                                                <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[0][type]" required>
+                                                                <select class="form-select select2 addpayment" style="width: 100%" name="addmore[0][type]" required>
                                                                     <option value="">- Select Type -</option>
                                                                     <option value="D">Debit</option>
                                                                     <option value="K">Kredit</option>
                                                                 </select>
+                                                            </td>
+                                                            <td>
+                                                                <textarea class="form-control" name="addmore[0][note]" cols="20" rows="3" placeholder="Input Note (Optional).."></textarea>
                                                             </td>
                                                             <td style="text-align:center"><button type="button" name="add" id="adds" class="btn btn-success"><i class="fas fa-plus"></i></button></td>
                                                         </tr>
@@ -319,6 +331,27 @@
     </div>
 </div>
 
+<div class="modal fade" id="alertTerm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-top" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel"><span class="mdi mdi-alert"></span> Term Required</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12 p-2 text-center">
+                        Term is required. Please fill in the Term field before submitting the form. 
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="alert" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-top" role="document">
         <div class="modal-content">
@@ -327,9 +360,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="row" id="modalBodyContent">
-                    <!-- Content will be populated by JavaScript -->
-                </div>
+                <div class="row" id="modalBodyContent"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
@@ -376,6 +407,13 @@
         event.preventDefault();
         let totals = calculateTotals();
 
+        let term = document.querySelector('textarea[name="term"]').value.trim();
+        if (term === "") {
+            var modalTerm = new bootstrap.Modal(document.getElementById('alertTerm'));
+            modalTerm.show();
+            return;
+        }
+
         if (totals.debitTotal !== totals.kreditTotal) {
             let modalBodyContent = `
                 <div class="col-12">
@@ -412,6 +450,8 @@
                 var submitButton = this.querySelector('button[name="sb"]');
                 submitButton.disabled = true;
                 submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
+                $("#processing").removeClass("hidden");
+                $("body").addClass("no-scroll");
                 this.submit();
                 return true;
             } 
@@ -447,12 +487,12 @@
 <script>
     var i = 0;
     $("#adds").click(function() {
-        $(".js-example-basic-single").select2();
+        $(".select2").select2();
         ++i;
         $("#dynamicTable").append(
             `<tr>
                 <td>
-                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[`+i+`][account_code]" required>
+                    <select class="form-select select2 addpayment" style="width: 100%" name="addmore[`+i+`][account_code]" required>
                         <option value="">- Select Account Code -</option>
                         @foreach( $accountcodes as $item )
                             <option value="{{ $item->id }}">{{ $item->account_code }} - {{ $item->account_name }}</option>
@@ -463,18 +503,21 @@
                     <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
                 </td>
                 <td>
-                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
+                    <select class="form-select select2 addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
                         <option value="">- Select Type -</option>
                         <option value="D">Debit</option>
                         <option value="K">Kredit</option>
                     </select>
+                </td>
+                <td>
+                    <textarea class="form-control" name="addmore[`+i+`][note]" cols="20" rows="3" placeholder="Input Note (Optional).."></textarea>
                 </td>
                 <td style="text-align:center">
                     <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>
                 </td>
             </tr>`);
 
-        $(".js-example-basic-single").select2();
+        $(".select2").select2();
 
         document.querySelectorAll(".rupiah-input").forEach((input) => {
             input.addEventListener("input", formatCurrencyInput);
@@ -581,7 +624,7 @@
                         if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
                         if (parts.length > 1) {
                             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
@@ -599,7 +642,7 @@
                         if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
                         if (parts.length > 1) {
                             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span><br>(' + row.ppn_rate + '%)';
@@ -617,7 +660,7 @@
                         if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
                         if (parts.length > 1) {
                             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
@@ -635,7 +678,7 @@
                         if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
                         if (parts.length > 1) {
                             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
@@ -653,7 +696,7 @@
                         if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
                         if (parts.length > 1) {
                             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
@@ -700,6 +743,9 @@
                         $('#id_master_customers').val(data.id_master_customers ?? '-');
                         $('#customer_name').val(data.customer_name ?? '-');
                         $('#sales_name').val(data.salesman_name ?? '-');
+                        $('#po_number').val(selected.data('po-number') ?? '-');
+                        $('#customer_address').val(data.address ?? '-');
+                        $('#destination').val(data.city ?? '');
                         $('input[name="currency"]').val(data.currency_code ?? 'IDR');
                         $('.currency').html(data.currency_code ?? 'IDR');
                     }

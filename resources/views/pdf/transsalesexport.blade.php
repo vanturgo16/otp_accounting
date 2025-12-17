@@ -66,6 +66,20 @@
             font-size: 10px;
         }
     </style>
+
+    <style>
+        .terms-content ul,
+        .terms-content ol {
+            margin-left: 8px !important;
+            padding-left: 8px !important;
+        }
+
+        .terms-content li {
+            margin-left: 2px !important;
+            padding-left: 2px !important;
+        }
+    </style>
+
 </head>
 <body class="padded-element-main">
     <header class="padded-element">
@@ -82,13 +96,12 @@
             <tr>
                 <td style="width:15%">
                     <img class="header-logo" src="{{ public_path('img/icon-otp.png') }}" alt="Logo">
+                    <br>
                 </td>
                 <td style="width:70%; text-align:center; font-size:8px;">
                     <div class="company-name">{{ $dataCompany->company_name }}</div>
-                    <div class="company-info">{{ $dataCompany->address }}</div>
-                    <div class="company-info">{{ $dataCompany->city }}, {{ $dataCompany->postal_code }}, {{ $dataCompany->province }}, {{ $dataCompany->country }}</div>
-                    <div class="company-info">Phone : {{ $dataCompany->telephone ?? '-' }}</div>
-                    <div class="company-info">E-mail : {{ $approvalInfo['email'] ?? '-' }}</div>
+                    <div class="company-info">{{ $dataCompany->address }}, {{ $dataCompany->city }}, {{ $dataCompany->province }}, {{ $dataCompany->postal_code }}</div>
+                    <div class="company-info">Phone : {{ $dataCompany->telephone ?? '-' }}, Email: {{ $dataCompany->email ??'-' }}</div>
                     <br>
                 </td>
                 <td style="width:15%"></td>
@@ -97,7 +110,7 @@
     </header>
 
     <main>
-        <table class="mt-n2 mb-2" style="width: 100%; border-collapse: collapse;" cellspacing="1">
+        <table class="mt-n4 mb-2" style="width: 100%; border-collapse: collapse;" cellspacing="1">
             <tbody>
                 <tr>
                     <td class="align-middle text-center font-weight-bold" style="width:100%; font-size: 14px; text-decoration: underline;">INVOICE</td>
@@ -110,26 +123,48 @@
                 <td style="width:50%; font-size:10px; vertical-align:top;">
                     <table style="width:100%; border-collapse:collapse;">
                         <tr style="font-size: 10px;">
-                            <td class="align-top" style="width:8%;"><b>To</b></td>
-                            <td class="text-right align-top" style="width:2%;"><b>:</b></td>
-                            <td class="align-top" style="width:90%;">
+                            <td class="align-top" style="width:10%;"><b>To</b></td>
+                            <td class="text-center align-top" style="width:4%;"><b>:</b></td>
+                            <td class="align-top" style="width:86%;">
                                 <b>{{ $detailCust->customer_name }}</b>
                                 <br>
                                 {{ $detailCust->address.', '.$detailCust->postal_code.', '.$detailCust->city.', '.$detailCust->province.', '.$detailCust->country }}
                                 <br>
-                                Telephone : {{ $detailCust->telephone ?? '-' }},
-                                Mobile Phone : {{ $detailCust->mobile_phone ?? '-' }}
+                                <table style="border-collapse:collapse;">
+                                    <tr style="font-size: 10px;">
+                                        <td class="align-top">Email</td>
+                                        <td class="align-top">&nbsp;:</td>
+                                        <td class="align-top">{{ $detailCust->email_customer ?? '-' }}</td>
+                                    </tr>
+                                    <tr style="font-size: 10px;">
+                                        <td class="align-top">Phone</td>
+                                        <td class="align-top">&nbsp;:</td>
+                                        <td class="align-top">{{ $detailCust->phone_customer ?? '-' }}</td>
+                                    </tr>
+                                    <tr style="font-size: 10px;">
+                                        <td class="align-top">Fax</td>
+                                        <td class="align-top">&nbsp;:</td>
+                                        <td class="align-top">{{ $detailCust->fax_customer ?? '-' }}</td>
+                                    </tr>
+                                </table>
                             </td>
                         </tr>
+                        <br>
                         <tr style="font-size: 10px;">
-                            <td class="align-top" style="width:8%;"><b>From</b></td>
-                            <td class="text-right align-top" style="width:2%;"><b>:</b></td>
-                            <td class="align-top" style="width:90%;">
+                            <td class="align-top" style="width:10%;"><b>From</b></td>
+                            <td class="text-center align-top" style="width:4%;"><b>:</b></td>
+                            <td class="align-top" style="width:86%;">
                                 <b>{{ $dataCompany->company_name }}</b>
                                 <br>
                                 {{ $dataCompany->address }}, {{ $dataCompany->city }}, {{ $dataCompany->postal_code }}, {{ $dataCompany->province }}, {{ $dataCompany->country }}
                                 <br>
-                                Phone : {{ $dataCompany->telephone ?? '-' }}
+                                <table style="border-collapse:collapse;">
+                                    <tr style="font-size: 10px;">
+                                        <td class="align-top">Phone</td>
+                                        <td class="align-top">&nbsp;:</td>
+                                        <td class="align-top">{{ $dataCompany->telephone ?? '-' }}</td>
+                                    </tr>
+                                </table>
                             </td>
                         </tr>
                     </table>
@@ -138,17 +173,35 @@
                 <td style="width:35%; font-size:10px; vertical-align:top; text-align:right;">
                     <table style="width:100%; border-collapse:collapse;">
                         <tr style="font-size: 10px;">
-                            <td class="text-right align-top" style="width:43%;">No.</td>
-                            <td class="text-right align-top" style="width:2%;">:</td>
-                            <td class="text-right align-top" style="width:55%;">
-                                {{ $detail->ref_number }}
+                            <td class="text-left align-top" style="width:10%;"></td>
+                            <td class="text-left align-top" style="width:30%;">No.</td>
+                            <td class="text-center align-top" style="width:10%;">:</td>
+                            <td class="text-left align-top" style="width:50%;">
+                                <b>{{ $detail->ref_number }}</b>
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
-                            <td class="text-right align-top" style="width:43%;">Date</td>
-                            <td class="text-right align-top" style="width:2%;">:</td>
-                            <td class="text-right align-top" style="width:55%;">
+                            <td class="text-left align-top" style="width:10%;"></td>
+                            <td class="text-left align-top" style="width:30%;">Date</td>
+                            <td class="text-center align-top" style="width:10%;">:</td>
+                            <td class="text-left align-top" style="width:50%;">
                                 {{ $dateInvoice }}
+                            </td>
+                        </tr>
+                        <tr style="font-size: 10px;">
+                            <td class="text-left align-top" style="width:10%;"></td>
+                            <td class="text-left align-top" style="width:30%;">PO No.</td>
+                            <td class="text-center align-top" style="width:10%;">:</td>
+                            <td class="text-left align-top" style="width:50%;">
+                                {{ $detail->po_number ?? '-' }}
+                            </td>
+                        </tr>
+                        <tr style="font-size: 10px;">
+                            <td class="text-left align-top" style="width:10%;"></td>
+                            <td class="text-left align-top" style="width:30%;">Destination</td>
+                            <td class="text-center align-top" style="width:10%;">:</td>
+                            <td class="text-left align-top" style="width:50%;">
+                                {{ $detail->destination ?? '-' }}
                             </td>
                         </tr>
                     </table>
@@ -159,16 +212,18 @@
         <table class="styled-table">
             <thead>
                 <tr style="font-size: 11px;">
-                    <th class="align-middle text-center"><b>No.</b></th>
-                    <th class="align-middle text-center"><b>Items</b></th>
-                    <th class="align-middle text-center"><b>Qty ({{ strtoupper($detailTransSales[0]->unit) }})</b></th>
+                    <th class="align-middle text-center"><b>NO.</b></th>
+                    <th class="align-middle text-center"><b>ITEMS</b></th>
+                    <th class="align-middle text-center"><b>QTY ({{ strtoupper($detailTransSales[0]->unit) }})</b></th>
                     <th class="align-middle text-center"><b>UOM</b></th>
-                    <th class="align-middle text-center"><b>Price/{{ strtoupper($detailTransSales[0]->unit) }}</b></th>
-                    <th class="align-middle text-center"><b>Total Price</b></th>
+                    <th class="align-middle text-center"><b>PRICE / {{ strtoupper($detailTransSales[0]->unit) }}</b></th>
+                    <th class="align-middle text-center"><b>TOTAL PRICE</b></th>
                 </tr>
             </thead>
             <tbody>
+                @php $qtyTotal = 0; @endphp
                 @foreach ($detailTransSales as $item)
+                    @php $qtyTotal += $item->qty; @endphp
                     <tr>
                         <td class="px-2 text-center" style="border-bottom: none; border-top: none;">{{ $loop->iteration }}</td>
                         <td class="px-2" style="border-bottom: none; border-top: none;">{{ $item->product }}</td>
@@ -177,54 +232,84 @@
                                 ? number_format($item->qty, 0, ',', '.') 
                                 : number_format(floor($item->qty), 0, ',', '.') . ',' . rtrim(str_replace('.', '', explode('.', (string)$item->qty)[1]), '0') }}
                         </td>
-                        <td class="px-2 text-center" style="border-bottom: none; border-top: none;">-</td>
-                        <td class="px-2 text-right" style="border-bottom: none; border-top: none;">{{ $detail->currency_code.'  ' . number_format($item->price_before_ppn, 2, ',', '.') }}</td>
-                        <td class="px-2 text-right" style="border-bottom: none; border-top: none;">{{ $detail->currency_code.'  ' . number_format($item->total_price_before_ppn, 2, ',', '.') }}</td>
+                        <td class="px-2 text-center" style="border-bottom: none; border-top: none;">{{ $item->unit ?? '-' }}</td>
+                        <td class="px-2 text-right" style="border-bottom: none; border-top: none;">{{ $detail->currency.'  ' . number_format($item->price_before_ppn, 2, ',', '.') }}</td>
+                        <td class="px-2 text-right" style="border-bottom: none; border-top: none;">{{ $detail->currency.'  ' . number_format($item->total_price_before_ppn, 2, ',', '.') }}</td>
                     </tr>
                 @endforeach
                 <tr>
-                    <td style="border-top: none; height: 30px;"></td>
-                    <td style="border-top: none;"></td>
-                    <td style="border-top: none;"></td>
-                    <td style="border-top: none;"></td>
-                    <td style="border-top: none;"></td>
-                    <td style="border-top: none;"></td>
+                    <td style="border-top: none; border-bottom: none; height: 40px;"></td>
+                    <td style="border-top: none; border-bottom: none;"></td>
+                    <td style="border-top: none; border-bottom: none;"></td>
+                    <td style="border-top: none; border-bottom: none;"></td>
+                    <td style="border-top: none; border-bottom: none;"></td>
+                    <td style="border-top: none; border-bottom: none;"></td>
+                </tr>
+                <tr>
+                    <td style="border-top: none; border-bottom: none;"></td>
+                    <td style="border-top: none; border-bottom: none;" class="p-2">
+                        @php
+                            $note = str_replace(['<p>', '</p>'],['', '<br>'], $detail->note);
+                        @endphp
+                        {!! $note ?? '' !!}
+                    </td>
+                    <td style="border-top: none; border-bottom: none;"></td>
+                    <td style="border-top: none; border-bottom: none;"></td>
+                    <td style="border-top: none; border-bottom: none;"></td>
+                    <td style="border-top: none; border-bottom: none;"></td>
                 </tr>
             </tbody>
+            <tfoot>
+                <tr>
+                    <td class="px-2 text-center"></td>
+                    <td class="px-2 text-center"><b>TOTAL</b></td>
+                    <td class="px-2 text-center">
+                        {{ fmod($qtyTotal, 1) == 0 
+                                ? number_format($qtyTotal, 0, ',', '.') 
+                                : number_format(floor($qtyTotal), 0, ',', '.') . ',' . rtrim(str_replace('.', '', explode('.', (string)$qtyTotal)[1]), '0') }}
+                    </td>
+                    <td class="px-2 text-center">{{ $detailTransSales[0]->unit }}</td>
+                    <td class="px-2 text-center"></td>
+                    <td class="px-2 text-right">{{ $detail->currency.'  ' . number_format($detail->sales_value, 2, ',', '.') }}</td>
+                </tr>
+
+            </tfoot>
         </table>
 
         <table class="py-2" style="width:100%; border-collapse:collapse;" id="totalNTerm">
             <tr>
                 <td style="width:65%; font-size:10px; vertical-align:top;">
-                    <div style="height: 15px;"></div>
-                    <div style="font-size: 12px;">TERMS</div>
+                    <div style="height: 5px;"></div>
+                    <div style="font-size: 11px;">TERMS :</div>
                     @php
                         $terms = str_replace(['<p>', '</p>'],['', '<br>'],$detail->term);
                     @endphp
-                    <div style="font-size: 10px;">{!! $terms !!}</div>
+                    <div class="terms-content" style="font-size: 10px;">
+                        {!! $terms !!}
+                    </div>
                 </td>
                 <td style="width:5%;"></td>
                 <td style="width:30%; font-size:10px; vertical-align:top; text-align:right;">
-                    <table style="width:100%; border-collapse:collapse;">
+                    {{-- <table style="width:100%; border-collapse:collapse;">
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:40%;"><b>Amount</b></td>
                             <td class="text-right align-top" style="width:60%;">
-                                {{ $detail->currency_code.'  ' . number_format($detail->sales_value, 2, ',', '.') }}
+                                {{ $detail->currency.'  ' . number_format($detail->sales_value, 2, ',', '.') }}
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:40%;"><b>Tax</b></td>
                             <td class="text-right align-top" style="width:60%;">
-                                {{ $detail->currency_code.'  ' . number_format($detail->ppn_value, 2, ',', '.') }}
+                                {{ $detail->currency.'  ' . number_format($detail->ppn_value, 2, ',', '.') }}
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:40%;"><b>Total</b></td>
                             <td class="text-right align-top" style="width:60%;">
-                                {{ $detail->currency_code.'  ' . number_format($detail->total, 2, ',', '.') }}
+                                {{ $detail->currency.'  ' . number_format($detail->total, 2, ',', '.') }}
                             </td>
                         </tr>
-                    </table>
+                    </table> --}}
                 </td>
             </tr>
         </table>

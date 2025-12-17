@@ -16,47 +16,55 @@ class MstPpnController extends Controller
 
     public function index(Request $request)
     {
-        $datas = MstPpn::orderBy('created_at','desc')->get();
-        
         // Datatables
         if ($request->ajax()) {
-            return DataTables::of($datas)->make(true);
+            $datas = MstPpn::orderBy('created_at','desc')->get();
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data){
+                    return view('ppn.action', compact('data'));
+                })
+                ->make(true);
         }
         
         //Audit Log
         $this->auditLogsShort('View List Mst PPN');
-
         return view('ppn.index');
     }
 
-    public function store(Request $request)
+    public function update(Request $request, $id)
     {
-        // dd($request->all());
+        $id = decrypt($id);
+        $fields = ['value'];
 
-        $request->validate([
-            'tax_name' => 'required',
-            'value' => 'required'
-        ]);
+        // Validation
+        $request->validate(array_fill_keys($fields, 'required'));
+        // Data
+        $data = MstPpn::findOrFail($id);
+        // Check Changes
+        if ($data->only($fields) == $request->only($fields)) {
+            return back()->with('info', 'No Changes Detected!');
+        }
 
         DB::beginTransaction();
-        try{
-            MstPpn::where('tax_name', $request->tax_name)->where('is_active', 1)->update(['is_active' => 0]);
-            MstPpn::create([
-                'tax_name' => $request->tax_name,
-                'value' => $request->value,
-                'is_active' => 1,
-                'created_by' => auth()->user()->email
-            ]);
+        try {
+            $data->update($request->only($fields));
 
-            //Audit Log
-            $this->auditLogsShort('Update Tax ('. $request->tax_name . ' = '.$request->value.')');
-
+            // Audit Log
+            $this->auditLogsShort("Update Default PPN ID : $id");
             DB::commit();
-
-            return redirect()->back()->with(['success' => 'Success Update Tax']);
-        } catch (Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Update!']);
+            return back()->with('success', 'Success Update Default PPN');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('fail', 'Failed to Update!');
         }
+    }
+
+    // MODAL SECTION
+    public function modalEdit($id)
+    {
+        $id = decrypt($id);
+        $data = MstPpn::findOrFail($id);
+
+        return view('ppn.modal.edit', compact('data'));
     }
 }

@@ -1,4 +1,4 @@
-/* .process-container {
+.process-container {
     position: fixed;
     top: 0;
     left: 0;
@@ -9,26 +9,7 @@
     justify-content: center;
     align-items: center;
     z-index: 10000;
-} */
-.process-container {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 400px;
-    height: auto;
-    min-height: 100px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    z-index: 10000;
-    box-sizing: border-box;
 }
-
 .hidden {
     display: none;
 }

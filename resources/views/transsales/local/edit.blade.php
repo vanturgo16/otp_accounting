@@ -1,5 +1,4 @@
 @extends('layouts.master')
-
 @section('konten')
 
 <div class="page-content">
@@ -8,184 +7,246 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('transsales.index') }}" class="btn btn-light waves-effect btn-label waves-light">
-                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Sales Transaction
+                        <a href="{{ route('transsales.local.index') }}" class="btn btn-light waves-effect btn-label waves-light">
+                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Sales Transaction (Local)
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Accounting</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('transsales.index') }}">Sales Transaction</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('transsales.local.index') }}">Sales (Local)</a></li>
                             <li class="breadcrumb-item active">Edit</li>
                         </ol>
                     </div>
                 </div>
             </div>
         </div>
-        
-        @include('layouts.alert')
 
-        <form action="{{ route('transsales.update', encrypt($data->id_trans)) }}" id="formupdate" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('transsales.local.update', encrypt($detail->id)) }}" id="formUpdate" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="row">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header text-center py-3">
-                            <h5 class="mb-0">Edit</h5>
+                            <h5 class="mb-0">Update Transaction</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-lg-4 mb-3">
-                                    <label class="form-label mb-0">Ref Number</label>
-                                    <br><h4><span class="badge bg-info">{{ $data->ref_number }}</span></h4>
-                                </div>
-                                <div class="col-lg-4 mb-3">
-                                    <label class="form-label">Transaction Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="transaction_date" value="{{ $transaction_date }}" required>
-                                </div>
-                                <div class="col-lg-4 mb-3">
-                                    <label class="form-label">No Delivery Note</label><label style="color: darkred">*</label>
-                                    <input type="text" class="form-control" name="no_delivery_note" value="{{ $data->no_delivery_note }}" placeholder="Input No Delivery Note.." required>
-                                </div>
-                                <hr>
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Sales Order</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_sales_order" required>
-                                        <option value="" selected>-- Select --</option>
-                                        @foreach($sales as $item)
-                                            <option value="{{ $item->id }}" @if($data->id_sales_order == $item->id) selected="selected" @endif>{{ $item->so_number." - ". $item->status }}</option>
+                                    <label class="form-label">Reference Number</label>
+                                    <input class="form-control" type="text" value="{{ $detail->ref_number }}" placeholder="Auto Generate" style="background-color:#EAECF4" readonly>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label required-label">Invoice Date</label>
+                                    <i class="mdi mdi-information-outline"
+                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Pilih tanggal yang akan ditampilkan pada invoice. Tanggal hanya dapat dipilih dari awal bulan ini hingga hari ini.">
+                                    </i>
+                                    <input type="date" class="form-control" name="date_invoice" value="{{ \Carbon\Carbon::parse($detail->date_invoice)->format('Y-m-d') }}" min="{{ date('Y-m-01') }}" max="{{ date('Y-m-d') }}" required>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label required-label">Due Date</label>
+                                    <input type="date" class="form-control" name="due_date" value="{{ \Carbon\Carbon::parse($detail->due_date)->format('Y-m-d') }}" required min="{{ date('Y-m-01') }}">
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label required-label">Bank Account</label>
+                                    <i class="mdi mdi-information-outline"
+                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Pilih akun bank yang akan ditampilkan pada invoice. Informasi ini akan muncul sebagai detail pembayaran.">
+                                    </i>
+                                    <select class="form-select select2" style="width: 100%" name="id_master_bank_account" required>
+                                        <option value="" selected disabled>Select Bank</option>
+                                        @foreach($bankAccounts as $item)
+                                            <option value="{{ $item->id }}" @if($item->id == $detail->id_master_bank_account) selected @endif>
+                                                {{ $item->account_number }} || {{ $item->bank_name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-lg-6 mb-3">
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Customer Name</label>
-                                    <input class="form-control" id="customer_name" type="text" value="{{ $data->customer_name }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Customer Address</label>
-                                    <input class="form-control" id="customer_address" type="text" value="{{ $data->customer_address }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Date</label>
-                                    <input class="form-control" id="date" type="text" value="{{ $data->date }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Due Date</label>
-                                    <input class="form-control" id="due_date" type="text" value="{{ $data->due_date }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">PPN</label>
-                                    <input class="form-control" id="ppn" type="text" value="{{ $data->ppn }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Status</label>
-                                    <input class="form-control" id="statusorder" type="text" value="{{ $data->status }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
+                            </div>
+                            <hr>
 
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">SO Type</label>
-                                    <input class="form-control" id="so_type" type="text" value="{{ $data->so_type }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">SO Category</label>
-                                    <input class="form-control" id="so_category" type="text" value="{{ $data->so_category }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Product</label>
-                                    <input class="form-control" id="product" type="text" value="{{ $data->product }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Type Product</label>
-                                    <input class="form-control" id="type_product" type="text" value="{{ $data->type_product }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Quantity</label>
-                                    <input class="form-control" id="qty" type="text" value="{{ $data->qty }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Unit</label>
-                                    <input class="form-control" id="unit" type="text" value="{{ $data->unit }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Price</label>
-                                    <input class="form-control" id="price" type="text" value="{{ $data->price }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Total Price</label>
-                                    <input class="form-control" id="total_price" type="text" value="{{ $data->total_price }}" placeholder="Select Sales Orders.." style="background-color:#EAECF4" readonly>
-                                </div>
+                            <div class="card">
+                                <div class="card-body" style="background-color:ghostwhite">
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label required-label">Delivery Note</label>
+                                            <input class="form-control" type="text"
+                                                value="{{ 
+                                                    $detail->dn_number . ' || ' .
+                                                    \Carbon\Carbon::parse($detail->dn_date)->format('Y-m-d') . ' || KO/PO: ' .
+                                                    ($detail->ko_number ? $detail->ko_number : ($detail->po_number ? $detail->po_number : '-'))
+                                                }}" style="background-color:#EAECF4" readonly>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">Customer Name</label>
+                                            <input type="hidden" name="id_master_customers" id="id_master_customers" value="">
+                                            <input class="form-control" id="customer_name" type="text" value="{{ $detailCust->customer_name ?? '-' }}" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">Sales Name</label>
+                                            <input class="form-control" id="sales_name" type="text" value="{{ $detailCust->salesman_name ?? '-' }}" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
+                                        </div>
+                                        
+                                        <div class="col-12">
+                                            <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th rowspan="2" class="align-middle text-center">No.</th>
+                                                        <th rowspan="2" class="align-middle text-center">SO Number</th>
+                                                        <th rowspan="2" class="align-middle text-center">Product</th>
+                                                        <th rowspan="2" class="align-middle text-center">Qty (Unit)</th>
+                                                        <th rowspan="2" class="align-middle text-center">Tax Type</th>
+                                                        <th colspan="3" class="align-middle text-center">Price</th>
+                                                        <th colspan="2" class="align-middle text-center">Total Price</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th class="align-middle text-center">Before Tax</th>
+                                                        <th class="align-middle text-center">Tax Value</th>
+                                                        <th class="align-middle text-center">After Tax</th>
+                                                        <th class="align-middle text-center">Before Tax</th>
+                                                        <th class="align-middle text-center">After Tax</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
 
+                                        <div class="col-lg-6 mt-4">
+                                        </div>
+                                        <div class="col-lg-6 mt-4">                                          
+                                            <table style="width: 100%">
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Set PPN Rate :</label>
+                                                        </td>
+                                                        <td class="text-end" style="width: 50%;">
+                                                            <div class="input-group" style="width: 150px; margin-left: auto;">
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonMinusPPNRate">-</button>
+                                                                <input type="text" name="ppn_rate" class="form-control text-center" value="{{ $detail->ppn_rate }}" id="ppn_rate" style="background-color:#EAECF4" required readonly>
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonPlusPPNRate">+</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><br></td><td><br></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Total Nilai Jual :</label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="text-muted">Rp. </span><span id="njPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">
+                                                                DPP Lain-lain 
+                                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Total Nilai Jual X (11/12)"></i>
+                                                                :
+                                                            </label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="text-muted">Rp. </span><span id="dppPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">
+                                                                PPN (<span id="labelPPNRate">{{ $detail->ppn_rate }}</span><span>%)</span>
+                                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Total Nilai Jual X PPN Rate"></i>
+                                                                :
+                                                            </label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> <span class="text-muted">Rp. </span><span id="ppnPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-end">
+                                                            <label class="form-label fw-bold">Total Nilai Jual + PPN :</label>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <label class="form-label"> Rp. <span id="totalPrice">0</span></label>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
                                 <div class="col-lg-12 mt-3">
                                     <div class="card">
                                         <div class="card-header text-center">
-                                            <h6 class="mb-0">Transaction</h6>
+                                            <h6 class="mb-0">
+                                                Transaction
+                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Aturan Transaksi: Total Debit harus sama dengan Total Kredit, serta sama dengan Total Nilai Jual + PPN"></i>
+                                            </h6>
                                         </div>
                                         <div class="card-body">
-                                            <div class="table-repsonsive">
+                                            <div class="table-responsive">
                                                 <table class="table table-bordered" id="dynamicTable">
                                                     <thead>
                                                         <tr>
                                                             <th>Account Code</th>
                                                             <th>Nominal</th>
                                                             <th>Debit / Kredit</th>
+                                                            <th>Note</th>
                                                             <th style="text-align:center">Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
+                                                        @foreach ($generalLedgers as $index => $ledger)
                                                         <tr>
                                                             <td>
-                                                                <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[0][account_code]" required>
+                                                                <select class="form-select select2 addpayment" name="addmore[{{ $index }}][account_code]" style="width:100%" required>
                                                                     <option value="">- Select Account Code -</option>
-                                                                    @foreach( $accountcodes as $item )
-                                                                        <option value="{{ $item->id }}" @if($general_ledger->id_account_code == $item->id) selected="selected" @endif>{{ $item->account_code }} - {{ $item->account_name }}</option>
+                                                                    @foreach ($accountcodes as $item)
+                                                                        <option value="{{ $item->id }}"
+                                                                            {{ $item->id == $ledger->id_account_code ? 'selected' : '' }}>
+                                                                            {{ $item->account_code }} - {{ $item->account_name }}
+                                                                        </option>
                                                                     @endforeach
                                                                 </select>
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="{{ number_format($general_ledger->amount, 3, ',', '.') }}" required>
+                                                                <input type="text"
+                                                                    class="form-control rupiah-input addpayment"
+                                                                    name="addmore[{{ $index }}][nominal]"
+                                                                    value="{{ number_format($ledger->amount, 2, ',', '.') }}"
+                                                                    required>
                                                             </td>
                                                             <td>
-                                                                <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[0][type]" required>
+                                                                <select class="form-select select2 addpayment" name="addmore[{{ $index }}][type]" style="width:100%" required>
                                                                     <option value="">- Select Type -</option>
-                                                                    <option value="Debit" @if($general_ledger->transaction == "D") selected="selected" @endif>Debit</option>
-                                                                    <option value="Kredit" @if($general_ledger->transaction == "K") selected="selected" @endif>Kredit</option>
+                                                                    <option value="D" {{ $ledger->transaction == 'D' ? 'selected' : '' }}>Debit</option>
+                                                                    <option value="K" {{ $ledger->transaction == 'K' ? 'selected' : '' }}>Kredit</option>
                                                                 </select>
                                                             </td>
-                                                            <td style="text-align:center"><button type="button" name="add" id="adds" class="btn btn-success"><i class="fas fa-plus"></i></button></td>
+                                                            <td>
+                                                                <textarea class="form-control" name="addmore[{{ $index }}][note]" rows="3" placeholder="Input Note (Optional)..">{{ $ledger->note }}</textarea>
+                                                            </td>
+                                                            <td style="text-align:center">
+                                                                @if ($index == 0)
+                                                                    <button type="button" id="adds" class="btn btn-success">
+                                                                        <i class="fas fa-plus"></i>
+                                                                    </button>
+                                                                @else
+                                                                    <button type="button" class="btn btn-danger remove-tr">
+                                                                        <i class="fas fa-minus"></i>
+                                                                    </button>
+                                                                @endif
+                                                            </td>
                                                         </tr>
-
-                                                        <?php $index = 0; ?>
-                                                        @if($general_ledgers != [])
-                                                            @foreach($general_ledgers as $gl)
-                                                            <?php $index++; ?>
-                                                            <tr>
-                                                                <td>
-                                                                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[{{ $index }}][account_code]" required>
-                                                                        <option value="">- Select Account Code -</option>
-                                                                        @foreach( $accountcodes as $item )
-                                                                            <option value="{{ $item->id }}" @if($gl->id_account_code == $item->id) selected="selected" @endif>{{ $item->account_code }} - {{ $item->account_name }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </td>
-                                                                <td>
-                                                                    <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[{{ $index }}][nominal]" value="{{ number_format($gl->amount, 3, ',', '.') }}" required>
-                                                                </td>
-                                                                <td>
-                                                                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[{{ $index }}][type]" required>
-                                                                        <option value="">- Select Type -</option>
-                                                                        <option value="Debit" @if($gl->transaction == "D") selected="selected" @endif>Debit</option>
-                                                                        <option value="Kredit" @if($gl->transaction == "K") selected="selected" @endif>Kredit</option>
-                                                                    </select>
-                                                                </td>
-                                                                <td style="text-align:center">
-                                                                    <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>
-                                                                </td>
-                                                            </tr>
-                                                            @endforeach
-                                                        @endif
-
+                                                        @endforeach
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -196,10 +257,10 @@
                             <hr>
                             <div class="row">
                                 <div class="col-12 align-right">
-                                    <a href="{{ route('transsales.index') }}" type="button" class="btn btn-light waves-effect btn-label waves-light">
+                                    <a href="{{ route('transsales.local.index') }}" type="button" class="btn btn-light waves-effect btn-label waves-light">
                                         <i class="mdi mdi-arrow-left-circle label-icon"></i>Back
                                     </a>
-                                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb">
+                                    <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sb">
                                         <i class="mdi mdi-update label-icon"></i>Update
                                     </button>
                                 </div>
@@ -212,126 +273,443 @@
     </div>
 </div>
 
+<div class="modal fade" id="alert" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-top" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel"><span class="mdi mdi-alert"></span> Nominal Not Equal !</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="modalBodyContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- Validation Form --}}
 <script>
-    document.getElementById('formupdate').addEventListener('submit', function(event) {
-        if (!this.checkValidity()) {
-            event.preventDefault();
-            return false;
+    function normalizeNumber(value) {
+        if (typeof value === "string") {
+            return parseFloat(
+                value.replace(/\./g, "").replace(",", ".")
+            );
         }
-        var submitButton = this.querySelector('button[name="sb"]');
-        submitButton.disabled = true;
-        submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
-        return true;
-    });
-</script>
+        return Number(value);
+    }
 
-{{-- Dynamic Table --}}                                                    
-<script>
-    var i = "{{ $index }}";
-    $("#adds").click(function() {
-        $(".js-example-basic-single").select2();
-        ++i;
-        $("#dynamicTable").append(
-            `<tr>
-                <td>
-                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[`+i+`][account_code]" required>
-                        <option value="">- Select Account Code -</option>
-                        @foreach( $accountcodes as $item )
-                            <option value="{{ $item->id }}">{{ $item->account_code }} - {{ $item->account_name }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                <td>
-                    <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
-                </td>
-                <td>
-                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
-                        <option value="">- Select Type -</option>
-                        <option value="Debit">Debit</option>
-                        <option value="Kredit">Kredit</option>
-                    </select>
-                </td>
-                <td style="text-align:center">
-                    <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>
-                </td>
-            </tr>`);
+    function parseCurrency(value) {
+        return parseFloat(value.replace(/\./g, '').replace(',', '.'));
+    }
 
-        $(".js-example-basic-single").select2();
+    function calculateTotals() {
+        let debitTotal = 0;
+        let kreditTotal = 0;
 
-        document.querySelectorAll(".rupiah-input").forEach((input) => {
-            input.addEventListener("input", formatCurrencyInput);
+        $("#dynamicTable tbody tr").each(function() {
+            let nominal = parseCurrency($(this).find('input[name*="[nominal]"]').val());
+            let type = $(this).find('select[name*="[type]"]').val();
+
+            if (type === "D") {
+                debitTotal += nominal;
+            } else if (type === "K") {
+                kreditTotal += nominal;
+            }
         });
-    });
-    $(document).on('click', '.remove-tr', function() {
-        $(this).parents('tr').remove();
-    });
-</script>
 
-{{-- Sales Order Choose --}}
-<script>
-    $('select[name="id_sales_order"]').on('change', function() {
-        $('#customer_name').val("");
-        $('#customer_address').val("");
-        $('#date').val("");
-        $('#due_date').val("");
-        $('#ppn').val("");
-        $('#statusorder').val("");
+        return { debitTotal, kreditTotal };
+    }
 
-        $('#so_type').val("");
-        $('#so_category').val("");
-        $('#product').val("");
-        $('#type_product').val("");
-        $('#qty').val("");
-        $('#unit').val("");
-        $('#price').val("");
-        $('#total_price').val("");
+    document.getElementById('formUpdate').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let totals = calculateTotals();
 
-        var id_sales_order = $(this).val();
-        if(id_sales_order == ""){
-            $('#customer_name').val("");
-            $('#customer_address').val("");
-            $('#date').val("");
-            $('#due_date').val("");
-            $('#ppn').val("");
-            $('#statusorder').val("");
+        if (totals.debitTotal !== totals.kreditTotal) {
+            let modalBodyContent = `
+                <div class="col-12">
+                    <table class="table dt-responsive w-100">
+                        <thead>
+                            <tr>
+                                <th class="align-top text-bold">Total Debit</th>
+                                <th class="text-center">:</th>
+                                <th class="align-top">${totals.debitTotal.toLocaleString('id-ID')}</th>
+                            </tr>
+                            <tr>
+                                <th class="align-top text-bold">Total Kredit</th>
+                                <th class="text-center">:</th>
+                                <th class="align-top">${totals.kreditTotal.toLocaleString('id-ID')}</th>
+                            </tr>
+                            <tr>
+                                <th class="align-top text-bold">Difference</th>
+                                <th class="text-center">:</th>
+                                <th class="align-top text-danger">${(totals.debitTotal - totals.kreditTotal).toLocaleString('id-ID')}</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            `;
 
-            $('#so_type').val("");
-            $('#so_category').val("");
-            $('#product').val("");
-            $('#type_product').val("");
-            $('#qty').val("");
-            $('#unit').val("");
-            $('#price').val("");
-            $('#total_price').val("");
+            document.getElementById('modalBodyContent').innerHTML = modalBodyContent;
+
+            var myModal = new bootstrap.Modal(document.getElementById('alert'));
+            myModal.show();
         } else {
-            var url = '{{ route("transsales.getsalesorder", ":id") }}';
-            url = url.replace(':id', id_sales_order);
-            if (id_sales_order) {
-                $.ajax({
-                    url: url,
-                    type: "GET",
-                    dataType: "json",
-                    success: function(data) {
-                        $('#customer_name').val(data.customer_name);
-                        $('#customer_address').val(data.customer_address);
-                        $('#date').val(data.date);
-                        $('#due_date').val(data.due_date);
-                        $('#ppn').val(data.ppn);
-                        $('#statusorder').val(data.status);
+            let numDebit = normalizeNumber(totals.debitTotal);
+            let numPrice = normalizeNumber(totalPriceGlobal);
+            if(numDebit == numPrice){
+                var submitButton = this.querySelector('button[name="sb"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML =
+                        '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
+                }
+                $("#processing").removeClass("hidden");
+                $("body").addClass("no-scroll");
+                this.submit();
+                return true;
+            } 
+            else {
+                let modalBodyContent = `
+                    <div class="col-12">
+                        <table class="table dt-responsive w-100">
+                            <thead>
+                                <tr>
+                                    <th class="align-top text-center text-bold">Total Debit</th>
+                                    <th class="align-top text-center text-bold">?</th>
+                                    <th class="align-top text-center text-bold">Total Sales Price</th>
+                                </tr>
+                                <tr>
+                                    <th class="align-top text-center">${totals.debitTotal.toLocaleString('id-ID')}</th>
+                                    <th class="align-top text-center text-danger">!=</th>
+                                    <th class="align-top text-center">${totalPriceGlobal}</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                `;
 
-                        $('#so_type').val(data.so_type);
-                        $('#so_category').val(data.so_category);
-                        $('#product').val(data.product);
-                        $('#type_product').val(data.type_product);
-                        $('#qty').val(data.qty);
-                        $('#unit').val(data.unit);
-                        $('#price').val(data.price);
-                        $('#total_price').val(data.total_price);
-                    }
-                });
+                document.getElementById('modalBodyContent').innerHTML = modalBodyContent;
+                var myModal = new bootstrap.Modal(document.getElementById('alert'));
+                myModal.show();
             }
         }
+    });
+</script>
+
+{{-- Dynamic Table --}}
+<script>
+    // start index based on existing data
+    var i = {{ count($generalLedgers) - 1 }};
+
+    function initPlugins() {
+        $('.select2').select2({ width: '100%' });
+        document.querySelectorAll(".rupiah-input").forEach((input) => {
+            input.removeEventListener("input", formatCurrencyInput);
+            input.addEventListener("input", formatCurrencyInput);
+        });
+    }
+
+    $(document).ready(function () {
+        initPlugins();
+    });
+
+    // ADD ROW
+    $(document).on('click', '#adds', function () {
+        i++;
+        let row = `
+        <tr>
+            <td>
+                <select class="form-select select2 addpayment"
+                    name="addmore[${i}][account_code]"
+                    style="width:100%" required>
+                    <option value="">- Select Account Code -</option>
+                    @foreach ($accountcodes as $item)
+                        <option value="{{ $item->id }}">
+                            {{ $item->account_code }} - {{ $item->account_name }}
+                        </option>
+                    @endforeach
+                </select>
+            </td>
+            <td>
+                <input type="text"
+                    class="form-control rupiah-input addpayment"
+                    name="addmore[${i}][nominal]"
+                    placeholder="Input Amount.." required>
+            </td>
+            <td>
+                <select class="form-select select2 addpayment"
+                    name="addmore[${i}][type]"
+                    style="width:100%" required>
+                    <option value="">- Select Type -</option>
+                    <option value="D">Debit</option>
+                    <option value="K">Kredit</option>
+                </select>
+            </td>
+            <td>
+                <textarea class="form-control"
+                    name="addmore[${i}][note]"
+                    rows="3"
+                    placeholder="Input Note (Optional).."></textarea>
+            </td>
+            <td style="text-align:center">
+                <button type="button" class="btn btn-danger remove-tr">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </td>
+        </tr>`;
+
+        $('#dynamicTable tbody').append(row);
+        initPlugins();
+    });
+
+    // REMOVE ROW
+    $(document).on('click', '.remove-tr', function () {
+        $(this).closest('tr').remove();
+    });
+
+    // RUPIAH FORMATTER
+    function formatCurrencyInput(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        e.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+</script>
+
+
+{{-- Delivery Notes Choose --}}
+<style>
+    /* Hide DataTable header and footer */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        display: none;
+    }
+</style>
+
+<script>
+    let totalPriceGlobal = 0;
+
+    $(function() {
+        var data = {
+            idDN    : '{{ $detail->id_delivery_notes }}',
+            ppnRate : '{{ $detail->ppn_rate }}',
+        };
+        var dataTable = $('#server-side-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{!! route('transsales.getSOPriceFromDN') !!}',
+                type: 'GET',
+                data: function(d) {
+                    d.idDN      = data.idDN;
+                    d.ppnRate   = data.ppnRate;
+                }
+            },
+            "columns": [
+                {
+                data: null,
+                    render: function(data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    },
+                    orderable: false,
+                    searchable: false,
+                    className: 'text-center',
+                },
+                {
+                    data: 'so_number',
+                    name: 'so_number',
+                    orderable: true,
+                    searchable: true,
+                    render: function(data, type, row) {
+                        return row.so_number 
+                            ? `<span class="text-bold">${row.so_number}</span>` 
+                            : `<span class="badge bg-secondary">Null</span>`;
+                    },
+                },
+                {
+                    data: 'product',
+                    name: 'product',
+                    orderable: true,
+                    searchable: true,
+                    render: function(data, type, row) {
+                        var html;
+                        if (row.product == null) {
+                            html = '<div class="text-center"><span class="badge bg-secondary">Null</span></div>';
+                        } else {
+                            html = row.product + '<br><b>(' + row.type_product + ')</b>';
+                        }
+                        return html;
+                    },
+                },
+                {
+                    data: 'qty',
+                    name: 'qty',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        return (data ? data : '-') + ' (' + (row.unit ? row.unit : '-') + ')';
+                    },
+                },
+                {
+                    data: 'ppn_type',
+                    name: 'ppn_type',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        return (data ? data : '-');
+                    },
+                },
+                {
+                    data: 'price_before_ppn',
+                    name: 'price_before_ppn',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
+                            return '<span class="badge bg-secondary">Null</span>';
+                        }
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
+                    },
+                },
+                {
+                    data: 'ppn_value',
+                    name: 'ppn_value',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
+                            return '<span class="badge bg-secondary">Null</span>';
+                        }
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span><br>(' + row.ppn_rate + '%)';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span><br>(' + row.ppn_rate + '%)';
+                    },
+                },
+                {
+                    data: 'price_after_ppn',
+                    name: 'price_after_ppn',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
+                            return '<span class="badge bg-secondary">Null</span>';
+                        }
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
+                    },
+                },
+                {
+                    data: 'total_price_before_ppn',
+                    name: 'total_price_before_ppn',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
+                            return '<span class="badge bg-secondary">Null</span>';
+                        }
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
+                    },
+                },
+                {
+                    data: 'total_price_after_ppn',
+                    name: 'total_price_after_ppn',
+                    orderable: true,
+                    searchable: true,
+                    className: 'text-end',
+                    render: function(data, type, row) {
+                        if (data == null) {
+                            return '<span class="badge bg-secondary">Null</span>';
+                        }
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return '<span class="text-bold">' + parts[0] + '</span>';
+                    },
+                },
+            ]
+        });
+
+        dataTable.on('xhr.dt', function(e, settings, json, xhr) {
+            if (json) {
+                $('#njPrice').html(json.nj ? formatPriceWithStyle(json.nj) : 0);
+                $('#dppPrice').html(json.dpp ? formatPriceWithStyle(json.dpp) : 0);
+                $('#ppnPrice').html(json.ppn ? formatPriceWithStyle(json.ppn) : 0);
+                $('#totalPrice').html(json.total ? formatPriceWithStyle(json.total) : 0);
+                $('#labelPPNRate').html(json.ppn_rate ?? 0);
+                totalPriceGlobal = formatPrice(json.total) || 0;
+            }
+        });
+
+        function resetPPNRate(){
+            let initPPN = parseFloat('{{ $initPPN }}') || 0;
+            $('#buttonMinusPPNRate, #buttonPlusPPNRate').prop('disabled', true);
+            $('#ppn_rate').val(initPPN).css('background-color', '#EAECF4');
+        }
+        function enablePPNRate(){
+            $('#buttonMinusPPNRate, #buttonPlusPPNRate').prop('disabled', false);
+            $('#ppn_rate').css('background-color', '');
+        }
+        function resetPrice(){
+            $('#njPrice, #dppPrice, #ppnPrice, #totalPrice').html(0);
+        }
+
+        function reloadDataSO(idDN, ppnRate){
+            // To Update Datatable Display
+            data.idDN       = idDN;
+            data.ppnRate    = ppnRate;
+            dataTable.ajax.reload();
+        }
+
+        // plus
+        $('#buttonPlusPPNRate').on('click', function() {
+            resetPrice();
+            let idDN    = "{{ $detail->id_delivery_notes }}";
+            let ppnRate = parseFloat($('#ppn_rate').val()) || 0;
+            if(ppnRate < 100) {
+                ppnRate++;
+                $('#ppn_rate').val(ppnRate);
+                reloadDataSO(idDN, ppnRate);
+            }
+        });
+        // minus
+        $('#buttonMinusPPNRate').on('click', function() {
+            resetPrice();
+            let idDN    = "{{ $detail->id_delivery_notes }}";
+            let ppnRate = parseFloat($('#ppn_rate').val()) || 0;
+            if(ppnRate > 0) {
+                ppnRate--;
+                $('#ppn_rate').val(ppnRate);
+                reloadDataSO(idDN, ppnRate);
+            }
+        });
     });
 </script>
 

@@ -15,385 +15,233 @@ use App\Models\GoodReceiptNote;
 use App\Models\GoodReceiptNoteDetail;
 use App\Models\PurchaseOrder;
 use App\Models\TransPurchase;
+use App\Models\MstPpn;
+use App\Models\PurchaseRequisitions;
 
 class TransPurchaseController extends Controller
 {
     use AuditLogsTrait;
     use GeneralLedgerTrait;
 
-    // Get Purchase Order
-    public function getpurchaseorder($id)
-    {
-        $purchaseorder = PurchaseOrder::select('purchase_orders.*', 'master_suppliers.name as supplier')
-            ->leftjoin('master_suppliers', 'purchase_orders.id_master_suppliers', 'master_suppliers.id')
-            ->where('purchase_orders.id', $id)
-            ->first();
-
-        return json_encode($purchaseorder);
-    }
-    public function getgoodReceiptNote($id)
-    {
-        $goodReceiptNote = GoodReceiptNote::select('master_suppliers.name as supplier', 'purchase_orders.*')
-            ->leftjoin('master_suppliers', 'good_receipt_notes.id_master_suppliers', 'master_suppliers.id')
-            ->leftjoin('purchase_orders', 'good_receipt_notes.id_purchase_orders', 'purchase_orders.id')
-            ->where('good_receipt_notes.id', $id)
-            ->first();
-
-        return json_encode($goodReceiptNote);
-    }
-
-    function generateRefNumber()
-    {
-        // Get current year and month
-        $year = date('y');
-        $month = date('m');
-        // Get the last reference number for the current year and month from the database
-        $lastRefNumber = TransPurchase::where('ref_number', 'like', "PRC-$year$month%")->orderBy('ref_number', 'desc')->first();
-        // If there are no existing reference numbers for the current year and month, start from 1
-        if (!$lastRefNumber) {
-            $counter = 1;
-        } else {
-            // Extract the counter from the last reference number and increment it
-            $lastCounter = intval(substr($lastRefNumber->ref_number, 9)); // Assuming the format is fixed as "PRC-YYMMXXXXX"
-            $counter = $lastCounter + 1;
-        }
-        // Format the counter with leading zeros
-        $counterFormatted = str_pad($counter, 5, '0', STR_PAD_LEFT);
-        // Generate the reference number
-        $refNumber = "PRC-$year$month$counterFormatted";
-    
-        return $refNumber;
-    }
-
     public function index(Request $request)
     {
+        $grn_number = $request->get('grn_number');
         $ref_number = $request->get('ref_number');
-        $id_good_receipt_notes = $request->get('id_good_receipt_notes');
+        $po_number = $request->get('po_number');
+        $tax_invoice_number = $request->get('tax_invoice_number');
+        $invoice_number = $request->get('invoice_number');
         $searchDate = $request->get('searchDate');
         $startdate = $request->get('startdate');
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
+        if (is_null($searchDate)) {
+            $searchDate = "Custom";
+            $startdate = now()->startOfYear()->format('Y-m-d');
+            $enddate = now()->endOfYear()->format('Y-m-d');
+        }
 
-        $goodReceiptNote = GoodReceiptNote::select('id', 'receipt_number', 'status')->get();
-
-        $datas = TransPurchase::select(
-                'trans_purchase.*', 'purchase_orders.po_number',
-                DB::raw("'Purchase Transaction' as source")
-            )
-            ->leftjoin('good_receipt_notes', 'trans_purchase.id_good_receipt_notes', 'good_receipt_notes.id')
-            ->leftjoin('purchase_orders', 'good_receipt_notes.id_purchase_orders', 'purchase_orders.id')
-            ->orderBy('trans_purchase.created_at','desc');
-
-        if($ref_number != null){
-            $datas = $datas->where('ref_number', 'like', '%'.$ref_number.'%');
-        }
-        if($id_good_receipt_notes != null){
-            $datas = $datas->where('id_good_receipt_notes', $id_good_receipt_notes);
-        }
-        if($startdate != null && $enddate != null){
-            $datas = $datas->whereDate('trans_purchase.created_at','>=',$startdate)->whereDate('trans_purchase.created_at','<=',$enddate);
-        }
-        
-        if($request->flag != null){
-            $datas = $datas->get()->makeHidden(['id']);
-            return $datas;
-        }
-        
-        $datas = $datas->get();
-        
         // Datatables
         if ($request->ajax()) {
+            $datas = TransPurchase::select('trans_purchase.*', DB::raw("'Purchase Transaction' as source"))->orderBy('created_at','desc');
+            
+            if($grn_number != null){
+                $datas = $datas->where('grn_number', 'like', '%'.$grn_number.'%');
+            }
+            if($ref_number != null){
+                $datas = $datas->where('ref_number', 'like', '%'.$ref_number.'%');
+            }
+            if($po_number != null){
+                $datas = $datas->where('po_number', 'like', '%'.$po_number.'%');
+            }
+            if($tax_invoice_number != null){
+                $datas = $datas->where('tax_invoice_number', 'like', '%'.$tax_invoice_number.'%');
+            }
+            if($invoice_number != null){
+                $datas = $datas->where('invoice_number', 'like', '%'.$invoice_number.'%');
+            }
+            if($startdate != null && $enddate != null){
+                $datas = $datas->whereDate('trans_purchase.created_at','>=',$startdate)->whereDate('trans_purchase.created_at','<=',$enddate);
+            }
+            
+            if($request->flag != null){
+                $datas = $datas->get()->makeHidden(['id']);
+                return $datas;
+            }
+            
+            $datas = $datas->get();
+
             return DataTables::of($datas)
                 ->addColumn('action', function ($data){
                     return view('transpurchase.action', compact('data'));
-                })
-                // ->addColumn('bulk-action', function ($data) {
-                //     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
-                //     return $checkBox;
-                // })
-                // ->rawColumns(['bulk-action'])
-                ->make(true);
+                })->make(true);
         }
         
         //Audit Log
         $this->auditLogsShort('View List Trans Purchase');
 
-        return view('transpurchase.index',compact('datas', 'goodReceiptNote',
-            'ref_number', 'id_good_receipt_notes', 'searchDate', 'startdate', 'enddate', 'flag'));
+        return view('transpurchase.index',compact('grn_number', 'ref_number', 'po_number', 'tax_invoice_number', 'invoice_number', 'searchDate', 'startdate', 'enddate', 'flag'));
+    }
+
+    public function getListAvailGRN()
+    {
+        return GoodReceiptNote::query()
+            ->leftJoin(
+                'trans_purchase',
+                'trans_purchase.id_good_receipt_notes',
+                '=',
+                'good_receipt_notes.id'
+            )
+            ->whereNull('trans_purchase.id_good_receipt_notes')
+            ->whereIn('good_receipt_notes.status', ['Posted', 'Closed'])
+            ->select(
+                'good_receipt_notes.id',
+                'good_receipt_notes.receipt_number as grn_number',
+                'good_receipt_notes.date as grn_date',
+                'good_receipt_notes.status'
+            )
+            ->get();
+    }
+
+    public function getDetailGRN($idGRN)
+    {
+        $prNumber = $poNumber = $supplierName = $requester = null;
+        if($idGRN) {
+            $grn = GoodReceiptNote::where('id', $idGRN)->first();
+            $idPR = $grn->reference_number;
+            $pr = PurchaseRequisitions::select('purchase_requisitions.request_number', 'master_suppliers.name', 'master_requester.nm_requester')
+                ->leftJoin('master_suppliers', 'purchase_requisitions.id_master_suppliers', 'master_suppliers.id')
+                ->leftJoin('master_requester', 'purchase_requisitions.requester', 'master_requester.id')
+                ->where('purchase_requisitions.id', $idPR)
+                ->first();
+            if($pr){
+                $prNumber = $pr->request_number;
+                $supplierName = $pr->name;
+                $requester = $pr->nm_requester;
+            }
+            $idPO = $grn->id_purchase_orders;
+            if ($idPO) {
+                $poNumber = optional(PurchaseOrder::where('id', $idPO)->first())->po_number;
+            }
+        }
+        $response = [
+            'prNumber'    => $prNumber,
+            'poNumber'    => $poNumber,
+            'supplierName'=> $supplierName,
+            'requester'   => $requester,
+        ];
+        return $response;
+    }
+    
+    public function getPriceFromGRN(Request $request)
+    {
+        $idGRN      = $request->idGRN;
+        $ppnRate    = $request->ppnRate;
+
+        $datas = GoodReceiptNoteDetail::select(
+                'good_receipt_note_details.lot_number',
+                'good_receipt_note_details.type_product',
+                DB::raw("
+                    CASE 
+                        WHEN good_receipt_note_details.type_product = 'RM' THEN master_raw_materials.description
+                        WHEN good_receipt_note_details.type_product = 'WIP' THEN master_wips.description
+                        WHEN good_receipt_note_details.type_product = 'FG' THEN master_product_fgs.description
+                        WHEN good_receipt_note_details.type_product IN ('TA', 'Other') THEN master_tool_auxiliaries.description
+                    END as product
+                "),
+                'good_receipt_note_details.receipt_qty',
+                'master_units.unit as unit',
+                DB::raw("
+                    COALESCE(
+                        purchase_requisition_details.currency,
+                        purchase_order_details.currency
+                    ) as currency
+                "),
+                DB::raw("
+                    COALESCE(
+                        purchase_requisition_details.price,
+                        purchase_order_details.price
+                    ) as price_origin
+                "),
+                DB::raw("
+                    COALESCE(
+                        purchase_requisition_details.price,
+                        purchase_order_details.price
+                    ) as price
+                "),
+                DB::raw("
+                    (
+                        COALESCE(
+                            purchase_requisition_details.price,
+                            purchase_order_details.price
+                        ) * good_receipt_note_details.receipt_qty
+                    ) as total_price
+                ")
+            )
+            ->leftJoin('master_raw_materials', function ($join) {
+                $join->on('good_receipt_note_details.id_master_products', '=', 'master_raw_materials.id')
+                    ->where('good_receipt_note_details.type_product', '=', 'RM');
+            })
+            ->leftJoin('master_wips', function ($join) {
+                $join->on('good_receipt_note_details.id_master_products', '=', 'master_wips.id')
+                    ->where('good_receipt_note_details.type_product', '=', 'WIP');
+            })
+            ->leftJoin('master_product_fgs', function ($join) {
+                $join->on('good_receipt_note_details.id_master_products', '=', 'master_product_fgs.id')
+                    ->where('good_receipt_note_details.type_product', '=', 'FG');
+            })
+            ->leftJoin('master_tool_auxiliaries', function ($join) {
+                $join->on('good_receipt_note_details.id_master_products', '=', 'master_tool_auxiliaries.id')
+                    ->whereIn('good_receipt_note_details.type_product', ['TA', 'Other']);
+            })
+            ->leftJoin('master_units', 'good_receipt_note_details.master_units_id', 'master_units.id')
+            ->leftJoin(
+                'purchase_requisition_details',
+                'good_receipt_note_details.id_purchase_requisition_details',
+                '=',
+                'purchase_requisition_details.id'
+            )
+            ->leftJoin(
+                'purchase_order_details',
+                'good_receipt_note_details.id_purchase_requisition_details',
+                '=',
+                'purchase_order_details.id_purchase_requisition_details'
+            )
+            ->where('good_receipt_note_details.id_good_receipt_notes', $idGRN)
+            ->get();
+
+        $totalPrice     = (float) $datas->sum('total_price');
+        $ppnValue       = (float) ($ppnRate/100) * $totalPrice;
+        $total          = (float) $totalPrice + $ppnValue;
+
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->with([
+                    'currency'  => optional($datas->first())->currency,
+                    'nj'        => $totalPrice,
+                    'ppn_rate'  => $ppnRate,
+                    'ppn'       => $ppnValue,
+                    'total'     => $total,
+                ])
+                ->toJson();
+        }
     }
 
     public function create(Request $request)
     {
-        $goodReceiptNote = GoodReceiptNote::select('id', 'receipt_number', 'status')->get();
+        $grns = $this->getListAvailGRN();
         $accountcodes = MstAccountCodes::where('is_active', 1)->get();
+        $initPPN = MstPpn::where('tax_name', 'Trans. Purchase')->where('is_active', 1)->first()->value;
 
         //Audit Log
-        $this->auditLogsShort('View Create New Purchase Transaction');
+        $this->auditLogsShort('View Create New Sales Purchase');
 
-        return view('transpurchase.create',compact('accountcodes', 'goodReceiptNote'));
+        return view('transpurchase.create',compact('grns', 'accountcodes', 'initPPN'));
     }
 
     public function store(Request $request)
     {
-        // dd($request->all());
-        $request->validate([
-            'date_transaction' => 'required',
-            'id_good_receipt_notes' => 'required',
-            'delivery_note_date' => 'required',
-            'delivery_note_number' => 'required',
-            'invoice_date' => 'required',
-            'invoice_number' => 'required',
-            'quantity' => 'required',
-            'description' => 'required',
-            'addmore.*.account_code' => 'required',
-            'addmore.*.nominal' => 'required',
-            'addmore.*.type' => 'required',
-        ]);
-        
-        $refNumber = $this->generateRefNumber();
+        $listProduct = json_decode($request->listProduct, true);
+        dd($request->all(), $listProduct);
 
-        DB::beginTransaction();
-        try{
-            $refParent = TransPurchase::create([
-                'ref_number' => $refNumber,
-                'total_transaction' => $request->addmore ? count($request->addmore) : 0,
-                'date_transaction' => $request->date_transaction,
-                'id_good_receipt_notes' => $request->id_good_receipt_notes,
-                'delivery_note_date' => $request->delivery_note_date,
-                'delivery_note_number' => $request->delivery_note_number,
-                'invoice_date' => $request->invoice_date,
-                'tax_invoice_number' => $request->tax_invoice_number,
-                'invoice_number' => $request->invoice_number,
-                'quantity' => $request->quantity,
-                'description' => $request->description,
-                'created_by' => auth()->user()->email
-            ]);
-
-            if($request->addmore != null){
-                foreach($request->addmore as $item){
-                    if($item['account_code'] != null && $item['nominal'] != null){
-                        $nominal = str_replace('.', '', $item['nominal']);
-                        $nominal = str_replace(',', '.', $nominal);
-
-                        // Create General Ledger
-                        $this->storeGeneralLedger($refParent->id, $refNumber, $request->date_transaction, $item['account_code'], $item['type'], $nominal, 'Purchase Transaction');
-                        // Update & Calculate Balance Account Code
-                        $this->updateBalanceAccount($item['account_code'], $nominal, $item['type']);
-                    }
-                }
-            }
-
-            //Audit Log
-            $this->auditLogsShort('Create New Purchase Transaction Ref. Number ('. $refNumber . ')');
-
-            DB::commit();
-            return redirect()->route('transpurchase.index')->with(['success' => 'Success Create New Purchase Transaction']);
-        } catch (Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Create New Purchase Transaction!']);
-        }
     }
-
-    public function info($id)
-    {
-        $id = decrypt($id);
-        // dd($id);
-
-        $data = TransPurchase::select('good_receipt_notes.receipt_number', 'trans_purchase.*', 'purchase_orders.*', 'master_suppliers.name as supplier')
-            ->leftjoin('good_receipt_notes', 'trans_purchase.id_good_receipt_notes', 'good_receipt_notes.id')
-            ->leftjoin('purchase_orders', 'good_receipt_notes.id_purchase_orders', 'purchase_orders.id')
-            ->leftjoin('master_suppliers', 'purchase_orders.id_master_suppliers', 'master_suppliers.id')
-            ->where('trans_purchase.id', $id)
-            ->first();
-        
-        $general_ledgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
-            ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
-            ->where('general_ledgers.id_ref', $id)
-            ->where('general_ledgers.ref_number', $data->ref_number)
-            ->where('general_ledgers.source', 'Purchase Transaction')
-            ->get();
-        
-        $transaction_date = date('Y-m-d', strtotime($general_ledgers[0]->date_transaction));
-        
-        //Audit Log
-        $this->auditLogsShort('View Info Purchase Transaction Ref Number ('. $data->ref_number . ')');
-
-        return view('transpurchase.info',compact('data', 'general_ledgers', 'transaction_date'));
-    }
-
-    // public function edit($id)
-    // {
-    //     $id = decrypt($id);
-    //     // dd($id);
-
-    //     $purchase = PurchaseOrder::select('id', 'po_number', 'status')->get();
-
-    //     $data = TransPurchase::select('trans_purchase.*', 'purchase_orders.*', 'master_suppliers.name as supplier')
-    //         ->leftjoin('purchase_orders', 'trans_purchase.id_purchase_order', 'purchase_orders.id')
-    //         ->leftjoin('master_suppliers', 'purchase_orders.id_master_suppliers', 'master_suppliers.id')
-    //         ->where('trans_purchase.id', $id)
-    //         ->first();
-
-    //     $general_ledger = GeneralLedger::where('ref_number', $data->ref_number)->first();
-    //     if($general_ledger != []){
-    //         $general_ledgers = GeneralLedger::where('ref_number', $data->ref_number)->where('id', '!=', $general_ledger->id)->get();
-    //     } else {
-    //         $general_ledgers = [];
-    //     }
-
-    //     $transaction_date = date('Y-m-d', strtotime($general_ledger->date_transaction));
-
-    //     $accountcodes = MstAccountCodes::get();
-        
-    //     //Audit Log
-    //     $this->auditLogsShort('View Edit Purchase Transaction Ref Number ('. $data->ref_number . ')');
-
-    //     return view('transpurchase.edit',compact('data', 'purchase', 'general_ledger', 'general_ledgers', 'transaction_date', 'accountcodes'));
-    // }
-    // public function update(Request $request, $id)
-    // {
-    //     // dd($request->all());
-    //     $id = decrypt($id);
-
-    //     $request->validate([
-    //         'transaction_date' => 'required',
-    //         'id_purchase_order' => 'required',
-    //         'delivery_note_date' => 'required',
-    //         'delivery_note_number' => 'required',
-    //         'invoice_date' => 'required',
-    //         'tax_invoice_number' => 'required',
-    //         'invoice_number' => 'required',
-    //         'quantity' => 'required',
-    //         'description' => 'required',
-    //         'addmore.*.account_code' => 'required',
-    //         'addmore.*.nominal' => 'required',
-    //         'addmore.*.type' => 'required',
-    //     ]);
-
-    //     $databefore = TransPurchase::where('id', $id)->first();
-
-    //     // Compare Transaction
-    //     $transbefore = GeneralLedger::where('ref_number', $databefore->ref_number)->get();
-    //     $inputtrans = $request->addmore;
-    //     $updatetrans = false;
-        
-    //     if ($transbefore->isNotEmpty() && is_array($inputtrans)) {
-    //         // Check if lengths are different
-    //         if (count($transbefore) != count($inputtrans)) {
-    //             $updatetrans = true;
-    //         } else {
-    //             $updatetrans = false;
-    //             // Iterate and compare
-    //             foreach ($transbefore as $index => $trans) {
-    //                 // Ensure index exists
-    //                 if (!isset($inputtrans[$index])) {
-    //                     $updatetrans = true;
-    //                     break;
-    //                 }
-    //                 $detail = $inputtrans[$index];
-    //                 // Compare attributes (also remove formatting from amount_fee for accurate comparison)
-    //                 $nominal = str_replace('.', '', $detail['nominal']);
-    //                 $nominal = str_replace(',', '.', $nominal);
-    //                 $type = ($detail['type'] == 'Debit') ? 'D' : 'K';
-    //                 if ($trans->id_account_code != $detail['account_code'] || $trans->amount != $nominal || $trans->transaction != $type) {
-    //                     $updatetrans = true;
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //     } elseif($transbefore->isEmpty() && $inputtrans[0]['account_code'] != null || $transbefore->isNotEmpty() && $inputtrans[0]['account_code'] === null ) {
-    //         $updatetrans = true;
-    //     } else {
-    //         $updatetrans = false;
-    //     }
-
-    //     $date_transaction = GeneralLedger::where('ref_number', $databefore->ref_number)->first()->date_transaction;
-    //     $date_transaction = date('Y-m-d', strtotime($date_transaction));
-    //     if($date_transaction != $request->transaction_date){
-    //         $updatetrans = true;
-    //     }
-
-    //     if($databefore->isDirty() || $updatetrans == true){
-    //         DB::beginTransaction();
-    //         try{
-    //             //Update Trans Sales
-    //             if($databefore->isDirty()){
-    //                 TransPurchase::where('id', $id)->update([
-    //                     'id_purchase_order' => $request->id_purchase_order,
-    //                     'delivery_note_date' => $request->delivery_note_date,
-    //                     'delivery_note_number' => $request->delivery_note_number,
-    //                     'invoice_date' => $request->invoice_date,
-    //                     'tax_invoice_number' => $request->tax_invoice_number,
-    //                     'invoice_number' => $request->invoice_number,
-    //                     'quantity' => $request->quantity,
-    //                     'description' => $request->description,
-    //                     'updated_by' => auth()->user()->email
-    //                 ]);
-    //             }
-    //             //Update General Ledgers
-    //             if($updatetrans == true){
-    //                 TransPurchase::where('id', $id)->update([
-    //                     'updated_by' => auth()->user()->email
-    //                 ]);
-    //                 //Delete Data Before
-    //                 GeneralLedger::where('ref_number', $databefore->ref_number)->delete();
-    //                 //Add New Input
-    //                 if($request->addmore != null){
-    //                     foreach($request->addmore as $item){
-    //                         if($item['account_code'] != null && $item['nominal'] != null){
-    //                             $nominal = str_replace('.', '', $item['nominal']);
-    //                             $nominal = str_replace(',', '.', $nominal);
-
-    //                             if($item['type'] == 'Debit'){
-    //                                 $transaction = "D";
-    //                             } else {
-    //                                 $transaction = "K";
-    //                             }
-
-    //                             GeneralLedger::create([
-    //                                 'ref_number' => $databefore->ref_number,
-    //                                 'date_transaction' => $request->transaction_date,
-    //                                 'id_account_code' => $item['account_code'],
-    //                                 'transaction' => $transaction,
-    //                                 'amount' => $nominal,
-    //                                 'source' => 'Sales Transaction',
-    //                             ]);
-    //                         }
-    //                     }
-    //                 }
-    //             }
-
-    //             //Audit Log
-    //             $this->auditLogsShort('Update Purchase Transaction Ref. Number ('. $databefore->ref_number . ')');
-
-    //             DB::commit();
-    //             return redirect()->route('transpurchase.index')->with(['success' => 'Success Update Purchase Transaction']);
-    //         } catch (Exception $e) {
-    //             DB::rollback();
-    //             return redirect()->back()->with(['fail' => 'Failed to Update Purchase Transaction!']);
-    //         }
-    //     } else {
-    //         return redirect()->route('transpurchase.index')->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
-    //     }
-    // }
-    // public function delete($id)
-    // {
-    //     $id = decrypt($id);
-
-    //     DB::beginTransaction();
-    //     try{
-    //         $data = TransPurchase::where('id', $id)->first();
-    //         GeneralLedger::where('ref_number', $data->ref_number)->delete();
-    //         TransPurchase::where('id', $id)->delete();
-            
-    //         //Audit Log
-    //         $this->auditLogsShort('Delete Purchase Transaction Ref. Number = '.$data->ref_number);
-
-    //         DB::commit();
-    //         return redirect()->back()->with(['success' => 'Success Delete Purchase Transaction']);
-    //     } catch (Exception $e) {
-    //         DB::rollback();
-    //         return redirect()->back()->with(['fail' => 'Failed to Delete Purchase Transaction!']);
-    //     }
-    // }
 }
