@@ -589,8 +589,13 @@
 
 
         $('input[name="discount').on('keyup', function () {
+            if (!$(this).val()) {
+                $(this).val('0');
+                recalculateSummary();
+            }
             recalculateSummary();
         });
+
 
         // ===============================
         // SELECT GRN
