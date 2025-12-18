@@ -34,7 +34,7 @@
                             <div class="row">
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Transaction Number</label>
-                                    <input class="form-control" type="text" value="" placeholder="Auto Generate" style="background-color:#EAECF4" readonly>
+                                    <input class="form-control readonly-input" type="text" value="" placeholder="Auto Generate" readonly>
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label required-label">Invoice Date</label>
@@ -60,11 +60,14 @@
                                     <label class="form-label required-label">Type</label>
                                     <select class="form-control select2" name="type" required>
                                         <option value="" selected>Choose</option>
-                                        <option value="Bukti Kas Keluar">Bukti Kas Keluar</option>
-                                        <option value="Bukti Kas Masuk">Bukti Kas Masuk</option>
-                                        <option value="Bukti Bank Keluar">Bukti Bank Keluar</option>
-                                        <option value="Bukti Bank Masuk">Bukti Bank Masuk</option>
+                                        @foreach($typeManuals as $item)
+                                            <option value="{{ $item }}">{{ $item }}</option>
+                                        @endforeach
                                     </select>
+                                </div>
+                                <div class="col-lg-6 mb-3 d-none" id="currencyWrapper">
+                                    <label class="form-label required-label">Currency</label>
+                                    <input class="form-control readonly-input" name="currency" type="text" value="IDR" readonly>
                                 </div>
                                 <div class="col-lg-6 mb-3 d-none" id="bankAccountWrapper">
                                     <label class="form-label required-label">Bank Account</label>
@@ -76,7 +79,7 @@
                                         <option value="" selected disabled>Select Bank</option>
                                         @foreach($bankAccounts as $item)
                                             <option value="{{ $item->id }}">
-                                                {{ $item->account_number }} || {{ $item->bank_name }}
+                                                {{ $item->currency }} || {{ $item->account_number }} || {{ $item->bank_name }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -161,9 +164,11 @@
         function toggleBankAccount() {
             const type = $('select[name="type"]').val();
             if (type === 'Bukti Bank Keluar' || type === 'Bukti Bank Masuk') {
+                $('#currencyWrapper').addClass('d-none');
                 $('#bankAccountWrapper').removeClass('d-none');
                 $('select[name="id_master_bank_account"]').prop('required', true);
             } else {
+                $('#currencyWrapper').removeClass('d-none');
                 $('#bankAccountWrapper').addClass('d-none');
                 $('select[name="id_master_bank_account"]')
                     .prop('required', false)

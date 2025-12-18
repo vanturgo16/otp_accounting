@@ -59,33 +59,33 @@
                             <hr>
                             
                             <div class="card">
-                                <div class="card-body" style="background-color:ghostwhite">
+                                <div class="card-body readonly-card">
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label required-label">Good Receipt Notes</label>
-                                            <input class="form-control" type="text"
+                                            <input class="form-control readonly-input" type="text"
                                                 value="{{ $detail->grn_number . ' || ' . \Carbon\Carbon::parse($detail->grn_date)->format('Y-m-d') }}" 
-                                                style="background-color:#EAECF4" readonly>
+                                                readonly>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Ref Number / PR</label>
-                                            <input class="form-control" id="ref_number" type="text" value="{{ $detail->ref_number ?? '-' }}" style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="ref_number" type="text" value="{{ $detail->ref_number ?? '-' }}" readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">PO Number</label>
-                                            <input class="form-control" id="po_number" type="text" value="{{ $detail->po_number ?? '-' }}" style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="po_number" type="text" value="{{ $detail->po_number ?? '-' }}" readonly>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Suppliers</label>
-                                            <input class="form-control" id="suppliers" type="text" value="{{ $detail->suppliers ?? '-' }}" style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="suppliers" type="text" value="{{ $detail->suppliers ?? '-' }}" readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Requester</label>
-                                            <input class="form-control" id="requester" type="text" value="{{ $detail->requester ?? '-' }}" style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="requester" type="text" value="{{ $detail->requester ?? '-' }}" readonly>
                                         </div>
                                     </div>
 
@@ -116,7 +116,7 @@
                                                         <td class="text-end" style="width: 50%;">
                                                             <div class="input-group" style="width: 150px; margin-left: auto;">
                                                                 <button class="btn btn-outline-secondary" type="button" id="buttonMinusPPNRate">-</button>
-                                                                <input type="text" name="ppn_rate" class="form-control text-center" value="{{ $detail->ppn_rate }}" id="ppn_rate" style="background-color:#EAECF4" required readonly>
+                                                                <input type="text" name="ppn_rate" class="form-control readonly-input text-center" value="{{ $detail->ppn_rate }}" id="ppn_rate" required readonly>
                                                                 <button class="btn btn-outline-secondary" type="button" id="buttonPlusPPNRate">+</button>
                                                             </div>
                                                         </td>

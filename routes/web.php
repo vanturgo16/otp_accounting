@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CashBookController;
+use App\Http\Controllers\TransCashBookController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GeneralLedgersController;
 use App\Http\Controllers\EntityListController;
@@ -199,7 +199,7 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
     });
 
     //Cash Book
-    Route::controller(CashBookController::class)->group(function () {
+    Route::controller(TransCashBookController::class)->group(function () {
         Route::prefix('cashbook')->middleware('permission:Akunting_generalledger')->group(function () {
             // Modal
             Route::prefix('modal')->group(function () {
@@ -214,6 +214,7 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
                 Route::post('update/{id}', 'update')->name('cashbook.update');
                 Route::post('delete/{id}', 'delete')->name('cashbook.delete');
             });
+            Route::get('print/{id}', 'print')->name('cashbook.print');
         });
     });
 

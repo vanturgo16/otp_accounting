@@ -21,16 +21,6 @@
             <br><span>{{ $detail->date_invoice ? \Carbon\Carbon::parse($detail->date_invoice)->format('d-m-Y') : '-' }}</span>
         </div>
     </div>
-    {{-- <div class="row">
-        <div class="col-lg-3 mb-3">
-            <label class="form-label mb-0">Created By</label>
-            <br><span>{{ $detail->created_by ?? '-' }}</span>
-        </div>
-        <div class="col-lg-3 mb-3">
-            <label class="form-label mb-0">Invoice Date</label>
-            <br><span>{{ $detail->date_invoice ? \Carbon\Carbon::parse($detail->date_invoice)->format('d-m-Y') : '-' }}</span>
-        </div>
-    </div> --}}
 
     <div class="card">
         <div class="card-header bg-light">

@@ -35,7 +35,7 @@
                             <div class="row">
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Reference Number</label>
-                                    <input class="form-control" type="text" value="" placeholder="Auto Generate" style="background-color:#EAECF4" readonly>
+                                    <input class="form-control readonly-input" type="text" value="" placeholder="Auto Generate" readonly>
                                 </div>
                             </div>
                             <div class="row">
@@ -134,12 +134,12 @@
                             </div>
 
                             <div class="card">
-                                <div class="card-body" style="background-color:ghostwhite">
+                                <div class="card-body readonly-card">
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">PO Number</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
-                                            <input class="form-control" id="po_number" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="po_number" type="text" value="" placeholder="Select Delivery Notes.." readonly>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -147,19 +147,19 @@
                                             <label class="form-label">Customer Name</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
                                             <input type="hidden" name="id_master_customers" id="id_master_customers" value="">
-                                            <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="customer_name" type="text" value="" placeholder="Select Delivery Notes.." readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Sales Name</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
-                                            <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="sales_name" type="text" value="" placeholder="Select Delivery Notes.." readonly>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Customer Address</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
-                                            <input class="form-control" id="customer_address" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="customer_address" type="text" value="" placeholder="Select Delivery Notes.." readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label required-label">Destination</label>
@@ -206,7 +206,7 @@
                                                         <td class="text-end" style="width: 50%;">
                                                             <div class="input-group" style="width: 150px; margin-left: auto;">
                                                                 <button class="btn btn-outline-secondary" type="button" id="buttonMinusPPNRate" disabled>-</button>
-                                                                <input type="text" name="ppn_rate" class="form-control text-center" value="{{ $initPPN }}" id="ppn_rate" style="background-color:#EAECF4" required readonly>
+                                                                <input type="text" name="ppn_rate" class="form-control text-center readonly-input" value="{{ $initPPN }}" id="ppn_rate" required readonly>
                                                                 <button class="btn btn-outline-secondary" type="button" id="buttonPlusPPNRate" disabled>+</button>
                                                             </div>
                                                         </td>

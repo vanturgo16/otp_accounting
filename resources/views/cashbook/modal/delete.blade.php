@@ -2,22 +2,19 @@
     <h5 class="modal-title" id="staticBackdropLabel">Delete Transaction of <b>{{ $detail->invoice_number }}</b></h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
-<form action="{{ route('transpurchase.delete', encrypt($detail->id)) }}" method="POST" enctype="multipart/form-data">
+<form action="{{ route('cashbook.delete', encrypt($detail->id)) }}" method="POST" enctype="multipart/form-data">
     @csrf
     <div class="modal-body md-body-scroll">
         <div class="text-center">
             Are you sure you want to <b class="text-danger">DELETE</b> this transaction?
             <br><br>
-            <b>{{ $detail->invoice_number }}</b>
+            <b>{{ $detail->transaction_number }}</b>
         </div>
         <hr>
         <div class="alert alert-warning mb-0" role="alert">
             <ul class="mb-0 ps-3">
                 <li>
                     All <b>account codes</b> used in this transaction will be <b>rolled back</b>.
-                </li>
-                <li>
-                    The related <b>Good Receipt Note</b> status will be returned to <b>Posted</b>.
                 </li>
             </ul>
         </div>

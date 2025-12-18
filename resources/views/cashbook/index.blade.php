@@ -22,11 +22,10 @@
                                 <div class="col-6 mb-2">
                                     <label class="form-label">Type</label>
                                     <select class="form-control select2" name="type">
-                                        <option value="" selected>Choose</option>
-                                        <option value="Bukti Kas Keluar" @if($type == 'Bukti Kas Keluar') selected @endif>Bukti Kas Keluar</option>
-                                        <option value="Bukti Kas Masuk" @if($type == 'Bukti Kas Masuk') selected @endif>Bukti Kas Masuk</option>
-                                        <option value="Bukti Bank Keluar" @if($type == 'Bukti Bank Keluar') selected @endif>Bukti Bank Keluar</option>
-                                        <option value="Bukti Bank Masuk" @if($type == 'Bukti Bank Masuk') selected @endif>Bukti Bank Masuk</option>
+                                        <option value="" selected>All</option>
+                                        @foreach($typeManuals as $item)
+                                            <option value="{{ $item }}" @if($type == $item) selected @endif>{{ $item }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -249,10 +248,7 @@
             data: 'created_by',
             searchable: true,
             orderable: true,
-            render: function(data, type, row) {
-                var created_at = new Date(row.created_at);
-                return row.created_by + '<br><b>At. </b>' + created_at.toLocaleDateString('es-CL').replace(/\//g, '-');
-            },
+            render: (data, type, row) => fmtActionBy(data, row.created_at),
         },
         {
             data: 'action',
@@ -271,7 +267,53 @@
             showFilter: true,
             url: url,
             requestData: data,
+            customDrawCallback: function(api, settings) {
+                mergeByColumn(api, [1, 2, 6, 7, 10, 11], "id", "transaction_number");
+            },
         });
+
+        function mergeByColumn(api, columnIndexes, idField, refField) {
+            var rows = api.rows({ page: 'current' }).indexes().toArray();
+            var lastGroup = null;
+            var rowspan = 1;
+
+            rows.forEach(function (rowIdx, i) {
+                var rowData = api.row(rowIdx).data();
+                var groupKey = rowData[idField] + "|" + rowData[refField];
+
+                if (groupKey === lastGroup) {
+                    rowspan++;
+
+                    columnIndexes.forEach(function (colIdx) {
+                        var cell = api.cell(rowIdx, colIdx).node();
+                        $(cell).remove();
+                    });
+
+                } else {
+                    if (lastGroup !== null) {
+                        var startRowIdx = rows[i - rowspan];
+
+                        columnIndexes.forEach(function (colIdx) {
+                            var cell = api.cell(startRowIdx, colIdx).node();
+                            $(cell).attr('rowspan', rowspan);
+                        });
+                    }
+
+                    lastGroup = groupKey;
+                    rowspan = 1;
+                }
+            });
+
+            // apply rowspan for last group
+            if (lastGroup !== null) {
+                var startRowIdx = rows[rows.length - rowspan];
+
+                columnIndexes.forEach(function (colIdx) {
+                    var cell = api.cell(startRowIdx, colIdx).node();
+                    $(cell).attr('rowspan', rowspan);
+                });
+            }
+        }
         
         $(document).on('click', '#btnExport', function () {
             var currentDate = new Date();

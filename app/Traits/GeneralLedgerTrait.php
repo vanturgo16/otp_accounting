@@ -91,16 +91,25 @@ trait GeneralLedgerTrait {
     function normalizeOpeningBalance($value)
     {
         $value = str_replace(['.', ','], ['', '.'], $value);
-        return number_format((float) $value, 2, '.', '');
+        return (float) number_format((float) $value, 2, '.', '');
     }
 
     function normalizePrice($value)
     {
         $value = str_replace(['.', ','], ['', '.'], $value);
-        return number_format((float) $value, 2, '.', '');
+        return (float) number_format((float) $value, 2, '.', '');
     }
 
     function decimal3($value) {
         return number_format((float) $value, 3, '.', '');
+    }
+    
+    public function getManualType() {
+        return [
+            'Bukti Kas Keluar',
+            'Bukti Kas Masuk',
+            'Bukti Bank Keluar',
+            'Bukti Bank Masuk',
+        ];
     }
 }

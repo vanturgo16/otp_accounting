@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Accounting | PT. OTP</title>
-    <link rel="shortcut icon" href="{{ asset('assets/images/icon-otp.png') }}" />
+    {{-- <title>Accounting | PT. OTP</title>
+    <link rel="shortcut icon" href="{{ asset('assets/images/icon-otp.png') }}" /> --}}
+    <title>-</title>
 
     <!-- JQUERY SCRIPT -->
     <script type="text/javascript" src="{{ asset('assets/libs/jquery/jquery.min.js') }}"></script>
@@ -23,8 +24,8 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/app.min.css') }}"/>
     <!-- CHOICES SELECT CSS -->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/choices.js/public/assets/styles/choices.min.css') }}"/>
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/css/select2.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/css/select2.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/css/select2.css') }}"/>
     <!-- SUMMERNOTE -->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/summernote-bs4.min.css') }}"/>
     <!-- ADDITIONAL CSS -->
@@ -32,7 +33,9 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom2.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/floating-dropdown.css') }}"/>
 </head>
-<body>
+
+{{-- <body> --}}
+<body data-bs-theme="dark" data-topbar="dark" data-sidebar="dark">
     @include('layouts.loading')
     @include('layouts.toast')
 
@@ -46,7 +49,7 @@
                 <div class="d-flex">
                     <!-- LOGO -->
                     <div class="navbar-brand-box">
-                        <a href="https://sso.olefinatifaplas.my.id/menu" class="logo logo-dark">
+                        {{-- <a href="https://sso.olefinatifaplas.my.id/menu" class="logo logo-dark">
                             <span class="logo-sm">
                                 <img src="{{ asset('assets/images/icon-otp.png') }}" alt="" height="30">
                             </span>
@@ -62,7 +65,7 @@
                             <span class="logo-lg">
                                 <img src="{{ asset('assets/images/logo.png') }}" alt="" height="40">
                             </span>
-                        </a>
+                        </a> --}}
                     </div>
 
                     <button type="button" class="btn btn-sm px-3 font-size-16 header-item" id="vertical-menu-btn">
@@ -150,7 +153,8 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-6 footer-text">
-                            © PT Olefina Tifaplas Polikemindo {{ date('Y') }}
+                            {{-- © PT Olefina Tifaplas Polikemindo {{ date('Y') }} --}}
+                            -
                         </div>
                     </div>
                 </div>

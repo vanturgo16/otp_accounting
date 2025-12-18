@@ -8,13 +8,13 @@
         <div class="row">
             <div class="col-12 mb-2">
                 <label class="form-label">Status</label>
-                <input type="text" class="form-control" value="{{ $data->is_used === "1" ? 'Running' : 'Initiate' }}" style="background-color:#EAECF4"  readonly>
+                <input type="text" class="form-control readonly-input" value="{{ $data->is_used === "1" ? 'Running' : 'Initiate' }}" readonly>
             </div>
             <div class="col-12 mb-2">
                 <label class="form-label required-label">Account Type</label>
                 @if($data->is_used)
                     <input type="hidden" name="id_master_account_types" value="{{ $data->id_master_account_types }}">
-                    <input type="text" class="form-control" value="{{ $data->account_type_code ." - ". $data->account_type_name }}" style="background-color:#EAECF4"  readonly>
+                    <input type="text" class="form-control readonly-input" value="{{ $data->account_type_code ." - ". $data->account_type_name }}" readonly>
                 @else
                     <select class="form-select select2" name="id_master_account_types" required>
                         <option value="">Select Type</option>
@@ -28,7 +28,7 @@
                 <div class="mb-3">
                     <label class="form-label required-label">Account Code</label>
                     @if($data->is_used)
-                        <input type="text" class="form-control" name="account_code" value="{{ $data->account_code }}" style="background-color:#EAECF4" readonly>
+                        <input type="text" class="form-control readonly-input" name="account_code" value="{{ $data->account_code }}" readonly>
                     @else
                         <input class="form-control" name="account_code" type="text" value="{{ $data->account_code }}" placeholder="Input Account Code.." required>
                     @endif
@@ -47,7 +47,7 @@
                 <div class="mb-3">
                     <label class="form-label required-label">Opening Balance</label>
                     @if($data->is_used)
-                        <input type="text" class="form-control rupiah-input" name="opening_balance" value="{{ number_format($data->opening_balance, 2, ',', '.') }}" style="background-color:#EAECF4"  readonly>
+                        <input type="text" class="form-control rupiah-input readonly-input" name="opening_balance" value="{{ number_format($data->opening_balance, 2, ',', '.') }}" readonly>
                     @else
                         <input class="form-control currency-input" name="opening_balance" value="{{ number_format($data->opening_balance, 2, ',', '.') }}" type="text" placeholder="Input Opening Balance.." required>
                     @endif
@@ -58,7 +58,7 @@
                     <label class="form-label required-label">Type</label>
                     @if($data->is_used)
                         <input type="hidden" name="type" value="{{ $data->opening_balance_type }}">
-                        <input type="text" class="form-control" value="{{ $data->opening_balance_type === "K" ? 'Kredit' : 'Debit' }}" style="background-color:#EAECF4"  readonly>
+                        <input type="text" class="form-control readonly-input" value="{{ $data->opening_balance_type === "K" ? 'Kredit' : 'Debit' }}" readonly>
                     @else
                         <select class="form-select select2" name="type" required>
                             <option value="">Select Type</option>
@@ -73,13 +73,13 @@
                 <div class="col-lg-8">
                     <div class="mb-3">
                         <label class="form-label">Balance</label>
-                        <input type="text" class="form-control" value="{{ number_format($data->balance, 2, ',', '.') }}" style="background-color:#EAECF4"  readonly>
+                        <input type="text" class="form-control readonly-input" value="{{ number_format($data->balance, 2, ',', '.') }}" readonly>
                     </div>
                 </div>
                 <div class="col-lg-4">
                     <div class="mb-3">
                         <label class="form-label">Type</label>
-                        <input type="text" class="form-control" value="{{ $data->balance_type === "K" ? 'Kredit' : 'Debit' }}" style="background-color:#EAECF4"  readonly>
+                        <input type="text" class="form-control readonly-input" value="{{ $data->balance_type === "K" ? 'Kredit' : 'Debit' }}" readonly>
                     </div>
                 </div>
             @endif

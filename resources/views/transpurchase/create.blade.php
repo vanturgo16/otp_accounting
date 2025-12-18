@@ -87,29 +87,29 @@
                             </div>
 
                             <div class="card">
-                                <div class="card-body" style="background-color:ghostwhite">
+                                <div class="card-body readonly-card">
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Ref Number / PR</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
-                                            <input class="form-control" id="ref_number" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="ref_number" type="text" value="" placeholder="Select Good Receipt Notes.." readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">PO Number</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
-                                            <input class="form-control" id="po_number" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="po_number" type="text" value="" placeholder="Select Good Receipt Notes.." readonly>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Suppliers</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
-                                            <input class="form-control" id="suppliers" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="suppliers" type="text" value="" placeholder="Select Good Receipt Notes.." readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Requester</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
-                                            <input class="form-control" id="requester" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="requester" type="text" value="" placeholder="Select Good Receipt Notes.." readonly>
                                         </div>
                                     </div>
 
@@ -140,7 +140,7 @@
                                                         <td class="text-end" style="width: 50%;">
                                                             <div class="input-group" style="width: 150px; margin-left: auto;">
                                                                 <button class="btn btn-outline-secondary" type="button" id="buttonMinusPPNRate" disabled>-</button>
-                                                                <input type="text" name="ppn_rate" class="form-control text-center" value="{{ $initPPN }}" id="ppn_rate" style="background-color:#EAECF4" required readonly>
+                                                                <input type="text" name="ppn_rate" class="form-control readonly-input text-center" value="{{ $initPPN }}" id="ppn_rate" required readonly>
                                                                 <button class="btn btn-outline-secondary" type="button" id="buttonPlusPPNRate" disabled>+</button>
                                                             </div>
                                                         </td>
