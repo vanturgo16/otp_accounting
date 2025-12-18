@@ -27,6 +27,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th class="align-middle text-center">No.</th>
+                                    <th class="align-middle text-center">Code</th>
                                     <th class="align-middle text-center">Bank Name</th>
                                     <th class="align-middle text-center">Account Name</th>
                                     <th class="align-middle text-center">Account Number</th>
@@ -58,6 +59,12 @@
             render: function(data, type, row, meta) {
                 return meta.row + meta.settings._iDisplayStart + 1;
             },
+        },
+        {
+            data: 'code',
+            name: 'code',
+            orderable: true,
+            searchable: true
         },
         {
             data: 'bank_name',

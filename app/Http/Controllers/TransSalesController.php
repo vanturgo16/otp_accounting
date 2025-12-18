@@ -300,7 +300,11 @@ class TransSalesController extends Controller
     function generateRefNumberExport()
     {
         // Get the last reference number from the database
-        $lastRefNumber = TransSalesExport::orderBy('created_at', 'desc')->first();
+        // $lastRefNumber = TransSalesExport::orderBy('created_at', 'desc')->first();
+        $lastRefNumber = TransSalesExport::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->orderBy('created_at', 'desc')
+            ->first();
         
         // Determine the new counter
         if (!$lastRefNumber) {

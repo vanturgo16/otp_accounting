@@ -200,11 +200,20 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
 
     //Cash Book
     Route::controller(CashBookController::class)->group(function () {
-        Route::prefix('cashbook')->middleware('permission:Akunting_purchase')->group(function () {
+        Route::prefix('cashbook')->middleware('permission:Akunting_generalledger')->group(function () {
+            // Modal
+            Route::prefix('modal')->group(function () {
+                Route::get('/info/{id}', 'modalInfo')->name('cashbook.modal.info');
+                Route::get('/delete/{id}', 'modalDelete')->middleware('permission:Akunting_master_data')->name('cashbook.modal.delete');
+            });
             Route::get('/', 'index')->name('cashbook.index');
             Route::get('/create', 'create')->name('cashbook.create');
             Route::post('/store', 'store')->name('cashbook.store');
-            Route::get('/info/{id}', 'info')->name('cashbook.info');
+            Route::middleware('permission:Akunting_master_data')->group(function () {
+                Route::get('edit/{id}', 'edit')->name('cashbook.edit');
+                Route::post('update/{id}', 'update')->name('cashbook.update');
+                Route::post('delete/{id}', 'delete')->name('cashbook.delete');
+            });
         });
     });
 

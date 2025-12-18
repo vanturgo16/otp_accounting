@@ -7,6 +7,10 @@
     <div class="modal-body" style="max-height: 65vh; overflow:auto">
         <div class="row">
             <div class="col-lg-6 mb-3">
+                <label class="form-label required-label">Code</label>
+                <input type="text" class="form-control" name="code" value="{{ $data->code }}" placeholder="Input Bank Code (BCA, MAN, etc).." required>
+            </div>
+            <div class="col-lg-6 mb-3">
                 <label class="form-label required-label">Bank Name</label>
                 <input type="text" class="form-control" name="bank_name" value="{{ $data->bank_name }}" placeholder="Input Bank Name.." required>
             </div>

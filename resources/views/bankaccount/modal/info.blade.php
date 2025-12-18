@@ -12,7 +12,13 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-12 mb-2">
+        <div class="col-lg-6 mb-2">
+            <div><span class="fw-bold">Code :</span></div>
+            <span>
+                {{ $data->code ?? '-' }}
+            </span>
+        </div>
+        <div class="col-lg-6 mb-2">
             <div><span class="fw-bold">Bank Name :</span></div>
             <span>
                 {{ $data->bank_name ?? '-' }}

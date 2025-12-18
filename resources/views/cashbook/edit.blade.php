@@ -8,23 +8,22 @@
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
                         <a href="{{ route('transpurchase.index') }}" class="btn btn-light waves-effect btn-label waves-light">
-                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Sales Purchase
+                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Purchase Transaction
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Accounting</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('transpurchase.index') }}">Sales Purchase</a></li>
-                            <li class="breadcrumb-item active">Create</li>
+                            <li class="breadcrumb-item"><a href="{{ route('transpurchase.index') }}">Purchase</a></li>
+                            <li class="breadcrumb-item active">Edit</li>
                         </ol>
                     </div>
                 </div>
             </div>
         </div>
 
-        <form action="{{ route('transpurchase.store') }}" id="formstore" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('transpurchase.update', encrypt($detail->id)) }}" id="formUpdate" method="POST" enctype="multipart/form-data">
             @csrf
-            <input type="hidden" name="currency" value="IDR">
             <input type="hidden" name="listProduct">
             <input type="hidden" name="njPrice">
             <input type="hidden" name="ppnPrice">
@@ -34,7 +33,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header text-center py-3">
-                            <h5 class="mb-0">Create New</h5>
+                            <h5 class="mb-0">Update Transaction</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -44,72 +43,49 @@
                                         data-bs-toggle="tooltip" data-bs-placement="top"
                                         title="Tanggal hanya dapat dipilih dari awal bulan ini hingga hari ini.">
                                     </i>
-                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-01') }}" max="{{ date('Y-m-d') }}" required>
+                                    <input type="date" class="form-control" name="date_invoice" value="{{ \Carbon\Carbon::parse($detail->date_invoice)->format('Y-m-d') }}" min="{{ date('Y-m-01') }}" max="{{ date('Y-m-d') }}" required>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label required-label">Invoice Number</label>
-                                    <input type="text" class="form-control" name="invoice_number" placeholder="Input Invoice Number.." required>
+                                    <input type="text" class="form-control" name="invoice_number" value="{{ $detail->invoice_number }}" placeholder="Input Invoice Number.." required>
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label required-label">Tax Invoice Number / No Faktur</label>
-                                    <input type="text" class="form-control" name="tax_invoice_number" placeholder="Input Tax Invoice Number.." required>
+                                    <input type="text" class="form-control" name="tax_invoice_number" value="{{ $detail->tax_invoice_number }}" placeholder="Input Tax Invoice Number.." required>
                                 </div>
                             </div>
                             <hr>
-
-                            <div class="row">
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label required-label">Good Receipt Notes</label>
-                                    <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Daftar Good Receipt Notes (GRN) berstatus Posted yang belum dibuatkan invoice"></i>
-                                    <select class="form-select select2" style="width: 100%" name="id_good_receipt_notes" required>
-                                        <option value="" selected disabled>-- Select --</option>
-                                        @foreach($grns as $item)
-                                            <option value="{{ $item->id }}"
-                                                data-grn-number="{{ $item->grn_number }}"
-                                                data-grn-date="{{ $item->grn_date }}">
-                                                {{ $item->grn_number }} || 
-                                                {{ $item->grn_date }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <input type="hidden" name="grn_number" value="">
-                                    <input type="hidden" name="grn_date" value="">
-                                    
-                                    <input type="hidden" name="ref_number" value="">
-                                    <input type="hidden" name="po_number" value="">
-                                    <input type="hidden" name="suppliers" value="">
-                                    <input type="hidden" name="requester" value="">
-                                </div>
-                                <div class="col-lg-6 mb-3">
-                                </div>
-                            </div>
-
+                            
                             <div class="card">
                                 <div class="card-body" style="background-color:ghostwhite">
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
+                                            <label class="form-label required-label">Good Receipt Notes</label>
+                                            <input class="form-control" type="text"
+                                                value="{{ $detail->grn_number . ' || ' . \Carbon\Carbon::parse($detail->grn_date)->format('Y-m-d') }}" 
+                                                style="background-color:#EAECF4" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3">
                                             <label class="form-label">Ref Number / PR</label>
-                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
-                                            <input class="form-control" id="ref_number" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control" id="ref_number" type="text" value="{{ $detail->ref_number ?? '-' }}" style="background-color:#EAECF4" readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">PO Number</label>
-                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
-                                            <input class="form-control" id="po_number" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control" id="po_number" type="text" value="{{ $detail->po_number ?? '-' }}" style="background-color:#EAECF4" readonly>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Suppliers</label>
-                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
-                                            <input class="form-control" id="suppliers" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control" id="suppliers" type="text" value="{{ $detail->suppliers ?? '-' }}" style="background-color:#EAECF4" readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Requester</label>
-                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
-                                            <input class="form-control" id="requester" type="text" value="" placeholder="Select Good Receipt Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control" id="requester" type="text" value="{{ $detail->requester ?? '-' }}" style="background-color:#EAECF4" readonly>
                                         </div>
                                     </div>
 
@@ -135,13 +111,13 @@
                                                 <tbody>
                                                     <tr>
                                                         <td class="text-end">
-                                                            <label class="form-label fw-bold">Set PPN Rate <br><small>(default {{ $initPPN }}%)</small> :</label>
+                                                            <label class="form-label fw-bold">Set PPN Rate :</label>
                                                         </td>
                                                         <td class="text-end" style="width: 50%;">
                                                             <div class="input-group" style="width: 150px; margin-left: auto;">
-                                                                <button class="btn btn-outline-secondary" type="button" id="buttonMinusPPNRate" disabled>-</button>
-                                                                <input type="text" name="ppn_rate" class="form-control text-center" value="{{ $initPPN }}" id="ppn_rate" style="background-color:#EAECF4" required readonly>
-                                                                <button class="btn btn-outline-secondary" type="button" id="buttonPlusPPNRate" disabled>+</button>
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonMinusPPNRate">-</button>
+                                                                <input type="text" name="ppn_rate" class="form-control text-center" value="{{ $detail->ppn_rate }}" id="ppn_rate" style="background-color:#EAECF4" required readonly>
+                                                                <button class="btn btn-outline-secondary" type="button" id="buttonPlusPPNRate">+</button>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -159,7 +135,7 @@
                                                     <tr>
                                                         <td class="text-end">
                                                             <label class="form-label fw-bold">
-                                                                PPN (<span id="labelPPNRate">{{ $initPPN }}</span><span>%)</span>
+                                                                PPN (<span id="labelPPNRate">{{ $detail->ppn_rate }}</span><span>%)</span>
                                                                 <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Total Nilai Jual X PPN Rate"></i>
                                                                 :
                                                             </label>
@@ -174,7 +150,7 @@
                                                         </td>
                                                         <td class="text-end">
                                                             <label class="form-label"> 
-                                                                <input type="text" name="discount" class="form-control form-control-sm text-end currency-input" value="0">
+                                                                <input type="text" name="discount" class="form-control form-control-sm text-end currency-input" value="{{ number_format($detail->total_discount, 2, ',', '.') }}">
                                                             </label>
                                                         </td>
                                                     </tr>
@@ -192,10 +168,11 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row">
                                 <div class="col-lg-12 mb-3">
                                     <label class="form-label">Note</label>
-                                    <textarea class="summernote-editor-simple" name="note" placeholder="Input Note (Opsional)..."></textarea>
+                                    <textarea class="summernote-editor-simple" name="note" placeholder="Input Note (Opsional)...">{!! $detail->note !!}</textarea>
                                 </div>
                             </div>
 
@@ -205,11 +182,11 @@
                                         <div class="card-header text-center">
                                             <h6 class="mb-0">
                                                 Transaction
-                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Aturan Transaksi: Total Debit harus sama dengan Total Kredit, serta sama dengan Total (Nilai Purchase + PPN) - Diskon"></i>
+                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Aturan Transaksi: Total Debit harus sama dengan Total Kredit, serta sama dengan Total Nilai Jual + PPN"></i>
                                             </h6>
                                         </div>
                                         <div class="card-body">
-                                            <div class="table-repsonsive">
+                                            <div class="table-responsive">
                                                 <table class="table table-bordered" id="dynamicTable">
                                                     <thead>
                                                         <tr>
@@ -221,30 +198,49 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
+                                                        @foreach ($generalLedgers as $index => $ledger)
                                                         <tr>
                                                             <td>
-                                                                <select class="form-select select2 addpayment" style="width: 100%" name="addmore[0][account_code]" required>
+                                                                <select class="form-select select2 addpayment" name="addmore[{{ $index }}][account_code]" style="width:100%" required>
                                                                     <option value="">- Select Account Code -</option>
-                                                                    @foreach( $accountcodes as $item )
-                                                                        <option value="{{ $item->id }}">{{ $item->account_code }} - {{ $item->account_name }}</option>
+                                                                    @foreach ($accountcodes as $item)
+                                                                        <option value="{{ $item->id }}"
+                                                                            {{ $item->id == $ledger->id_account_code ? 'selected' : '' }}>
+                                                                            {{ $item->account_code }} - {{ $item->account_name }}
+                                                                        </option>
                                                                     @endforeach
                                                                 </select>
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="" required>
+                                                                <input type="text"
+                                                                    class="form-control rupiah-input addpayment"
+                                                                    name="addmore[{{ $index }}][nominal]"
+                                                                    value="{{ number_format($ledger->amount, 2, ',', '.') }}"
+                                                                    required>
                                                             </td>
                                                             <td>
-                                                                <select class="form-select select2 addpayment" style="width: 100%" name="addmore[0][type]" required>
+                                                                <select class="form-select select2 addpayment" name="addmore[{{ $index }}][type]" style="width:100%" required>
                                                                     <option value="">- Select Type -</option>
-                                                                    <option value="D">Debit</option>
-                                                                    <option value="K">Kredit</option>
+                                                                    <option value="D" {{ $ledger->transaction == 'D' ? 'selected' : '' }}>Debit</option>
+                                                                    <option value="K" {{ $ledger->transaction == 'K' ? 'selected' : '' }}>Kredit</option>
                                                                 </select>
                                                             </td>
                                                             <td>
-                                                                <textarea class="form-control" name="addmore[0][note]" cols="20" rows="3" placeholder="Input Note (Optional).."></textarea>
+                                                                <textarea class="form-control" name="addmore[{{ $index }}][note]" rows="3" placeholder="Input Note (Optional)..">{{ $ledger->note }}</textarea>
                                                             </td>
-                                                            <td style="text-align:center"><button type="button" name="add" id="adds" class="btn btn-success"><i class="fas fa-plus"></i></button></td>
+                                                            <td style="text-align:center">
+                                                                @if ($index == 0)
+                                                                    <button type="button" id="adds" class="btn btn-success">
+                                                                        <i class="fas fa-plus"></i>
+                                                                    </button>
+                                                                @else
+                                                                    <button type="button" class="btn btn-danger remove-tr">
+                                                                        <i class="fas fa-minus"></i>
+                                                                    </button>
+                                                                @endif
+                                                            </td>
                                                         </tr>
+                                                        @endforeach
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -258,8 +254,8 @@
                                     <a href="{{ route('transpurchase.index') }}" type="button" class="btn btn-light waves-effect btn-label waves-light">
                                         <i class="mdi mdi-arrow-left-circle label-icon"></i>Back
                                     </a>
-                                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb">
-                                        <i class="mdi mdi-plus-box label-icon"></i>Create
+                                    <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sb">
+                                        <i class="mdi mdi-update label-icon"></i>Update
                                     </button>
                                 </div>
                             </div>
@@ -268,7 +264,6 @@
                 </div>
             </div>
         </form>
-        
     </div>
 </div>
 
@@ -288,7 +283,6 @@
         </div>
     </div>
 </div>
-
 
 {{-- Validation Form --}}
 <script>
@@ -323,7 +317,7 @@
         return { debitTotal, kreditTotal };
     }
 
-    document.getElementById('formstore').addEventListener('submit', function(event) {
+    document.getElementById('formUpdate').addEventListener('submit', function(event) {
         event.preventDefault();
         let totals = calculateTotals();
 
@@ -365,14 +359,6 @@
                 dataTable.rows().every(function () {
                     let d = this.data();
                     listProduct.push({
-                        idGRNDetail  : d.id,
-                        idPRDetail   : d.id_purchase_requisition_details,
-                        lot_number   : d.lot_number,
-                        type_product : d.type_product,
-                        product      : d.product,
-                        receipt_qty  : d.receipt_qty,
-                        unit         : d.unit,
-                        price_origin : d.price_origin ?? d.price,
                         price_edit   : d.price_edit   ?? d.price,
                         total_price  : d.total_price
                     });
@@ -419,50 +405,84 @@
     });
 </script>
 
-{{-- Dynamic Table --}}                                                    
+{{-- Dynamic Table --}}
 <script>
-    var i = 0;
-    $("#adds").click(function() {
-        $(".select2").select2();
-        ++i;
-        $("#dynamicTable").append(
-            `<tr>
-                <td>
-                    <select class="form-select select2 addpayment" style="width: 100%" name="addmore[`+i+`][account_code]" required>
-                        <option value="">- Select Account Code -</option>
-                        @foreach( $accountcodes as $item )
-                            <option value="{{ $item->id }}">{{ $item->account_code }} - {{ $item->account_name }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                <td>
-                    <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
-                </td>
-                <td>
-                    <select class="form-select select2 addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
-                        <option value="">- Select Type -</option>
-                        <option value="D">Debit</option>
-                        <option value="K">Kredit</option>
-                    </select>
-                </td>
-                <td>
-                    <textarea class="form-control" name="addmore[`+i+`][note]" cols="20" rows="3" placeholder="Input Note (Optional).."></textarea>
-                </td>
-                <td style="text-align:center">
-                    <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>
-                </td>
-            </tr>`);
+    // start index based on existing data
+    var i = {{ count($generalLedgers) - 1 }};
 
-        $(".select2").select2();
-
+    function initPlugins() {
+        $('.select2').select2({ width: '100%' });
         document.querySelectorAll(".rupiah-input").forEach((input) => {
+            input.removeEventListener("input", formatCurrencyInput);
             input.addEventListener("input", formatCurrencyInput);
         });
+    }
+
+    $(document).ready(function () {
+        initPlugins();
     });
-    $(document).on('click', '.remove-tr', function() {
-        $(this).parents('tr').remove();
+
+    // ADD ROW
+    $(document).on('click', '#adds', function () {
+        i++;
+        let row = `
+        <tr>
+            <td>
+                <select class="form-select select2 addpayment"
+                    name="addmore[${i}][account_code]"
+                    style="width:100%" required>
+                    <option value="">- Select Account Code -</option>
+                    @foreach ($accountcodes as $item)
+                        <option value="{{ $item->id }}">
+                            {{ $item->account_code }} - {{ $item->account_name }}
+                        </option>
+                    @endforeach
+                </select>
+            </td>
+            <td>
+                <input type="text"
+                    class="form-control rupiah-input addpayment"
+                    name="addmore[${i}][nominal]"
+                    placeholder="Input Amount.." required>
+            </td>
+            <td>
+                <select class="form-select select2 addpayment"
+                    name="addmore[${i}][type]"
+                    style="width:100%" required>
+                    <option value="">- Select Type -</option>
+                    <option value="D">Debit</option>
+                    <option value="K">Kredit</option>
+                </select>
+            </td>
+            <td>
+                <textarea class="form-control"
+                    name="addmore[${i}][note]"
+                    rows="3"
+                    placeholder="Input Note (Optional).."></textarea>
+            </td>
+            <td style="text-align:center">
+                <button type="button" class="btn btn-danger remove-tr">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </td>
+        </tr>`;
+
+        $('#dynamicTable tbody').append(row);
+        initPlugins();
     });
+
+    // REMOVE ROW
+    $(document).on('click', '.remove-tr', function () {
+        $(this).closest('tr').remove();
+    });
+
+    // RUPIAH FORMATTER
+    function formatCurrencyInput(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        e.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
 </script>
+
 
 {{-- Delivery Notes Choose --}}
 <style>
@@ -480,10 +500,9 @@
     let dataTable;
 
     $(function() {
-        let data = {
-            idGRN   : '',
-            ppnRate : '{{ $initPPN }}',
-        };
+        let = idTrans = '{{ $detail->id }}'
+        let url = '{{ route("transpurchase.getDetail", ":id") }}'.replace(':id', idTrans);
+
         dataTable = $('#server-side-table').DataTable({
             processing: true,
             serverSide: true,
@@ -492,12 +511,8 @@
             ordering: false,
             info: false,
             ajax: {
-                url: '{!! route('transpurchase.getPriceFromGRN') !!}',
-                type: 'GET',
-                data: function(d) {
-                    d.idGRN   = data.idGRN;
-                    d.ppnRate = data.ppnRate;
-                }
+                url: url,
+                type: 'GET'
             },
             columns: [
                 {
@@ -608,42 +623,6 @@
             recalculateSummary();
         });
 
-
-        // ===============================
-        // SELECT GRN
-        // ===============================
-        $('select[name="id_good_receipt_notes"]').on('change', function() {
-            var selected = $(this).find('option:selected'); 
-            $('input[name="grn_number"]').val(selected.data('grn-number')); 
-            $('input[name="grn_date"]').val(selected.data('grn-date'));
-            
-            let idGRN = $(this).val();
-            let initPPN = parseFloat('{{ $initPPN }}') || 0;
-            resetPPNRate();
-            resetPrice();
-            $('#ref_number,#po_number,#suppliers,#requester').val('🔃');
-            $('input[name="ref_number"], input[name="po_number"], input[name="suppliers"], input[name="requester"]').val('');
-            $('input[name="discount"]').val(0);
-
-            if(idGRN) {
-                let url = '{{ route("transpurchase.getDetailGRN", ":id") }}'.replace(':id', idGRN);
-
-                $.get(url, function(res) {
-                    $('#ref_number').val(res.prNumber ?? '-');
-                    $('#po_number').val(res.poNumber ?? '-');
-                    $('#suppliers').val(res.supplierName ?? '-');
-                    $('#requester').val(res.requester ?? '-');
-                    
-                    $('input[name="ref_number"]').val(res.prNumber ?? '');
-                    $('input[name="po_number"]').val(res.poNumber ?? '');
-                    $('input[name="suppliers"]').val(res.supplierName ?? '');
-                    $('input[name="requester"]').val(res.requester ?? '');
-                });
-                reloadDataSO(idGRN, initPPN);
-                enablePPNRate();
-            }
-        });
-
         // ===============================
         // PPN BUTTONS
         // ===============================
@@ -669,22 +648,6 @@
         // ===============================
         // FUNCTIONS
         // ===============================
-        function reloadDataSO(idGRN, ppnRate){
-            data.idGRN = idGRN;
-            data.ppnRate = ppnRate;
-            dataTable.ajax.reload();
-        }
-        function resetPPNRate(){
-            let initPPN = parseFloat('{{ $initPPN }}') || 0;
-            $('#ppn_rate').val(initPPN);
-            $('#buttonMinusPPNRate,#buttonPlusPPNRate').prop('disabled', true);
-        }
-        function enablePPNRate(){
-            $('#buttonMinusPPNRate,#buttonPlusPPNRate').prop('disabled', false);
-        }
-        function resetPrice(){
-            $('#njPrice,#ppnPrice,#totalPrice').html(0);
-        }
         function recalculateSummary(){
             let totalNJ = 0;
             dataTable.rows().every(function(){
@@ -710,6 +673,5 @@
         }
     });
 </script>
-
 
 @endsection

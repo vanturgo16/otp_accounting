@@ -34,6 +34,7 @@ class MstBankAccountController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'code' => 'required',
             'bank_name' => 'required',
             'account_name' => 'required',
             'account_number' => 'required',
@@ -45,6 +46,7 @@ class MstBankAccountController extends Controller
         DB::beginTransaction();
         try{
             MstBankAccount::create([
+                'code' => $request->code,
                 'bank_name' => $request->bank_name,
                 'account_name' => $request->account_name,
                 'account_number' => $request->account_number,
@@ -69,7 +71,7 @@ class MstBankAccountController extends Controller
     public function update(Request $request, $id)
     {
         $id = decrypt($id);
-        $fields = ['bank_name', 'account_name', 'account_number', 'currency', 'swift_code', 'branch'];
+        $fields = ['code', 'bank_name', 'account_name', 'account_number', 'currency', 'swift_code', 'branch'];
 
         // Validation
         $request->validate(array_fill_keys($fields, 'required'));
