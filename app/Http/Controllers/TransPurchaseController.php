@@ -439,8 +439,6 @@ class TransPurchaseController extends Controller
         $disc      = $this->normalizePrice($request->discount);
         $invNumber = $request->invoice_number;
 
-        // dd($detail->amount, $detail->ppn_value, $detail->total_discount, $detail->total, (float) $request->njPrice, (float) $request->ppnPrice, (float) $disc, (float) $request->totalPrice);
-
         // Validation
         $trxDate = Carbon::parse($detail->date_invoice);
         $now     = Carbon::now();

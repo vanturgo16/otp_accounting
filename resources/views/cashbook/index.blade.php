@@ -124,10 +124,19 @@
                                     </small>
                                 </div>
                             </div>
-                            <div class="col-lg-4 text-end">
-                                <i class="mdi mdi-information-outline text-muted" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Edit and Delete actions are only available for Super Admin and only for transactions within the current month.">
-                                </i>
+                            <div class="col-lg-4">
+                                <div class="alert alert-warning mb-0 small d-none d-lg-block" role="alert">
+                                    <ul class="mb-0 ps-3">
+                                        <li>
+                                            <b>Edit</b> & <b>Delete</b> actions are only available for <b>Super Admin</b> and only for transactions within the <b>current month.</b>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="text-end d-block d-lg-none">
+                                    <i class="mdi mdi-information-outline text-muted" data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Edit and Delete actions are only available for Super Admin and only for transactions within the current month.">
+                                    </i>
+                                </div>
                             </div>
                         </div>
                     </div>

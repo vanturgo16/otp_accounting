@@ -7,19 +7,19 @@ use App\Traits\GeneralLedgerTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Carbon;
+use PDF;
 
 // Model
 use App\Models\MstAccountCodes;
 use App\Models\GeneralLedger;
-use App\Models\GoodReceiptNote;
-use App\Models\GoodReceiptNoteDetail;
 use App\Models\MstBankAccount;
+use App\Models\MstRule;
 use App\Models\TransCashBook;
 
 class TransCashBookController extends Controller
 {
-    use AuditLogsTrait;
-    use GeneralLedgerTrait;
+    use AuditLogsTrait, GeneralLedgerTrait;
 
     // MODAL VIEW
     public function modalInfo($id)
@@ -202,6 +202,7 @@ class TransCashBookController extends Controller
         $genNumber   = $this->generateCBNumber($type, $codeBank, $currency);
         $transNumber = $genNumber['trans_number'];
         $seqNumber   = $genNumber['seq_number'];
+        $docNo       = optional(MstRule::where('rule_name', 'DocNo. Invoice')->first())->rule_value;
 
         $total = 0;
         foreach ($request->addmore as $row) {
@@ -236,6 +237,7 @@ class TransCashBookController extends Controller
                 'total_transaction'  => $request->addmore ? count($request->addmore) : 0,
                 'transaction'        => $transactionType,
                 'total'              => $totalAmount,
+                'doc_no'             => $docNo,
                 'created_by'         => auth()->user()->email
             ]);
 
@@ -261,6 +263,151 @@ class TransCashBookController extends Controller
         } catch (Exception $e) {
             DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Cash Book Transaction!']);
+        }
+    }
+
+    public function edit($id)
+    {
+        $id = decrypt($id);
+        $detail = TransCashBook::where('id', $id)->first();
+        $bankAccountsUsed = MstBankAccount::where('id', $detail->id_master_bank_account)->first();
+        $generalLedgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
+            ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
+            ->where('general_ledgers.id_ref', $id)
+            ->where('general_ledgers.ref_number', $detail->transaction_number)
+            ->where('general_ledgers.source', 'Cash Book')
+            ->get();
+        $accountcodes = MstAccountCodes::where('is_active', 1)->get();
+
+        //Audit Log
+        $this->auditLogsShort('View Edit Cash Book Transaction Trans. Number ('. $detail->transaction_number . ')');
+
+        return view('cashbook.edit',compact('detail', 'bankAccountsUsed', 'accountcodes', 'generalLedgers'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        // dd($request->all());
+        $request->validate([
+            'date_invoice'              => 'required',
+            'invoice_number'            => 'required',
+            'tax_invoice_number'        => 'required',
+            'addmore.*.account_code'    => 'required',
+            'addmore.*.nominal'         => 'required',
+            'addmore.*.type'            => 'required',
+        ]);
+
+        $total = 0;
+        foreach ($request->addmore as $row) {
+            $nominal = $this->normalizeOpeningBalance($row['nominal']);
+            if ($row['type'] === 'D') {
+                $total += $nominal;
+            } elseif ($row['type'] === 'K') {
+                $total -= $nominal;
+            }
+        }
+        if ($total > 0) {
+            $transactionType = 'D';
+            $totalAmount = $total;
+        } else {
+            $transactionType = 'K';
+            $totalAmount = abs($total);
+        }
+        
+        $id          = decrypt($id);
+        $detail      = TransCashBook::where('id', $id)->lockForUpdate()->first();
+        $transNumber = $detail->transaction_number;
+        $invNumber   = $request->invoice_number;
+
+        // Validation
+        $trxDate = Carbon::parse($detail->date_invoice);
+        $now     = Carbon::now();
+        if (!$trxDate->isSameMonth($now)) {
+            return back()->with('error', 'This transaction cannot be updated because the transaction month has already passed.');
+        }
+        $isDuplicate = TransCashBook::where('invoice_number', $invNumber)->where('id', '!=', $id)->exists();
+        if ($isDuplicate) {
+            return back()->withInput()->with(['error' => 'Invoice number already in use, please use another invoice number']);
+        }
+        
+        $detail->date_invoice       = $request->date_invoice . ' 00:00:00';
+        $detail->invoice_number     = $invNumber;
+        $detail->tax_invoice_number = $request->tax_invoice_number;
+        $detail->transaction        = $transactionType;
+        $detail->total              = $this->decimal3($totalAmount);
+        $detail->total_transaction  = $request->addmore ? count($request->addmore) : 0;
+        $isChangedDetail            = $detail->isDirty();
+
+
+        $existingLedgers = GeneralLedger::where('id_ref', $id)->where('ref_number', $transNumber)->where('source', 'Cash Book')->get();
+        $existing = $existingLedgers->map(function ($item) {
+            return [
+                'account_code' => $item->id_account_code,
+                'type'         => $item->transaction,
+                'nominal'      => (float) $item->amount,
+                'note'         => $item->note,
+            ];
+        })->values()->toArray();
+        $requestData = collect($request->addmore)->map(function ($row) {
+            return [
+                'account_code' => $row['account_code'],
+                'type'         => $row['type'],
+                'nominal'      => (float) $this->normalizeOpeningBalance($row['nominal']),
+                'note'         => $row['note'],
+            ];
+        })->values()->toArray();
+        $isChangedTransaction = $existing != $requestData;
+
+        if($isChangedDetail || $isChangedTransaction) {
+            DB::beginTransaction();
+            try{
+                if($isChangedDetail) {
+                    TransCashBook::where('id', $id)->update([
+                        'invoice_number'     => $invNumber,
+                        'tax_invoice_number' => $request->tax_invoice_number,
+                        'date_invoice'       => $request->date_invoice,
+                        'total_transaction'  => $request->addmore ? count($request->addmore) : 0,
+                        'transaction'        => $transactionType,
+                        'total'              => $totalAmount,
+                        'updated_by'         => auth()->user()->email
+                    ]);
+                }
+
+                if($isChangedTransaction) {
+                    // Reset Balance Account
+                    foreach($existing as $item) {
+                        $reverseType = ($item['type'] === 'D') ? 'K' : 'D';
+                        $nominal = $this->normalizeOpeningBalance($item['nominal']);
+                        $this->updateBalanceAccount($item['account_code'], $nominal, $reverseType);
+                    }
+                    // Delete General Ledger
+                    GeneralLedger::where('id_ref', $id)->where('ref_number', $transNumber)->where('source', 'Cash Book')->delete();
+
+                    // Insert New
+                    foreach($request->addmore as $item){
+                        if($item['account_code'] != null && $item['nominal'] != null){
+                            $nominal = $this->normalizeOpeningBalance($item['nominal']);
+                            // Create General Ledger
+                            $this->storeGeneralLedger(
+                                $id, $transNumber, $request->date_invoice, 
+                                $item['account_code'], $item['type'], $nominal, $item['note'], 
+                                'Cash Book', null);
+                            // Update & Calculate Balance Account Code
+                            $this->updateBalanceAccount($item['account_code'], $nominal, $item['type']);
+                        }
+                    }
+                }
+
+                //Audit Log
+                $this->auditLogsShort('Update Cash Book Trans. Number ('. $transNumber . ')');
+                DB::commit();
+                return redirect()->route('cashbook.index')->with(['success' => 'Success Update Cash Book Transaction']);
+            } catch (Exception $e) {
+                DB::rollback();
+                return redirect()->back()->with(['fail' => 'Failed to Update Cash Book Transaction!']);
+            }
+        } else {
+            return back()->with('info', 'No Changes Detected!');
         }
     }
 
@@ -301,5 +448,53 @@ class TransCashBookController extends Controller
             DB::rollBack();
             return back()->with(['fail' => 'Failed to Delete Selected Cash Book Transaction!']);
         }
+    }
+
+    public function print($id)
+    {
+        $id = decrypt($id);
+        $detail = TransCashBook::where('id', $id)->first();
+        $generalLedgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
+            ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
+            ->where('general_ledgers.id_ref', $id)
+            ->where('general_ledgers.ref_number', $detail->transaction_number)
+            ->where('general_ledgers.source', 'Cash Book')
+            ->get();
+
+        $total = rtrim(rtrim($detail->total, '0'), '.');
+        $terbilangString = $this->terbilangWithDecimal($total) . " Rupiah.";
+        $dateInvoice = $this->formatDateToIndonesian($detail->date_invoice);
+
+        switch ($detail->type) {
+            case 'Bukti Kas Keluar':
+                $view = 'pdf.cashbookBKK';
+                break;
+
+            case 'Bukti Kas Masuk':
+                $view = 'pdf.cashbookBKM';
+                break;
+
+            case 'Bukti Bank Keluar':
+                $view = 'pdf.cashbookBBK';
+                break;
+
+            case 'Bukti Bank Masuk':
+                $view = 'pdf.cashbookBBM';
+                break;
+
+            default:
+                throw new \Exception('Invalid cash book type');
+        }
+
+        $pdf = PDF::loadView($view, [
+            'detail'            => $detail,
+            'dateInvoice'       => $dateInvoice,
+            'generalLedgers'    => $generalLedgers,
+            'terbilangString'   => $terbilangString
+        ])->setPaper('a4', 'portrait');
+
+        //Audit Log
+        $this->auditLogsShort('Generate PDF Cash Book Transaction ('. $detail->transaction_number . ')');
+        return $pdf->stream('Cash Book Transaction ('. $detail->transaction_number . ').pdf', array("Attachment" => false));
     }
 }

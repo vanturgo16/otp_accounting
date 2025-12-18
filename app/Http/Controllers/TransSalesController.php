@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
 use PDF;
-use DateTime;
 
 // Traits
 use App\Traits\AuditLogsTrait;
@@ -1207,77 +1206,6 @@ class TransSalesController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with(['fail' => 'Failed to Delete Selected Sales Transaction Export!']);
-        }
-    }
-
-
-    function formatDateToIndonesian($date)
-    {
-        $dateTime = new DateTime($date);
-        $formattedDate = $dateTime->format('d F Y');
-        $indonesianMonths = [
-            'January' => 'Januari',
-            'February' => 'Februari',
-            'March' => 'Maret',
-            'April' => 'April',
-            'May' => 'Mei',
-            'June' => 'Juni',
-            'July' => 'Juli',
-            'August' => 'Agustus',
-            'September' => 'September',
-            'October' => 'Oktober',
-            'November' => 'November',
-            'December' => 'Desember',
-        ];
-        return str_replace(array_keys($indonesianMonths), array_values($indonesianMonths), $formattedDate);
-    }
-    function formatDateToEnglish($date)
-    {
-        return (new DateTime($date))->format('d F Y');
-    }
-    function terbilang($number) 
-    {
-        $number = abs($number);
-        $words = array("", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas");
-        $temp = "";
-        if ($number < 12) {
-            $temp = " " . $words[$number];
-        } else if ($number < 20) {
-            $temp = $this->terbilang($number - 10) . " Belas ";
-        } else if ($number < 100) {
-            $temp = $this->terbilang(intval($number / 10)) . " Puluh " . $this->terbilang($number % 10);
-        } else if ($number < 200) {
-            $temp = " Seratus " . $this->terbilang($number - 100);
-        } else if ($number < 1000) {
-            $temp = $this->terbilang(intval($number / 100)) . " Ratus " . $this->terbilang($number % 100);
-        } else if ($number < 2000) {
-            $temp = " Seribu " . $this->terbilang($number - 1000);
-        } else if ($number < 1000000) {
-            $temp = $this->terbilang(intval($number / 1000)) . " Ribu " . $this->terbilang($number % 1000);
-        } else if ($number < 1000000000) {
-            $temp = $this->terbilang(intval($number / 1000000)) . " Juta " . $this->terbilang($number % 1000000);
-        } else if ($number < 1000000000000) {
-            $temp = $this->terbilang(intval($number / 1000000000)) . " Milyar " . $this->terbilang(fmod($number, 1000000000));
-        } else if ($number < 1000000000000000) {
-            $temp = $this->terbilang(intval($number / 1000000000000)) . " Trilyun " . $this->terbilang(fmod($number, 1000000000000));
-        }
-        return trim($temp);
-    }
-    function terbilangWithDecimal($number)
-    {
-        if (strpos($number, '.') !== false) {
-            [$intPart, $decPart] = explode('.', (string)$number, 2);
-            $result = $this->terbilang((int)$intPart) . " Koma";
-            // Read Each Digits
-            $decWords = [];
-            $words = array("Nol", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas");
-            foreach (str_split($decPart) as $digit) {
-                $decWords[] = $words[$digit];
-            }
-            $result .= " " . implode(" ", $decWords);
-            return trim($result);
-        } else {
-            return $this->terbilang((int)$number);
         }
     }
 

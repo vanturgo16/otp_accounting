@@ -116,7 +116,7 @@
             data: 'created_by',
             searchable: true,
             orderable: true,
-            render: (data, type, row) => userTimestampDT(data, row.created_at),
+            render: (data, type, row) => fmtActionBy(data, row.created_at),
         },
         {
             data: 'action',

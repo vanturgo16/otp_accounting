@@ -271,5 +271,12 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
     //     });
     // });
 
+    //Cash Book
+    Route::controller(ReportController::class)->group(function () {
+        Route::prefix('report')->middleware('permission:Akunting_master_data')->group(function () {
+            Route::get('/', 'index')->name('report.index');
+        });
+    });
+
 });
 

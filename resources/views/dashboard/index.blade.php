@@ -17,7 +17,7 @@
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active">Dashboard</li>
+                            <li class="breadcrumb-item active">Transaction Summary</li>
                         </ol>
                     </div>
                 </div>
@@ -30,13 +30,16 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="text-center mt-3">
-                            <h5>Welcome to the "Dashboard Accounting"</h5>
-                            <p class="text-muted">Here you can Manage Accounting on the system PT Olefina Tifaplas Polikemindo</p>
+                            <h4>Welcome to the <b>Accounting Dashboard</b></h4>
+                            <p class="text-muted">
+                                Easily manage accounting records and financial transactions for PT Olefina Tifaplas Polikemindo.
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
 
         {{-- SUMMARY SECTION --}}
         <div class="row">
@@ -112,14 +115,14 @@
                             {{-- IMPORT --}}
                             <div class="col-lg-3">
                                 <div class="card card-h-100">
-                                    <div class="card-header bg-light p-3"><h6>Import Transaction</h6></div>
+                                    <div class="card-header bg-light p-3"><h6>Cash Book Transaction</h6></div>
                                     <div class="card-body">
                                         <div class="summary-skeleton d-none">
                                             <div class="skeleton skeleton-text"></div>
                                         </div>
                                         <div class="summary-value">
                                             <h4 class="mb-3">
-                                                <span id="it">0</span>
+                                                <span id="cb">0</span>
                                             </h4>
                                         </div>
                                     </div>
@@ -158,7 +161,7 @@
                                     $("#st_local").text(res.countSTLocal);
                                     $("#st_export").text(res.countSTExport);
                                     $("#pt").text(res.countPT);
-                                    $("#it").text(res.countIT);
+                                    $("#cb").text(res.countCB);
                                 },
                                 complete: function() {
                                     hideSkeleton();

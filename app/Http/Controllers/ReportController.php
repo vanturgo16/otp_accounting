@@ -19,6 +19,13 @@ use App\Models\ReportNeraca;
 class ReportController extends Controller
 {
     use AuditLogsTrait;
+
+    public function index(Request $request)
+    {
+        
+    }
+
+
     // NERACA 
     public function neraca(Request $request)
     {

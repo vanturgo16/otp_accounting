@@ -24,6 +24,9 @@ function timestampDT(timestamp) {
     const formatted = d.toISOString().slice(0, 19).replace('T', ' ');
     return `${formatted}`;
 }
+
+
+
 // Helper: format user + timestamp
 function fmtActionBy(username, datetime) {
     if (!datetime) return username;
@@ -40,4 +43,15 @@ function fmtActionBy(username, datetime) {
         <span class="text-nowrap"><b>At.</b> ${formatted}</span>
     `;
 }
-
+// Helper: format timestamp
+function fmtTimeDT(datetime) {
+    const d = new Date(datetime);
+    const formatted =
+        d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0') + ' ' +
+        String(d.getHours()).padStart(2, '0') + ':' +
+        String(d.getMinutes()).padStart(2, '0') + ':' +
+        String(d.getSeconds()).padStart(2, '0');
+    return `<span class="text-nowrap">${formatted}</span>`;
+}

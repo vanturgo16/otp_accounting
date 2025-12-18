@@ -69,7 +69,7 @@
             data: 'updated_by',
             searchable: true,
             orderable: true,
-            render: (data, type, row) => userTimestampDT(data, row.updated_at),
+            render: (data, type, row) => fmtActionBy(data, row.updated_at),
         },
         {
             data: 'action',

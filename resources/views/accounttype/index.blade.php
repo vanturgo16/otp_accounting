@@ -179,7 +179,7 @@
             searchable: true,
             orderable: true,
             className: 'text-center',
-            render: (data, type, row) => timestampDT(data),
+            render: (data, type, row) => fmtTimeDT(data),
         },
         {
             data: 'action',
