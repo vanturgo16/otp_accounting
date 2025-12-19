@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+
+// Trait
+use App\Traits\AuditLogsTrait;
 
 // Model
 use App\Models\MstBankAccount;

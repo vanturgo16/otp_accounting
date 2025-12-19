@@ -190,7 +190,7 @@
             @can('Akunting_master_data') 
                 <li class="menu-title" data-key="t-menu">Report</li>
                 <li>
-                    <a href="{{ route('report.index') }}" class="{{ request()->is('report*') ? 'bg-light text-primary active' : '' }}">
+                    <a href="{{ route('report.monthly.index') }}" class="{{ request()->is('report*') ? 'bg-light text-primary active' : '' }}">
                         <i class="mdi mdi-finance"></i>
                         <span>Monthly Summary</span>
                     </a>

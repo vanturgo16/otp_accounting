@@ -11,6 +11,9 @@
         }
     </style>
     <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+        }
         @page { 
             margin: 20px 25px 30px 25px;
         }
@@ -19,10 +22,10 @@
         p { page-break-after: always; }
         p:last-child { page-break-after: never; }
         .padded-element {
-            padding: 10px 20px;
+            padding: 0px 20px;
         }
         .padded-element-main {
-            padding-top: 150px;
+            padding-top: 100px;
             padding-bottom: 25px;
             padding-left: 20px;
             padding-right: 20px;
@@ -37,14 +40,14 @@
                 <td rowspan="2" 
                     style="
                         width:20%; 
-                        border-left: none; border-top: 0.75px solid black; border-bottom: 0.75px solid black; border-right: 0.75px solid black; 
+                        border-left: 0.75px solid black; border-top: 0.75px solid black; border-bottom: 0.75px solid black; border-right: 0.75px solid black; 
                         text-align: center; height: 55px;
                         ">
-                    <img src="{{ public_path('img/icon-otp.png') }}" alt="Logo">
+                    <img src="{{ public_path('img/logoOTP.png') }}" alt="Logo">
                 </td>
                 <td 
                     style="
-                        border-left: 0.75px solid black; border-top: 0.75px solid black; border-bottom: 0.75px solid black; border-right: none; 
+                        border-left: 0.75px solid black; border-top: 0.75px solid black; border-bottom: 0.75px solid black; border-right: 0.75px solid black; 
                         text-align: center; height: 55px; background-color: #f0f0f0;
                         ">
                     <span style="font-size: 20px; font-weight: bold">BUKTI KAS KELUAR</span>
@@ -53,7 +56,7 @@
             <tr>
                 <td 
                     style="
-                        border-left: 0.75px solid black; border-top: 0.75px solid black; border-bottom: 0.75px solid black; border-right: none;
+                        border-left: 0.75px solid black; border-top: 0.75px solid black; border-bottom: 0.75px solid black; border-right: 0.75px solid black;
                         text-align: center; padding: 0; line-height: 1;
                         ">
                     <span style="font-size: 12px;">
@@ -65,7 +68,7 @@
     </header>
 
     <main>
-        <table class="mt-n4 mb-2" style="width: 100%; border-collapse: collapse;" cellspacing="1">
+        <table class="mb-2" style="width: 100%; border-collapse: collapse;" cellspacing="1">
             <tbody>
                 <tr>
                     <td class="align-middle text-right" 
@@ -82,7 +85,7 @@
                     <th class="align-middle text-center font-weight-bold" 
                         style="
                             width: 20%;
-                            border-left: none; border-top: 0.75px solid black; border-bottom: 0.75px solid black; border-right: 0.75px solid black; 
+                            border-left: 0.75px solid black; border-top: 0.75px solid black; border-bottom: 0.75px solid black; border-right: 0.75px solid black; 
                             text-align: center;
                             ">
                         NO. PERKIRAAN
@@ -97,7 +100,7 @@
                     <th class="align-middle text-center font-weight-bold" 
                         style="
                             width: 20%;
-                            border-left: 0.75px solid black; border-top: 0.75px solid black; border-bottom: 0.75px solid black; border-right: none; 
+                            border-left: 0.75px solid black; border-top: 0.75px solid black; border-bottom: 0.75px solid black; border-right: 0.75px solid black; 
                             text-align: center;
                             ">
                         JUMLAH
@@ -107,27 +110,30 @@
             <tbody style="font-size: 10px;">
                 @foreach ($generalLedgers as $item)
                     <tr>
-                        <td class="px-2 text-center"></td>
+                        <td class="px-2 text-center"
+                            style="border-left: 0.75px solid black">
+                            {{ $item->account_code ?? '-' }}
+                        </td>
                         <td class="px-2" 
                             style="
                                 border-left: 0.75px solid black; border-right: 0.75px solid black; 
                                 ">
                             {{ $item->note ?? '-' }}
                         </td>
-                        <td class="px-2 text-right">{{ number_format($item->amount, 2, ',', '.') }}</td>
+                        <td class="px-2 text-right" style="border-right: 0.75px solid black">{{ number_format($item->amount, 2, ',', '.') }}</td>
                     </tr>
                 @endforeach
                 <tr>
-                    <td class="px-2 text-center" style="height: 50px; border-bottom: 0.75px solid;"></td>
+                    <td class="px-2 text-center" style="height: 50px; border-bottom: 0.75px solid; border-left: 0.75px solid black;"></td>
                     <td class="px-2" style="border-left: 0.75px solid black; border-right: 0.75px solid black; border-bottom: 0.75px solid;"></td>
-                    <td class="px-2 text-center" style="border-bottom: 0.75px solid;"></td>
+                    <td class="px-2 text-center" style="border-bottom: 0.75px solid; border-right: 0.75px solid black;"></td>
                 </tr>
             </tbody>
             <tfoot style="font-size: 12px;">
                 <tr>
                     <td class="text-right px-2">TERBILANG : </td>
                     <td class="px-2" style="text-decoration: underline;">{{ strtoupper($terbilangString ?? '-') }}</td>
-                    <td class="px-2 text-right" style="border-bottom: 0.75px solid; border-left: 0.75px solid;">
+                    <td class="px-2 text-right" style="border-bottom: 0.75px solid; border-left: 0.75px solid; border-right: 0.75px solid black">
                         {{ number_format($detail->total, 2, ',', '.') }}
                     </td>
                 </tr>
@@ -146,10 +152,10 @@
                     <td style="width: 25%">PENERIMA</td>
                 </tr>
                 <tr class="text-center">
-                    <td style="height: 80px;"></td>
-                    <td style="height: 80px;"></td>
-                    <td style="height: 80px;"></td>
-                    <td style="height: 80px;"></td>
+                    <td style="height: 100px;"></td>
+                    <td style="height: 100px;"></td>
+                    <td style="height: 100px;"></td>
+                    <td style="height: 100px;"></td>
                 </tr>
                 <tr class="text-center">
                     <td class="font-weight-bold">___________________</td>

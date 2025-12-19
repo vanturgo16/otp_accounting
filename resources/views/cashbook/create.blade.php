@@ -128,7 +128,7 @@
                                                                 </select>
                                                             </td>
                                                             <td>
-                                                                <textarea class="form-control" name="addmore[0][note]" cols="20" rows="3" placeholder="Input Note (Optional).."></textarea>
+                                                                <textarea class="form-control" name="addmore[0][note]" cols="20" rows="3" placeholder="Input Note.." required></textarea>
                                                             </td>
                                                             <td style="text-align:center"><button type="button" name="add" id="adds" class="btn btn-success"><i class="fas fa-plus"></i></button></td>
                                                         </tr>
@@ -212,7 +212,7 @@
                     </select>
                 </td>
                 <td>
-                    <textarea class="form-control" name="addmore[`+i+`][note]" cols="20" rows="3" placeholder="Input Note (Optional).."></textarea>
+                    <textarea class="form-control" name="addmore[`+i+`][note]" cols="20" rows="3" placeholder="Input Note.." required></textarea>
                 </td>
                 <td style="text-align:center">
                     <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>

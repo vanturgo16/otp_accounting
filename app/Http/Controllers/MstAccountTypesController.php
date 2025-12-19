@@ -6,12 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
+// Traits
+use App\Traits\AuditLogsTrait;
+
 // Model
 use App\Models\MstAccountTypes;
 use App\Models\MstAccountCodes;
-
-// Traits
-use App\Traits\AuditLogsTrait;
 
 class MstAccountTypesController extends Controller
 {

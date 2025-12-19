@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
+// Trait
 use App\Traits\AuditLogsTrait;
 use App\Traits\GeneralLedgerTrait;
 

@@ -125,7 +125,7 @@
                                                                 </select>
                                                             </td>
                                                             <td>
-                                                                <textarea class="form-control" name="addmore[{{ $index }}][note]" rows="3" placeholder="Input Note (Optional)..">{{ $ledger->note }}</textarea>
+                                                                <textarea class="form-control" name="addmore[{{ $index }}][note]" rows="3" placeholder="Input Note.." required>{{ $ledger->note }}</textarea>
                                                             </td>
                                                             <td style="text-align:center">
                                                                 @if ($index == 0)
@@ -219,7 +219,7 @@
                 <textarea class="form-control"
                     name="addmore[${i}][note]"
                     rows="3"
-                    placeholder="Input Note (Optional).."></textarea>
+                    placeholder="Input Note.." required></textarea>
             </td>
             <td style="text-align:center">
                 <button type="button" class="btn btn-danger remove-tr">

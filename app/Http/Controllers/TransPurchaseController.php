@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Traits\AuditLogsTrait;
-use App\Traits\GeneralLedgerTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Carbon;
+
+// Traits
+use App\Traits\AuditLogsTrait;
+use App\Traits\GeneralLedgerTrait;
 
 // Model
 use App\Models\MstAccountCodes;
@@ -330,12 +332,15 @@ class TransPurchaseController extends Controller
         $listProduct = json_decode($request->listProduct, true);
         $disc        = $this->normalizePrice($request->discount);
 
+        $lastStatusGRN = optional(GoodReceiptNote::where('id', $idGRN)->first())->status;
+
         DB::beginTransaction();
         try{
             $trans = TransPurchase::create([
                 'id_good_receipt_notes'=> $idGRN,
                 'grn_number'           => $grnNumber,
                 'grn_date'             => $request->grn_date,
+                'last_status_grn'      => $lastStatusGRN,
                 'ref_number'           => $request->ref_number,
                 'po_number'            => $request->po_number,
                 'suppliers'            => $request->suppliers,
@@ -587,7 +592,8 @@ class TransPurchaseController extends Controller
                 return back()->with('error', 'This transaction cannot be deleted because the transaction month has already passed.');
             }
 
-            GoodReceiptNote::where('id', $detail->id_good_receipt_notes)->update(['status' => 'Posted']);
+            $lastStatusGRN = $detail->last_status_grn ?? 'Posted';
+            GoodReceiptNote::where('id', $detail->id_good_receipt_notes)->update(['status' => $lastStatusGRN]);
             $generalLedgers = GeneralLedger::where('id_ref', $id)
                 ->where('ref_number', $detail->invoice_number)
                 ->where('source', 'Purchase')

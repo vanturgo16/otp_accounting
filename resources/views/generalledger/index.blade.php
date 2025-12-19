@@ -11,7 +11,7 @@
                         <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form class="formLoad" action="{{ route('generalledger.index') }}" method="POST" enctype="multipart/form-data">
+                    <form class="formLoad" action="{{ route('generalledger.index') }}" method="GET" enctype="multipart/form-data">
                         @csrf
                         <div class="modal-body md-body-scroll">
                             <div class="row">

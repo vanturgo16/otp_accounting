@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Traits\AuditLogsTrait;
-use App\Traits\GeneralLedgerTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Carbon;
 use PDF;
+
+// Traits
+use App\Traits\AuditLogsTrait;
+use App\Traits\GeneralLedgerTrait;
 
 // Model
 use App\Models\MstAccountCodes;
@@ -184,6 +186,7 @@ class TransCashBookController extends Controller
             'addmore.*.account_code' => 'required',
             'addmore.*.nominal'      => 'required',
             'addmore.*.type'         => 'required',
+            'addmore.*.note'         => 'required',
         ]);
 
         $codeBank = null;
@@ -202,7 +205,15 @@ class TransCashBookController extends Controller
         $genNumber   = $this->generateCBNumber($type, $codeBank, $currency);
         $transNumber = $genNumber['trans_number'];
         $seqNumber   = $genNumber['seq_number'];
-        $docNo       = optional(MstRule::where('rule_name', 'DocNo. Invoice')->first())->rule_value;
+
+        $rules = [
+            'Bukti Bank Keluar' => 'DocNo. Invoice1',
+            'Bukti Bank Masuk'  => 'DocNo. Invoice2',
+            'Bukti Kas Keluar'  => 'DocNo. Invoice3',
+            'Bukti Kas Masuk'   => 'DocNo. Invoice4',
+        ];
+        $rule = $rules[$type] ?? null;
+        $docNo = $rule ? optional(MstRule::where('rule_name', $rule)->first())->rule_value : null;
 
         $total = 0;
         foreach ($request->addmore as $row) {
@@ -461,8 +472,16 @@ class TransCashBookController extends Controller
             ->where('general_ledgers.source', 'Cash Book')
             ->get();
 
+        $currencyNames = [
+            'IDR' => 'Rupiah',
+            'USD' => 'US Dollar',
+            'EUR' => 'Euro',
+            'RMB' => 'Yuan',
+        ];
+        $currencyText = $currencyNames[$detail->currency] ?? 'Rupiah';
+
         $total = rtrim(rtrim($detail->total, '0'), '.');
-        $terbilangString = $this->terbilangWithDecimal($total) . " Rupiah.";
+        $terbilangString = $this->terbilangWithDecimal($total) . ' ' . $currencyText . '.';
         $dateInvoice = $this->formatDateToIndonesian($detail->date_invoice);
 
         switch ($detail->type) {

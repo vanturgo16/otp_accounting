@@ -5,16 +5,17 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TransCashBookController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GeneralLedgersController;
-use App\Http\Controllers\EntityListController;
 use App\Http\Controllers\MstAccountCodesController;
 use App\Http\Controllers\MstAccountTypesController;
 use App\Http\Controllers\MstBankAccountController;
 use App\Http\Controllers\MstPpnController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\TransDataBankController;
-use App\Http\Controllers\TransDataKasController;
 use App\Http\Controllers\TransSalesController;
 use App\Http\Controllers\TransPurchaseController;
+
+use App\Http\Controllers\EntityListController;
+use App\Http\Controllers\TransDataBankController;
+use App\Http\Controllers\TransDataKasController;
 use App\Http\Controllers\TransImportController;
 
 //Route Login
@@ -85,7 +86,6 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
     Route::controller(MstAccountCodesController::class)->group(function () {
         Route::prefix('accountcode')->middleware('permission:Akunting_master_data')->group(function () {
             Route::get('/', 'index')->name('accountcode.index');
-            Route::post('/', 'index')->name('accountcode.index');
             Route::post('/store', 'store')->name('accountcode.store');
             Route::get('/edit/{id}', 'edit')->name('accountcode.edit');
             Route::post('/update/{id}', 'update')->name('accountcode.update');
@@ -104,25 +104,6 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
         });
     });
 
-    //TransDataKas
-    Route::get('/transdatakas', [TransDataKasController::class, 'index'])->name('transdatakas.index');
-    Route::post('/transdatakas', [TransDataKasController::class, 'index'])->name('transdatakas.index');
-    Route::post('transdatakas/create', [TransDataKasController::class, 'store'])->name('transdatakas.store');
-    Route::post('transdatakas/update/{id}', [TransDataKasController::class, 'update'])->name('transdatakas.update');
-    Route::post('transdatakas/delete/{id}', [TransDataKasController::class, 'delete'])->name('transdatakas.delete');
-    //TransDataBank
-    Route::get('/transdatabank', [TransDataBankController::class, 'index'])->name('transdatabank.index');
-    Route::post('/transdatabank', [TransDataBankController::class, 'index'])->name('transdatabank.index');
-    Route::post('transdatabank/create', [TransDataBankController::class, 'store'])->name('transdatabank.store');
-    Route::post('transdatabank/update/{id}', [TransDataBankController::class, 'update'])->name('transdatabank.update');
-    Route::post('transdatabank/delete/{id}', [TransDataBankController::class, 'delete'])->name('transdatabank.delete');
-    //SalesInvoice
-    Route::get('/salesinvoice', [TransDataBankController::class, 'index'])->name('transdatabank.index');
-    Route::post('/salesinvoice', [TransDataBankController::class, 'index'])->name('transdatabank.index');
-    Route::post('salesinvoice/create', [TransDataBankController::class, 'store'])->name('transdatabank.store');
-    Route::post('salesinvoice/update/{id}', [TransDataBankController::class, 'update'])->name('transdatabank.update');
-    Route::post('salesinvoice/delete/{id}', [TransDataBankController::class, 'delete'])->name('transdatabank.delete');
-
     //TransSales
     Route::controller(TransSalesController::class)->group(function () {
         Route::prefix('transsales')->middleware('permission:Akunting_sales')->group(function () {
@@ -130,7 +111,6 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
             Route::get('/getsoprice-from-dn', 'getSOPriceFromDN')->name('transsales.getSOPriceFromDN');
             Route::get('/gettotalprice/{id}/{ppnRate}/{type}', 'getTotalPrice')->name('transsales.gettotalprice');
             Route::get('/getcustomer-from-dn/{id}', 'getCustomerFromDN')->name('transsales.getCustomerFromDN');
-
             // Local
             Route::prefix('local')->group(function () {
                 // Modal
@@ -150,7 +130,6 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
                 });
                 Route::get('print/{id}', 'printLocal')->name('transsales.local.print');
             });
-
             // Export
             Route::prefix('export')->group(function () {
                 // Modal
@@ -218,6 +197,42 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
         });
     });
 
+    //GeneralLedger
+    Route::controller(GeneralLedgersController::class)->group(function () {
+        Route::prefix('generalledger')->middleware('permission:Akunting_generalledger')->group(function () {
+            Route::get('/', 'index')->name('generalledger.index');
+            Route::prefix('modal')->group(function () {
+                Route::get('/info/{source}/{id}', 'modalInfo')->name('generalledger.modal.info');
+            });
+        });
+    });
+
+    //Report
+    Route::controller(ReportController::class)->group(function () {
+        Route::prefix('report')->middleware('permission:Akunting_master_data')->group(function () {
+            Route::get('/', 'index')->name('report.monthly.index');
+        });
+    });
+
+    // //TransDataKas
+    // Route::get('/transdatakas', [TransDataKasController::class, 'index'])->name('transdatakas.index');
+    // Route::post('/transdatakas', [TransDataKasController::class, 'index'])->name('transdatakas.index');
+    // Route::post('transdatakas/create', [TransDataKasController::class, 'store'])->name('transdatakas.store');
+    // Route::post('transdatakas/update/{id}', [TransDataKasController::class, 'update'])->name('transdatakas.update');
+    // Route::post('transdatakas/delete/{id}', [TransDataKasController::class, 'delete'])->name('transdatakas.delete');
+    // //TransDataBank
+    // Route::get('/transdatabank', [TransDataBankController::class, 'index'])->name('transdatabank.index');
+    // Route::post('/transdatabank', [TransDataBankController::class, 'index'])->name('transdatabank.index');
+    // Route::post('transdatabank/create', [TransDataBankController::class, 'store'])->name('transdatabank.store');
+    // Route::post('transdatabank/update/{id}', [TransDataBankController::class, 'update'])->name('transdatabank.update');
+    // Route::post('transdatabank/delete/{id}', [TransDataBankController::class, 'delete'])->name('transdatabank.delete');
+    // //SalesInvoice
+    // Route::get('/salesinvoice', [TransDataBankController::class, 'index'])->name('transdatabank.index');
+    // Route::post('/salesinvoice', [TransDataBankController::class, 'index'])->name('transdatabank.index');
+    // Route::post('salesinvoice/create', [TransDataBankController::class, 'store'])->name('transdatabank.store');
+    // Route::post('salesinvoice/update/{id}', [TransDataBankController::class, 'update'])->name('transdatabank.update');
+    // Route::post('salesinvoice/delete/{id}', [TransDataBankController::class, 'delete'])->name('transdatabank.delete');
+
     // //TransImport
     // Route::controller(TransImportController::class)->group(function () {
     //     Route::prefix('transimport')->middleware('permission:Akunting_import')->group(function () {
@@ -228,21 +243,6 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
     //         Route::get('/info/{id}', 'info')->name('transimport.info');
     //     });
     // });
-
-    //GeneralLedger
-    Route::controller(GeneralLedgersController::class)->group(function () {
-        Route::prefix('generalledger')->middleware('permission:Akunting_generalledger')->group(function () {
-            Route::get('/', 'index')->name('generalledger.index');
-            Route::post('/', 'index')->name('generalledger.index');
-            Route::get('/create', 'create')->name('generalledger.create');
-            Route::post('/store', 'store')->name('generalledger.store');
-            Route::get('/getData', 'getData')->name('generalledger.getData');
-
-            Route::prefix('modal')->group(function () {
-                Route::get('/info/{id}', 'modalInfo')->name('generalledger.modal.info');
-            });
-        });
-    });
 
     // //ENTITY LIST
     // Route::controller(EntityListController::class)->group(function () {
@@ -270,13 +270,6 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
     //         Route::get('/labarugi', 'labarugi')->name('report.labarugi');
     //     });
     // });
-
-    //Cash Book
-    Route::controller(ReportController::class)->group(function () {
-        Route::prefix('report')->middleware('permission:Akunting_master_data')->group(function () {
-            Route::get('/', 'index')->name('report.index');
-        });
-    });
 
 });
 
