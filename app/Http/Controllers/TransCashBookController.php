@@ -225,10 +225,10 @@ class TransCashBookController extends Controller
         $seqNumber   = $genNumber['seq_number'];
 
         $rules = [
-            'Bukti Bank Keluar' => 'DocNo. Invoice1',
-            'Bukti Bank Masuk'  => 'DocNo. Invoice2',
-            'Bukti Kas Keluar'  => 'DocNo. Invoice3',
-            'Bukti Kas Masuk'   => 'DocNo. Invoice4',
+            'Bukti Bank Keluar' => 'DocNo. Invoice BBK',
+            'Bukti Bank Masuk'  => 'DocNo. Invoice BBM',
+            'Bukti Kas Keluar'  => 'DocNo. Invoice BKK',
+            'Bukti Kas Masuk'   => 'DocNo. Invoice BKM',
         ];
         $rule = $rules[$type] ?? null;
         $docNo = $rule ? optional(MstRule::where('rule_name', $rule)->first())->rule_value : null;
