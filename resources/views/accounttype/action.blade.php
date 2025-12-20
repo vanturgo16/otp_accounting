@@ -1,195 +1,41 @@
-<div class="btn-group" role="group">
-    <button id="btnGroupDrop{{ $data->id }}" type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown"
-        aria-expanded="false">
+<div class="btn-group">
+    <button class="btn btn-sm btn-primary action-btn" data-id="{{ $data->id }}">
         Action <i class="mdi mdi-chevron-down"></i>
     </button>
-    <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $data->id }}">
-        <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
-        <li><a class="dropdown-item drpdwn" href="{{ route('accounttype.edit', encrypt($data->id)) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
-        @if($data->is_active == 0)
-            <li><a class="dropdown-item drpdwn-scs" href="#" data-bs-toggle="modal" data-bs-target="#activate{{ $data->id }}"><span class="mdi mdi-check-circle"></span> | Activate</a></li>
-        @else
-            <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#deactivate{{ $data->id }}"><span class="mdi mdi-close-circle"></span> | Deactivate</a></li>
-        @endif
-
-        <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#delete{{ $data->id }}"><span class="mdi mdi-delete-alert"></span> | Delete</a></li>
-    </ul>
 </div>
 
-{{-- Modal --}}
-<div class="left-align truncate-text">
-    {{-- Modal Info --}}
-    <div class="modal fade" id="info{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-top" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Info Account Type</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-lg-12 mb-2">
-                            <div class="form-group">
-                                <div><span class="fw-bold">Status :</span></div>
-                                <span>
-                                    @if($data->is_active == 1)
-                                        <span class="badge bg-success text-white">Active</span>
-                                    @else
-                                        <span class="badge bg-danger text-white">Inactive</span>
-                                    @endif
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 mb-2">
-                            <div class="form-group">
-                                <div><span class="fw-bold">Account Type Code :</span></div>
-                                <span>
-                                    <span>{{ $data->account_type_code }}</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <div><span class="fw-bold">Account Type Name :</span></div>
-                                <span>
-                                    <span>{{ $data->account_type_name }}</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <div><span class="fw-bold">Created At :</span></div>
-                                <span>
-                                    <span>{{ $data->created_at }}</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <div><span class="fw-bold">Updated At :</span></div>
-                                <span>
-                                    <span>{{ $data->updated_at }}</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Modal Activate --}}
-    <div class="modal fade" id="activate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-top" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Activate Account Type</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('accounttype.activate', encrypt($data->id)) }}" id="formactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="text-center">
-                            Are You Sure to <b>Activate</b> This Account Type?
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-success waves-effect btn-label waves-light" id="sb-activate{{ $data->id }}"><i class="mdi mdi-check-circle label-icon"></i>Activate</button>
-                    </div>
-                </form>
-                <script>
-                    $(document).ready(function() {
-                        let idList = "{{ $data->id }}";
-                        $('#formactivate' + idList).submit(function(e) {
-                            if (!$('#formactivate' + idList).valid()){
-                                e.preventDefault();
-                            } else {
-                                $('#sb-activate' + idList).attr("disabled", "disabled");
-                                $('#sb-activate' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
-                            }
-                        });
-                    });
-                </script>
-            </div>
-        </div>
-    </div>
-
-    {{-- Modal Deactivate --}}
-    <div class="modal fade" id="deactivate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-top" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Deactivate Account Type</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('accounttype.deactivate', encrypt($data->id)) }}" id="formdeactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="text-center">
-                            Are You Sure to <b>Deactivate</b> This Account Type?
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deactivate{{ $data->id }}"><i class="mdi mdi-close-circle label-icon"></i>Deactivate</button>
-                    </div>
-                </form>
-                <script>
-                    $(document).ready(function() {
-                        let idList = "{{ $data->id }}";
-                        $('#formdeactivate' + idList).submit(function(e) {
-                            if (!$('#formdeactivate' + idList).valid()){
-                                e.preventDefault();
-                            } else {
-                                $('#sb-deactivate' + idList).attr("disabled", "disabled");
-                                $('#sb-deactivate' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
-                            }
-                        });
-                    });
-                </script>
-            </div>
-        </div>
-    </div>
-
-    {{-- Modal Delete --}}
-    <div class="modal fade" id="delete{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-top" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('accounttype.delete', encrypt($data->id)) }}" id="formdelete{{ $data->id }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="row">
-                            <p class="text-center">Are You Sure To Delete This Data?</p>
-                            <p class="text-center"><b>{{ $data->account_type_name }}</b></p>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-delete{{ $data->id }}"><i class="mdi mdi-delete label-icon"></i>Delete</button>
-                    </div>
-                </form>
-                <script>
-                    $(document).ready(function() {
-                        let idList = "{{ $data->id }}";
-                        $('#formdelete' + idList).submit(function(e) {
-                            if (!$('#formdelete' + idList).valid()){
-                                e.preventDefault();
-                            } else {
-                                $('#sb-delete' + idList).attr("disabled", "disabled");
-                                $('#sb-delete' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
-                            }
-                        });
-                    });
-                </script>
-            </div>
-        </div>
-    </div>
+<div id="action-menu-{{ $data->id }}" class="floating-dropdown d-none">
+    <a href="javascript:void(0)" class="dropdown-item-floating openAjaxModal d-flex align-items-center gap-2"
+        data-id="info_{{ $data->id }}" data-size="md" data-url="{{ route('accounttype.modal.info', encrypt($data->id)) }}">
+        <i class="mdi mdi-information"></i>
+        <div class="dropdown-item-floating-divider"></div>
+        <span>Info</span>
+    </a>
+    <a href="javascript:void(0)" class="dropdown-item-floating openAjaxModal d-flex align-items-center gap-2"
+        data-id="edit_{{ $data->id }}" data-size="md" data-url="{{ route('accounttype.modal.edit', encrypt($data->id)) }}">
+        <i class="mdi mdi-file-edit"></i>
+        <div class="dropdown-item-floating-divider"></div>
+        <span>Edit</span>
+    </a>
+    @if($data->is_active == 0)
+        <a href="javascript:void(0)" class="dropdown-item-floating success openAjaxModal d-flex align-items-center gap-2"
+            data-id="activate_{{ $data->id }}" data-size="md" data-url="{{ route('accounttype.modal.activate', encrypt($data->id)) }}">
+            <i class="mdi mdi-check-circle"></i>
+            <div class="dropdown-item-floating-divider"></div>
+            <span>Activate</span>
+        </a>
+    @else
+        <a href="javascript:void(0)" class="dropdown-item-floating danger openAjaxModal d-flex align-items-center gap-2"
+            data-id="deactivate_{{ $data->id }}" data-size="md" data-url="{{ route('accounttype.modal.deactivate', encrypt($data->id)) }}">
+            <i class="mdi mdi-close-circle"></i>
+            <div class="dropdown-item-floating-divider"></div>
+            <span>Deactivate</span>
+        </a>
+    @endif
+    <a href="javascript:void(0)" class="dropdown-item-floating danger openAjaxModal d-flex align-items-center gap-2"
+        data-id="delete_{{ $data->id }}" data-size="md" data-url="{{ route('accounttype.modal.delete', encrypt($data->id)) }}">
+        <i class="mdi mdi-delete-alert"></i>
+        <div class="dropdown-item-floating-divider"></div>
+        <span>Delete</span>
+    </a>
 </div>

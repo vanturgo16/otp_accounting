@@ -1,0 +1,73 @@
+/* ===============================
+SKELETON – LIGHT MODE
+=============================== */
+body:not([data-bs-theme="dark"]) .skeleton {
+    background-color: #e9ecef;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+body:not([data-bs-theme="dark"]) .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.7),
+        transparent
+    );
+    animation: shimmer 1.3s infinite;
+}
+
+/* ===============================
+SKELETON – DARK MODE
+=============================== */
+body[data-bs-theme="dark"] .skeleton {
+    background-color: #2a2e2c;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+body[data-bs-theme="dark"] .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.12),
+        transparent
+    );
+    animation: shimmer 1.3s infinite;
+}
+
+/* ===============================
+SKELETON SHAPES
+=============================== */
+.skeleton-text {
+    width: 100%;
+    height: 28px;
+    margin-top: 10px;
+    border-radius: 4px;
+}
+
+.skeleton-title {
+    height: 38px;
+    width: 60%;
+    margin-bottom: 15px;
+    border-radius: 6px;
+}
+
+/* ===============================
+SHIMMER ANIMATION
+=============================== */
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}

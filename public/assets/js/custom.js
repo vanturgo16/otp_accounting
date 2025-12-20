@@ -8,6 +8,9 @@ $(".js-example-basic-single").select2();
 
 $(document).on("hidden.bs.modal", ".modal", function () {
     $(".js-example-basic-single").select2();
+    $(".select2").select2({
+        width: '100%'
+    });
 });
 
 // Format Rupiah

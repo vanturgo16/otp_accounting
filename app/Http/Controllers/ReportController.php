@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\DetailReportHpp;
 use App\Models\DetailReportNeraca;
 use App\Models\MasterHpp;
+use App\Models\MstRule;
 use App\Models\ReportHpp;
+use App\Models\ReportMonthly;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Traits\AuditLogsTrait;
@@ -19,6 +21,51 @@ use App\Models\ReportNeraca;
 class ReportController extends Controller
 {
     use AuditLogsTrait;
+
+    public function index(Request $request)
+    {
+        $account_code = $request->get('account_code');
+        $account_name = $request->get('account_name');
+
+        if (!$request->has('monthYear') || $request->monthYear == "") {
+            $monthYear = Carbon::now()->format('Y-m');
+        } else {
+            $monthYear = $request->monthYear;
+        }
+        if ($request->ajax()) {
+            $datas = ReportMonthly::select(
+                    'master_account_codes.account_code', 'master_account_codes.account_name',
+                    'report_montly.*'
+                )
+                ->leftjoin('master_account_codes', 'report_montly.id_account_code', 'master_account_codes.id')
+                ->where('report_montly.period', $monthYear);
+
+            if($account_code != null){
+                $datas = $datas->where('account_code', 'like', '%'.$account_code.'%');
+            }
+            if($account_name != null){
+                $datas = $datas->where('account_name', 'like', '%'.$account_name.'%');
+            }
+
+            if($request->flag != null){
+                $datas = $datas->get()->makeHidden(['id', 'id_account_code', 'created_at', 'updated_at']);
+                return $datas;
+            }
+                
+            $datas = $datas->get();
+            
+            return DataTables::of($datas)->toJson();
+        }
+
+        $rule = MstRule::where('rule_name', 'Sync Time Accounting Daily')->first();
+        $syncTime = Carbon::createFromFormat('H:i', $rule->rule_value)->format('H:i');
+
+        // Audit Log
+        $this->auditLogsShort('View List Report Monthly'. $monthYear);
+        return view('report.monthly.index', compact('monthYear', 'account_code', 'account_name', 'syncTime'));
+    }
+
+
     // NERACA 
     public function neraca(Request $request)
     {

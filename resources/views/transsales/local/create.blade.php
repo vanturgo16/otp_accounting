@@ -1,5 +1,4 @@
 @extends('layouts.master')
-
 @section('konten')
 
 <div class="page-content">
@@ -22,8 +21,6 @@
                 </div>
             </div>
         </div>
-        
-        @include('layouts.alert')
 
         <form action="{{ route('transsales.local.store') }}" id="formstore" method="POST" enctype="multipart/form-data">
             @csrf
@@ -36,29 +33,49 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Ref Number</label><label style="color: darkred">*</label>
-                                    <br><span class="badge bg-info text-white">Auto Generate</span>
+                                    <label class="form-label">Reference Number</label>
+                                    <input class="form-control readonly-input" type="text" value="" placeholder="Auto Generate" readonly>
                                 </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Invoice Date</label><label style="color: darkred">*</label>
-                                    <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Tanggal yang akan ditampilkan pada lembar invoice"></i>
-                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" required max="<?= date('Y-m-d'); ?>">
-                                </div>
-                                <div class="col-lg-3 mb-3">
-                                    <label class="form-label">Due Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="due_date" value="" required min="<?= date('Y-m-d'); ?>">
-                                </div>
-                                <hr>
                             </div>
+                            <div class="row">
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label required-label">Invoice Date</label>
+                                    <i class="mdi mdi-information-outline"
+                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Pilih tanggal yang akan ditampilkan pada invoice. Tanggal hanya dapat dipilih dari awal bulan ini hingga hari ini.">
+                                    </i>
+                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-01') }}" max="{{ date('Y-m-d') }}" required>
+                                </div>
+                                <div class="col-lg-3 mb-3">
+                                    <label class="form-label required-label">Due Date</label>
+                                    <input type="date" class="form-control" name="due_date" value="" required min="{{ date('Y-m-01') }}">
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label required-label">Bank Account</label>
+                                    <i class="mdi mdi-information-outline"
+                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Pilih akun bank yang akan ditampilkan pada invoice. Informasi ini akan muncul sebagai detail pembayaran.">
+                                    </i>
+                                    <select class="form-select select2" style="width: 100%" name="id_master_bank_account" required>
+                                        <option value="" selected disabled>Select Bank</option>
+                                        @foreach($bankAccounts as $item)
+                                            <option value="{{ $item->id }}">
+                                                {{ $item->account_number }} || {{ $item->bank_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <hr>
 
                             <div class="card">
-                                <div class="card-body" style="background-color:ghostwhite">
+                                <div class="card-body readonly-card">
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
-                                            <label class="form-label">Delivery Note</label><label style="color: darkred">*</label>
+                                            <label class="form-label required-label">Delivery Note</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Daftar Delivery Note (DN) berstatus Posted yang belum dibuatkan invoice"></i>
-                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_delivery_notes" required>
-                                                <option value="" selected disabled>-- Select --</option>
+                                            <select class="form-select select2" style="width: 100%" name="id_delivery_notes" required>
+                                                <option value="" selected disabled>Select Delivery Notes</option>
                                                 @foreach($deliveryNotes as $item)
                                                     <option value="{{ $item->id }}"
                                                         data-dn-number="{{ $item->dn_number }}"
@@ -83,12 +100,12 @@
                                             <label class="form-label">Customer Name</label>
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
                                             <input type="hidden" name="id_master_customers" id="id_master_customers" value="">
-                                            <input class="form-control" id="customer_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
+                                            <input class="form-control readonly-input" id="customer_name" type="text" value="" placeholder="Select Delivery Notes.." readonly>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Sales Name</label>
-                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih"></i>
-                                            <input class="form-control" id="sales_name" type="text" value="" placeholder="Select Delivery Notes.." style="background-color:#EAECF4" readonly>
+                                            <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih (diambil dari pengisian sales order)"></i>
+                                            <input class="form-control readonly-input" id="sales_name" type="text" value="" placeholder="Select Delivery Notes.." readonly>
                                         </div>
                                         
                                         <div class="col-12">
@@ -126,7 +143,7 @@
                                                         <td class="text-end" style="width: 50%;">
                                                             <div class="input-group" style="width: 150px; margin-left: auto;">
                                                                 <button class="btn btn-outline-secondary" type="button" id="buttonMinusPPNRate" disabled>-</button>
-                                                                <input type="text" name="ppn_rate" class="form-control text-center" value="{{ $initPPN }}" id="ppn_rate" style="background-color:#EAECF4" required readonly>
+                                                                <input type="text" name="ppn_rate" class="form-control text-center readonly-input" value="{{ $initPPN }}" id="ppn_rate" required readonly>
                                                                 <button class="btn btn-outline-secondary" type="button" id="buttonPlusPPNRate" disabled>+</button>
                                                             </div>
                                                         </td>
@@ -198,13 +215,14 @@
                                                             <th>Account Code</th>
                                                             <th>Nominal</th>
                                                             <th>Debit / Kredit</th>
+                                                            <th>Note</th>
                                                             <th style="text-align:center">Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
                                                             <td>
-                                                                <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[0][account_code]" required>
+                                                                <select class="form-select select2 addpayment" style="width: 100%" name="addmore[0][account_code]" required>
                                                                     <option value="">- Select Account Code -</option>
                                                                     @foreach( $accountcodes as $item )
                                                                         <option value="{{ $item->id }}">{{ $item->account_code }} - {{ $item->account_name }}</option>
@@ -215,11 +233,14 @@
                                                                 <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="" required>
                                                             </td>
                                                             <td>
-                                                                <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[0][type]" required>
+                                                                <select class="form-select select2 addpayment" style="width: 100%" name="addmore[0][type]" required>
                                                                     <option value="">- Select Type -</option>
                                                                     <option value="D">Debit</option>
                                                                     <option value="K">Kredit</option>
                                                                 </select>
+                                                            </td>
+                                                            <td>
+                                                                <textarea class="form-control" name="addmore[0][note]" cols="20" rows="3" placeholder="Input Note (Optional).."></textarea>
                                                             </td>
                                                             <td style="text-align:center"><button type="button" name="add" id="adds" class="btn btn-success"><i class="fas fa-plus"></i></button></td>
                                                         </tr>
@@ -257,9 +278,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="row" id="modalBodyContent">
-                    <!-- Content will be populated by JavaScript -->
-                </div>
+                <div class="row" id="modalBodyContent"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
@@ -339,8 +358,13 @@
             let numPrice = normalizeNumber(totalPriceGlobal);
             if(numDebit == numPrice){
                 var submitButton = this.querySelector('button[name="sb"]');
-                submitButton.disabled = true;
-                submitButton.innerHTML  = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML =
+                        '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
+                }
+                $("#processing").removeClass("hidden");
+                $("body").addClass("no-scroll");
                 this.submit();
                 return true;
             } 
@@ -376,12 +400,12 @@
 <script>
     var i = 0;
     $("#adds").click(function() {
-        $(".js-example-basic-single").select2();
+        $(".select2").select2();
         ++i;
         $("#dynamicTable").append(
             `<tr>
                 <td>
-                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[`+i+`][account_code]" required>
+                    <select class="form-select select2 addpayment" style="width: 100%" name="addmore[`+i+`][account_code]" required>
                         <option value="">- Select Account Code -</option>
                         @foreach( $accountcodes as $item )
                             <option value="{{ $item->id }}">{{ $item->account_code }} - {{ $item->account_name }}</option>
@@ -392,18 +416,21 @@
                     <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
                 </td>
                 <td>
-                    <select class="form-select js-example-basic-single addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
+                    <select class="form-select select2 addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
                         <option value="">- Select Type -</option>
                         <option value="D">Debit</option>
                         <option value="K">Kredit</option>
                     </select>
+                </td>
+                <td>
+                    <textarea class="form-control" name="addmore[`+i+`][note]" cols="20" rows="3" placeholder="Input Note (Optional).."></textarea>
                 </td>
                 <td style="text-align:center">
                     <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>
                 </td>
             </tr>`);
 
-        $(".js-example-basic-single").select2();
+        $(".select2").select2();
 
         document.querySelectorAll(".rupiah-input").forEach((input) => {
             input.addEventListener("input", formatCurrencyInput);
@@ -510,7 +537,7 @@
                         if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
                         if (parts.length > 1) {
                             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
@@ -528,7 +555,7 @@
                         if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
                         if (parts.length > 1) {
                             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span><br>(' + row.ppn_rate + '%)';
@@ -546,7 +573,7 @@
                         if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
                         if (parts.length > 1) {
                             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
@@ -564,7 +591,7 @@
                         if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
                         if (parts.length > 1) {
                             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
@@ -582,7 +609,7 @@
                         if (data == null) {
                             return '<span class="badge bg-secondary">Null</span>';
                         }
-                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
                         if (parts.length > 1) {
                             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';

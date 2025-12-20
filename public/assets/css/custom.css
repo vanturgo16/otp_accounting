@@ -17,25 +17,12 @@
     padding-right: 0.1rem;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.586);
 }
-.select2-container .select2-selection--single {
-    height: 39px;
-    border: 1px solid #e9e9ef;
-    border-radius: 0.25rem;
-}
-
-.select2-container--default
-    .select2-selection--single
-    .select2-selection__rendered {
-    line-height: 32px;
-    color: #495057;
-    background-color: #f8f9fa;
-    border-radius: 0.25rem;
-}
-
-.select2-container--default
-    .select2-selection--single
-    .select2-selection__arrow {
-    height: 32px;
+[data-bs-theme="dark"] .dropdown-menu2 {
+    background-color: #2c2f33;
+    border: 0.1rem solid #888;
+    padding-left: 0.1rem;
+    padding-right: 0.1rem;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.9);
 }
 
 .truncate-text {
@@ -124,4 +111,79 @@ mark.highlight {
 }
 mark.current-match {
     background-color: orange;
+}
+
+.required-label::after {
+    content: " *";
+    color: #dc3545;
+    font-weight: normal;
+}
+
+
+.toast {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25) !important;
+    border-radius: 0.75rem !important;
+    overflow: hidden;
+    animation: toast-pop 0.25s ease-out;
+}
+
+@keyframes toast-pop {
+    0% { transform: translateY(20px) scale(0.95); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.toast-header {
+    font-weight: 600;
+}
+
+.toast-body {
+    font-size: .95rem;
+}
+
+.md-body-scroll {
+    overflow-y: auto;
+    max-height: 67vh;
+}
+
+
+/* ===============================
+READONLY INPUT – LIGHT MODE
+=============================== */
+body:not([data-bs-theme="dark"])
+.readonly-input {
+    background-color: #eaecf4;
+    color: #313533;
+    cursor: not-allowed;
+}
+/* ===============================
+READONLY INPUT – DARK MODE
+=============================== */
+body[data-bs-theme="dark"]
+.readonly-input {
+    background-color: #252827; /* darker than input */
+    color: #8b949e;            /* muted gray */
+    border-color: #2e3231;
+    cursor: not-allowed;
+}
+/* Prevent Bootstrap overriding on focus */
+.readonly-input:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+
+/* ===============================
+READONLY CARD – LIGHT MODE
+=============================== */
+body:not([data-bs-theme="dark"])
+.readonly-card {
+    background-color: ghostwhite;
+}
+/* ===============================
+READONLY CARD – DARK MODE
+=============================== */
+body[data-bs-theme="dark"]
+.readonly-card {
+    background-color: #1f2221;  /* darker, inactive feel */
+    border-color: #2e3231;
 }

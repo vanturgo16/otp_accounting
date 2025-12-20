@@ -1,4 +1,51 @@
-<div class="btn-group" role="group">
+<div class="btn-group">
+    <button class="btn btn-sm btn-primary action-btn" data-id="{{ $data->id }}">
+        Action <i class="mdi mdi-chevron-down"></i>
+    </button>
+</div>
+
+<div id="action-menu-{{ $data->id }}" class="floating-dropdown d-none">
+    <a href="javascript:void(0)" class="dropdown-item-floating openAjaxModal d-flex align-items-center gap-2"
+        data-id="info_{{ $data->id }}" data-size="md" data-url="{{ route('accountcode.modal.info', encrypt($data->id)) }}">
+        <i class="mdi mdi-information"></i>
+        <div class="dropdown-item-floating-divider"></div>
+        <span>Info</span>
+    </a>
+    <a href="javascript:void(0)" class="dropdown-item-floating openAjaxModal d-flex align-items-center gap-2"
+        data-id="edit_{{ $data->id }}" data-size="md" data-url="{{ route('accountcode.modal.edit', encrypt($data->id)) }}">
+        <i class="mdi mdi-file-edit"></i>
+        <div class="dropdown-item-floating-divider"></div>
+        <span>Edit</span>
+    </a>
+    @if($data->is_active == 0)
+        <a href="javascript:void(0)" class="dropdown-item-floating success openAjaxModal d-flex align-items-center gap-2"
+            data-id="activate_{{ $data->id }}" data-size="md" data-url="{{ route('accountcode.modal.activate', encrypt($data->id)) }}">
+            <i class="mdi mdi-check-circle"></i>
+            <div class="dropdown-item-floating-divider"></div>
+            <span>Activate</span>
+        </a>
+    @else
+        <a href="javascript:void(0)" class="dropdown-item-floating danger openAjaxModal d-flex align-items-center gap-2"
+            data-id="deactivate_{{ $data->id }}" data-size="md" data-url="{{ route('accountcode.modal.deactivate', encrypt($data->id)) }}">
+            <i class="mdi mdi-close-circle"></i>
+            <div class="dropdown-item-floating-divider"></div>
+            <span>Deactivate</span>
+        </a>
+    @endif
+    
+    @if($data->is_used != 1)
+        <a href="javascript:void(0)" class="dropdown-item-floating danger openAjaxModal d-flex align-items-center gap-2"
+            data-id="delete_{{ $data->id }}" data-size="md" data-url="{{ route('accountcode.modal.delete', encrypt($data->id)) }}">
+            <i class="mdi mdi-delete-alert"></i>
+            <div class="dropdown-item-floating-divider"></div>
+            <span>Delete</span>
+        </a>
+    @endif
+</div>
+
+
+
+{{-- <div class="btn-group" role="group">
     <button id="btnGroupDrop{{ $data->id }}" type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown"
         aria-expanded="false">
         Action <i class="mdi mdi-chevron-down"></i>
@@ -18,9 +65,7 @@
     </ul>
 </div>
 
-{{-- Modal --}}
 <div class="left-align truncate-text">
-    {{-- Modal Info --}}
     <div class="modal fade" id="info{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-top" role="document">
             <div class="modal-content">
@@ -149,7 +194,6 @@
         </div>
     </div>
 
-    {{-- Modal Activate --}}
     <div class="modal fade" id="activate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-top" role="document">
             <div class="modal-content">
@@ -186,7 +230,6 @@
         </div>
     </div>
 
-    {{-- Modal Deactivate --}}
     <div class="modal fade" id="deactivate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-top" role="document">
             <div class="modal-content">
@@ -225,7 +268,6 @@
 
 
     @if($data->is_used == null)
-        {{-- Modal Delete --}}
         <div class="modal fade" id="delete{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-top" role="document">
                 <div class="modal-content">
@@ -263,4 +305,4 @@
             </div>
         </div>
     @endif
-</div>
+</div> --}}
