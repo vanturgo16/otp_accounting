@@ -12,4 +12,11 @@ class TransPurchase extends Model
     protected $guarded=[
         'id'
     ];
+
+    protected $casts = [
+        'amount'          => 'decimal:3',
+        'ppn_value'       => 'decimal:3',
+        'total_discount'  => 'decimal:3',
+        'total'           => 'decimal:3',
+    ];
 }

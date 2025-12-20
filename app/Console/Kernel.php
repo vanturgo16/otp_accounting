@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Carbon;
 
 class Kernel extends ConsoleKernel
 {
@@ -12,7 +13,18 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $logPath = storage_path('logs/log_sync_acc_daily_cron');
+        // Ensure the directory exists
+        if (!file_exists($logPath)) {
+            mkdir($logPath, 0777, true);
+        }
+        
+        $now = Carbon::now()->format('YmdHis');
+        $schedule->command('sync:accounting-daily')
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->sendOutputTo("storage/logs/log_sync_acc_daily_cron/response_at_" . $now . ".txt");;
     }
 
     /**
