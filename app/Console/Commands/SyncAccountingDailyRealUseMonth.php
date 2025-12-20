@@ -6,12 +6,13 @@ use Illuminate\Console\Command;
 use App\Models\MstRule;
 use App\Models\MstAccountCodes;
 use App\Models\ReportMonthly;
+use App\Models\GeneralLedger;
 use Carbon\Carbon;
 
-class SyncAccountingDaily extends Command
+class SyncAccountingDailyRealUseMonth extends Command
 {
-    protected $signature = 'sync:accounting-daily';
-    protected $description = 'Sync accounting data daily based on rule time';
+    protected $signature = 'sync:accounting-daily-real-use-month';
+    protected $description = 'Sync accounting data daily based on rule time, but calculate real month transaction';
 
     public function handle()
     {
@@ -28,7 +29,7 @@ class SyncAccountingDaily extends Command
         if ($now !== $syncTime) {
             return Command::SUCCESS;
         }
-        
+
         $this->log('--- Starting Sync Accounting Daily ---');
 
         // --- 2. Scheduler logic starts here ---
@@ -42,10 +43,13 @@ class SyncAccountingDaily extends Command
             return Command::SUCCESS;
         }
 
-        // 2b. First day of month? open current month by get amount close prev month
+        // 2b. First day of month? Close previous month and open current month
         $today = now();
         if ($today->day === 1) {
-            $this->log("First day of month. Opening current month: {$currentPeriod}");
+            $this->log("First day of month. Closing previous month: {$previousPeriod}");
+            $this->closePreviousMonth($previousPeriod);
+
+            $this->log("Opening current month: {$currentPeriod}");
             $this->openCurrentMonth($currentPeriod, $previousPeriod);
         }
 
@@ -81,6 +85,50 @@ class SyncAccountingDaily extends Command
         }
     }
 
+    private function closePreviousMonth($period)
+    {
+        $start = Carbon::createFromFormat('Y-m', $period)->startOfMonth();
+        $end   = Carbon::createFromFormat('Y-m', $period)->endOfMonth();
+
+        $reports = ReportMonthly::where('period', $period)->get();
+
+        foreach ($reports as $report) {
+            $balance = (float) $report->opening_balance;
+            $type    = $report->opening_balance_type;
+
+            $transactions = GeneralLedger::where('id_account_code', $report->id_account_code)
+                ->whereBetween('date_transaction', [$start, $end])
+                ->get();
+
+            foreach ($transactions as $trx) {
+                $incoming     = (float) $trx->amount;
+                $incomingType = $trx->transaction;
+
+                // if same type, just add
+                if ($type === $incomingType) {
+                    $balance += $incoming;
+                } else {
+                    // different type → subtract
+                    $result = $balance - $incoming;
+                    if ($result > 0) {
+                        $balance = $result; // keep original type (it "wins")
+                    } elseif ($result < 0) {
+                        $balance = abs($result);
+                        $type = $incomingType; // incoming "wins"
+                    } else {
+                        $balance = 0;
+                        $type = "D"; // default when zero (or set to null if you prefer)
+                    }
+                }
+            }
+
+            $report->update([
+                'closing_balance' => $balance,
+                'closing_balance_type' => $type,
+            ]);
+        }
+    }
+
     private function openCurrentMonth($currentPeriod, $previousPeriod)
     {
         $accounts = MstAccountCodes::all();
@@ -100,8 +148,8 @@ class SyncAccountingDaily extends Command
                 $openingBalance = $lastMonth->closing_balance;
                 $openingType    = $lastMonth->closing_balance_type;
             } else {
-                $openingBalance = $account->opening_balance;
-                $openingType    = $account->opening_balance_type;
+                $openingBalance = $account->balance;
+                $openingType    = $account->balance_type;
             }
 
             ReportMonthly::create([
@@ -137,20 +185,47 @@ class SyncAccountingDaily extends Command
         }
     }
 
-    // --- Daily closing snapshot ---
     private function updateCurrentMonthClosing($period)
     {
+        $start = Carbon::parse($period)->startOfMonth();
+        $end   = now()->endOfDay();
+
         $reports = ReportMonthly::where('period', $period)->get();
 
         foreach ($reports as $report) {
-            $account = MstAccountCodes::find($report->id_account_code);
+            $balance = (float) $report->opening_balance;
+            $type    = $report->opening_balance_type;
 
-            if ($account) {
-                $report->update([
-                    'closing_balance'      => $account->balance,
-                    'closing_balance_type' => $account->balance_type,
-                ]);
+            $transactions = GeneralLedger::where('id_account_code', $report->id_account_code)
+                ->whereBetween('date_transaction', [$start, $end])
+                ->get();
+
+            foreach ($transactions as $trx) {
+                $incoming     = (float) $trx->amount;
+                $incomingType = $trx->transaction;
+
+                // if same type, just add
+                if ($type === $incomingType) {
+                    $balance += $incoming;
+                } else {
+                    // different type → subtract
+                    $result = $balance - $incoming;
+                    if ($result > 0) {
+                        $balance = $result; // keep original type (it "wins")
+                    } elseif ($result < 0) {
+                        $balance = abs($result);
+                        $type = $incomingType; // incoming "wins"
+                    } else {
+                        $balance = 0;
+                        $type = "D"; // default when zero (or set to null if you prefer)
+                    }
+                }
             }
+
+            $report->update([
+                'closing_balance' => $balance,
+                'closing_balance_type' => $type,
+            ]);
         }
     }
 

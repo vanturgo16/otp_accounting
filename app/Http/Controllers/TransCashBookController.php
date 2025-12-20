@@ -76,6 +76,25 @@ class TransCashBookController extends Controller
                 ->leftjoin('general_ledgers', 'trans_cash_book.id', 'general_ledgers.id_ref')
                 ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
                 ->where('general_ledgers.source', 'Cash Book')
+                ->where(function ($query) {
+                    $query
+                        // Bukti Keluar → Debit
+                        ->where(function ($q) {
+                            $q->whereIn('trans_cash_book.type', [
+                                    'Bukti Kas Keluar',
+                                    'Bukti Bank Keluar'
+                                ])
+                            ->where('general_ledgers.transaction', 'D');
+                        })
+                        // Bukti Masuk → Kredit
+                        ->orWhere(function ($q) {
+                            $q->whereIn('trans_cash_book.type', [
+                                    'Bukti Kas Masuk',
+                                    'Bukti Bank Masuk'
+                                ])
+                            ->where('general_ledgers.transaction', 'K');
+                        });
+                })
                 ->orderBy('trans_cash_book.created_at', 'desc')
                 ->orderBy('general_ledgers.created_at', 'asc');
             
@@ -186,7 +205,6 @@ class TransCashBookController extends Controller
             'addmore.*.account_code' => 'required',
             'addmore.*.nominal'      => 'required',
             'addmore.*.type'         => 'required',
-            'addmore.*.note'         => 'required',
         ]);
 
         $codeBank = null;
@@ -216,12 +234,15 @@ class TransCashBookController extends Controller
         $docNo = $rule ? optional(MstRule::where('rule_name', $rule)->first())->rule_value : null;
 
         $total = 0;
+        $calculateType = in_array($type, ['Bukti Kas Keluar', 'Bukti Bank Keluar']) ? 'D' : 'K';
         foreach ($request->addmore as $row) {
-            $nominal = $this->normalizeOpeningBalance($row['nominal']);
-            if ($row['type'] === 'D') {
-                $total += $nominal;
-            } elseif ($row['type'] === 'K') {
-                $total -= $nominal;
+            if($row['type'] == $calculateType){
+                $nominal = $this->normalizeOpeningBalance($row['nominal']);
+                if ($row['type'] === 'D') {
+                    $total += $nominal;
+                } elseif ($row['type'] === 'K') {
+                    $total -= $nominal;
+                }
             }
         }
         if ($total > 0) {
@@ -307,29 +328,12 @@ class TransCashBookController extends Controller
             'addmore.*.nominal'         => 'required',
             'addmore.*.type'            => 'required',
         ]);
-
-        $total = 0;
-        foreach ($request->addmore as $row) {
-            $nominal = $this->normalizeOpeningBalance($row['nominal']);
-            if ($row['type'] === 'D') {
-                $total += $nominal;
-            } elseif ($row['type'] === 'K') {
-                $total -= $nominal;
-            }
-        }
-        if ($total > 0) {
-            $transactionType = 'D';
-            $totalAmount = $total;
-        } else {
-            $transactionType = 'K';
-            $totalAmount = abs($total);
-        }
         
         $id          = decrypt($id);
         $detail      = TransCashBook::where('id', $id)->lockForUpdate()->first();
         $transNumber = $detail->transaction_number;
         $invNumber   = $request->invoice_number;
-
+        
         // Validation
         $trxDate = Carbon::parse($detail->date_invoice);
         $now     = Carbon::now();
@@ -339,6 +343,26 @@ class TransCashBookController extends Controller
         $isDuplicate = TransCashBook::where('invoice_number', $invNumber)->where('id', '!=', $id)->exists();
         if ($isDuplicate) {
             return back()->withInput()->with(['error' => 'Invoice number already in use, please use another invoice number']);
+        }
+
+        $total = 0;
+        $calculateType = in_array($detail->type, ['Bukti Kas Keluar', 'Bukti Bank Keluar']) ? 'D' : 'K';
+        foreach ($request->addmore as $row) {
+            if($row['type'] == $calculateType){
+                $nominal = $this->normalizeOpeningBalance($row['nominal']);
+                if ($row['type'] === 'D') {
+                    $total += $nominal;
+                } elseif ($row['type'] === 'K') {
+                    $total -= $nominal;
+                }
+            }
+        }
+        if ($total > 0) {
+            $transactionType = 'D';
+            $totalAmount = $total;
+        } else {
+            $transactionType = 'K';
+            $totalAmount = abs($total);
         }
         
         $detail->date_invoice       = $request->date_invoice . ' 00:00:00';
@@ -465,10 +489,12 @@ class TransCashBookController extends Controller
     {
         $id = decrypt($id);
         $detail = TransCashBook::where('id', $id)->first();
+        $typeView = in_array($detail->type, ['Bukti Kas Keluar', 'Bukti Bank Keluar']) ? 'D' : 'K';
         $generalLedgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
             ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
             ->where('general_ledgers.id_ref', $id)
             ->where('general_ledgers.ref_number', $detail->transaction_number)
+            ->where('general_ledgers.transaction', $typeView)
             ->where('general_ledgers.source', 'Cash Book')
             ->get();
 

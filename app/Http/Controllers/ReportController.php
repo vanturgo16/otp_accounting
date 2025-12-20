@@ -24,10 +24,6 @@ class ReportController extends Controller
 
     public function index(Request $request)
     {
-        
-
-
-
         $account_code = $request->get('account_code');
         $account_name = $request->get('account_name');
 
@@ -49,6 +45,11 @@ class ReportController extends Controller
             }
             if($account_name != null){
                 $datas = $datas->where('account_name', 'like', '%'.$account_name.'%');
+            }
+
+            if($request->flag != null){
+                $datas = $datas->get()->makeHidden(['id', 'id_account_code', 'created_at', 'updated_at']);
+                return $datas;
             }
                 
             $datas = $datas->get();

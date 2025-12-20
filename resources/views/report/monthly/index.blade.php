@@ -5,7 +5,7 @@
     <div class="container-fluid">
         <!-- Modal Search -->
         <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-dialog modal-md" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
@@ -15,11 +15,11 @@
                         @csrf
                         <div class="modal-body md-body-scroll">
                             <div class="row">
-                                <div class="col-6 mb-2">
+                                <div class="col-12 mb-2">
                                     <label class="form-label">Account Code</label>
                                     <input class="form-control" name="account_code" type="text" value="{{ $account_code }}" placeholder="Filter Code..">
                                 </div>
-                                <div class="col-6 mb-2">
+                                <div class="col-12 mb-2">
                                     <label class="form-label">Account Name</label>
                                     <input class="form-control" name="account_name" type="text" value="{{ $account_name }}" placeholder="Filter Account Code..">
                                 </div>
@@ -27,7 +27,7 @@
                             <hr>
                             <div class="row">
                                 <div class="col-lg-12 mb-3">
-                                    <label class="form-label">DateTime</label> <label class="text-danger">*</label>
+                                    <label class="form-label">Period</label> <label class="text-danger">*</label>
                                     <input type="month" class="form-control" name="monthYear" value="{{ $monthYear }}" required>
                                 </div>
                             </div>
@@ -70,6 +70,15 @@
                                         @endif
                                         (PERIOD - {{ \Carbon\Carbon::createFromFormat('Y-m', $monthYear)->translatedFormat('F Y') }})
                                     </small>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="alert alert-warning mb-0 d-none d-lg-block" style="font-size:0.6rem;" role="alert">
+                                    <ul class="mb-0 ps-3">
+                                        <li>
+                                            Transactions made after the sync time on month-end will be included in the next month’s report.
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -130,12 +139,14 @@
             name: 'account_code',
             orderable: true,
             searchable: true,
+            className: 'text-center',
         },
         {
             data: 'account_name',
             name: 'account_name',
             orderable: true,
             searchable: true,
+            className: 'text-bold',
         },
         {
             data: 'opening_balance',
@@ -180,12 +191,21 @@
         initDTUI({
             idTable: "#ssTable",
             columns: columns,
-            showExport: false,
+            showExport: true,
             showFilter: true,
             url: url,
             requestData: data,
             customDrawCallback: null
         });
+    });
+
+    $(document).on('click', '#btnExport', function () {
+        var currentDate = new Date();
+        var formattedDate = currentDate.toISOString().split('T')[0];
+        var fileName = "Monthly Report - " + formattedDate + ".xlsx";
+        var requestData = Object.assign({}, data);
+        requestData.flag = 1;
+        handleExport(url, requestData, fileName);
     });
 </script>
 

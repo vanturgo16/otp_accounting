@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    {{-- <title>Accounting | PT. OTP</title>
-    <link rel="shortcut icon" href="{{ asset('assets/images/icon-otp.png') }}" /> --}}
-    <title>-</title>
+    <title>Accounting | PT. OTP</title>
+    <link rel="shortcut icon" href="{{ asset('assets/images/icon-otp.png') }}" />
 
     <!-- JQUERY SCRIPT -->
     <script type="text/javascript" src="{{ asset('assets/libs/jquery/jquery.min.js') }}"></script>
@@ -34,8 +33,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/floating-dropdown.css') }}"/>
 </head>
 
-{{-- <body> --}}
-<body data-bs-theme="dark" data-topbar="dark" data-sidebar="dark">
+<body @if(Auth::user()->is_darkmode) data-bs-theme="dark" data-topbar="dark" data-sidebar="dark" @endif>
     @include('layouts.loading')
     @include('layouts.toast')
 
@@ -49,7 +47,7 @@
                 <div class="d-flex">
                     <!-- LOGO -->
                     <div class="navbar-brand-box">
-                        {{-- <a href="https://sso.olefinatifaplas.my.id/menu" class="logo logo-dark">
+                        <a href="https://sso.olefinatifaplas.my.id/menu" class="logo logo-dark">
                             <span class="logo-sm">
                                 <img src="{{ asset('assets/images/icon-otp.png') }}" alt="" height="30">
                             </span>
@@ -65,7 +63,7 @@
                             <span class="logo-lg">
                                 <img src="{{ asset('assets/images/logo.png') }}" alt="" height="40">
                             </span>
-                        </a> --}}
+                        </a>
                     </div>
 
                     <button type="button" class="btn btn-sm px-3 font-size-16 header-item" id="vertical-menu-btn">
@@ -102,13 +100,20 @@
                             </form>
                         </div>
                     </div>
-
-                    <div class="dropdown d-none d-sm-inline-block">
+                    
+                    {{-- <div class="dropdown d-none d-sm-inline-block">
                         <button type="button" class="btn header-item" id="mode-setting-btn">
                             <i data-feather="moon" class="icon-lg layout-mode-dark"></i>
                             <i data-feather="sun" class="icon-lg layout-mode-light"></i>
                         </button>
+                    </div> --}}
+                    <div class="dropdown d-none d-sm-inline-block">
+                        <button type="button" class="btn header-item" data-bs-toggle="modal" data-bs-target="#switchTheme">
+                            <i data-feather="moon" class="icon-lg layout-mode-dark"></i>
+                            <i data-feather="sun" class="icon-lg layout-mode-light"></i>
+                        </button>
                     </div>
+
 
                     <div class="dropdown d-inline-block">
                         <button type="button" class="btn header-item right-bar-toggle me-2">
@@ -153,8 +158,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-6 footer-text">
-                            {{-- © PT Olefina Tifaplas Polikemindo {{ date('Y') }} --}}
-                            -
+                            © PT Olefina Tifaplas Polikemindo {{ date('Y') }}
                         </div>
                     </div>
                 </div>
@@ -162,7 +166,28 @@
         </div>
         <!-- end main content-->
 
-        {{-- Modal Logout --}}
+        <!-- Modal Switch Them -->
+        <div class="modal fade" id="switchTheme" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-top" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Switch Theme</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <h5>Switch To <b>@if(Auth::user()->is_darkmode) Light @else Dark @endif</b> Mode ?</h5>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <form class="formLoad" action="{{ route('switchTheme') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light"><i class="mdi mdi-check label-icon"></i>Apply</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal Logout -->
         <div class="modal fade" id="logout" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-top" role="document">
                 <div class="modal-content">
@@ -324,12 +349,14 @@
     <!-- Right bar overlay-->
     <div class="rightbar-overlay"></div>
 
+    
+
     <!-- JAVASCRIPT -->
     <script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('assets/libs/metismenu/metisMenu.min.js') }}"></script>
     <script src="{{ asset('assets/libs/simplebar/simplebar.min.js') }}"></script>
     <script src="{{ asset('assets/libs/node-waves/waves.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/feather-icons/feather.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/feather-icons/feather.min.js') }}"></script>\
     <!-- DATATABLE -->
     <script src="{{ asset('assets/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
@@ -356,6 +383,6 @@
     <script src="{{ asset('assets/js/searchInput.js') }}"></script>
     <script src="{{ asset('assets/js/floating-dropdown.js') }}"></script>
     <script src="{{ asset('assets/js/helperDT.js') }}"></script>
-    <script src="{{ asset('assets/js/currencyFormat.js') }}"></script>
+    <script src="{{ asset('assets/js/currencyFormat.js') }}"></script>\
 </body>
 </html>

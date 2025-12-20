@@ -332,6 +332,27 @@
             requestData.flag = 1;
             handleExport(url, requestData, fileName);
         });
+
+        // Filter Type
+        let types = @json($typeManuals);
+        var filterType = `
+            <select class="form-select" id="filterType">
+                <option value="">-- All Type --</option>
+                <option disabled>──────────</option>
+                ${types.map(type => `<option value="${type}">${type}</option>`).join('')}
+            </select>
+        `;
+        $('.dataTables_wrapper .dataTables_length #lengthDT').after(filterType);
+        $('#filterType').on('change', function() {
+            var dt = $('#ssTable').DataTable();
+            var originalAjax = dt.ajax;
+            dt.settings()[0].ajax.data = function(d) {
+                return $.extend({}, d, data, {
+                    type: $('#filterType').val()
+                });
+            };
+            dt.ajax.reload();
+        });
     });
 </script>
 

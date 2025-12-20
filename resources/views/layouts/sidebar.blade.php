@@ -68,7 +68,7 @@
             <li class="menu-title" data-key="t-menu">Accounting</li>
             @can('Akunting_generalledger') 
                 <li>
-                    <a href="{{ route('generalledger.index') }}" class="{{ request()->is('generalledger*') ? 'bg-light text-primary active' : '' }}">
+                    <a href="{{ route('generalledger.index') }}" class="{{ request()->is('general-ledger*') ? 'bg-light text-primary active' : '' }}">
                         <i class="mdi mdi-file-cabinet"></i>
                         <span>General Ledger</span>
                     </a>

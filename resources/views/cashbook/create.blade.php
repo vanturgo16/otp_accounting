@@ -22,7 +22,7 @@
             </div>
         </div>
 
-        <form class="formLoad" action="{{ route('cashbook.store') }}" method="POST" enctype="multipart/form-data">
+        <form id="formstore" action="{{ route('cashbook.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="row">
                 <div class="col-12">
@@ -93,9 +93,19 @@
                                         <div class="card-header text-center">
                                             <h6 class="mb-0">
                                                 Transaction
+                                                <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Aturan Transaksi: Total Debit harus sama dengan Total Kredit"></i>
                                             </h6>
                                         </div>
                                         <div class="card-body">
+                                            <!-- Transaction Note -->
+                                            <div class="alert alert-info small mb-3">
+                                                <strong>Note:</strong><br>
+                                                Pada bagian <b>Index</b> dan <b>Print Invoice</b>, akun yang ditampilkan adalah:
+                                                <ul class="mb-0 ps-3">
+                                                    <li><b>Bukti Kas Masuk & Bank Masuk</b> → List akun <b>Kredit</b> saja</li>
+                                                    <li><b>Bukti Kas Keluar & Bank Keluar</b> → List akun <b>Debit</b> saja</li>
+                                                </ul>
+                                            </div>
                                             <div class="table-repsonsive">
                                                 <table class="table table-bordered" id="dynamicTable">
                                                     <thead>
@@ -128,7 +138,7 @@
                                                                 </select>
                                                             </td>
                                                             <td>
-                                                                <textarea class="form-control" name="addmore[0][note]" cols="20" rows="3" placeholder="Input Note.." required></textarea>
+                                                                <textarea class="form-control" name="addmore[0][note]" cols="20" rows="3" placeholder="Input Note..(Optional)"></textarea>
                                                             </td>
                                                             <td style="text-align:center"><button type="button" name="add" id="adds" class="btn btn-success"><i class="fas fa-plus"></i></button></td>
                                                         </tr>
@@ -145,7 +155,7 @@
                                     <a href="{{ route('cashbook.index') }}" type="button" class="btn btn-light waves-effect btn-label waves-light">
                                         <i class="mdi mdi-arrow-left-circle label-icon"></i>Back
                                     </a>
-                                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light">
+                                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb">
                                         <i class="mdi mdi-plus-box label-icon"></i>Create
                                     </button>
                                 </div>
@@ -157,6 +167,104 @@
         </form>
     </div>
 </div>
+
+<div class="modal fade" id="alert" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-top" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel"><span class="mdi mdi-alert"></span> Nominal Not Equal !</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="modalBodyContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Validation Form --}}
+<script>
+    function normalizeNumber(value) {
+        if (typeof value === "string") {
+            return parseFloat(
+                value.replace(/\./g, "").replace(",", ".")
+            );
+        }
+        return Number(value);
+    }
+
+    function parseCurrency(value) {
+        return parseFloat(value.replace(/\./g, '').replace(',', '.'));
+    }
+
+    function calculateTotals() {
+        let debitTotal = 0;
+        let kreditTotal = 0;
+
+        $("#dynamicTable tbody tr").each(function() {
+            let nominal = parseCurrency($(this).find('input[name*="[nominal]"]').val());
+            let type = $(this).find('select[name*="[type]"]').val();
+
+            if (type === "D") {
+                debitTotal += nominal;
+            } else if (type === "K") {
+                kreditTotal += nominal;
+            }
+        });
+
+        return { debitTotal, kreditTotal };
+    }
+
+    document.getElementById('formstore').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let totals = calculateTotals();
+
+        if (totals.debitTotal !== totals.kreditTotal) {
+            let modalBodyContent = `
+                <div class="col-12">
+                    <table class="table dt-responsive w-100">
+                        <thead>
+                            <tr>
+                                <th class="align-top text-bold">Total Debit</th>
+                                <th class="text-center">:</th>
+                                <th class="align-top">${totals.debitTotal.toLocaleString('id-ID')}</th>
+                            </tr>
+                            <tr>
+                                <th class="align-top text-bold">Total Kredit</th>
+                                <th class="text-center">:</th>
+                                <th class="align-top">${totals.kreditTotal.toLocaleString('id-ID')}</th>
+                            </tr>
+                            <tr>
+                                <th class="align-top text-bold">Difference</th>
+                                <th class="text-center">:</th>
+                                <th class="align-top text-danger">${(totals.debitTotal - totals.kreditTotal).toLocaleString('id-ID')}</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('modalBodyContent').innerHTML = modalBodyContent;
+
+            var myModal = new bootstrap.Modal(document.getElementById('alert'));
+            myModal.show();
+        } else {
+            var submitButton = this.querySelector('button[name="sb"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerHTML =
+                    '<i class="mdi mdi-loading mdi-spin label-icon"></i>Please Wait...';
+            }
+            $("#processing").removeClass("hidden");
+            $("body").addClass("no-scroll");
+            this.submit();
+            return true;
+        }
+    });
+</script>
 
 {{-- Toogle Type --}}
 <script>
@@ -212,7 +320,7 @@
                     </select>
                 </td>
                 <td>
-                    <textarea class="form-control" name="addmore[`+i+`][note]" cols="20" rows="3" placeholder="Input Note.." required></textarea>
+                    <textarea class="form-control" name="addmore[`+i+`][note]" cols="20" rows="3" placeholder="Input Note..(Optional)"></textarea>
                 </td>
                 <td style="text-align:center">
                     <button type="button" class="btn btn-danger remove-tr"><i class="fas fa-minus"></i></button>

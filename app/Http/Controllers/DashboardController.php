@@ -3,16 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+
+// Traits
+use App\Traits\AuditLogsTrait;
 
 // Model
 use App\Models\TransCashBook;
 use App\Models\TransPurchase;
 use App\Models\TransSales;
 use App\Models\TransSalesExport;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
+    use AuditLogsTrait;
+
     public function __construct()
     {
         $this->middleware(['permission:Akunting_dashboard']);
@@ -38,6 +45,24 @@ class DashboardController extends Controller
                 'countPT'       => $countPT,
                 'countCB'       => $countCB,
             ]);
+        }
+    }
+
+    public function switchTheme(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $statusBefore = User::where('id', auth()->user()->id)->first()->is_darkmode;
+            $status = ($statusBefore == 1) ? null : 1;
+            User::where('id', auth()->user()->id)->update(['is_darkmode' => $status]);
+
+            //Audit Log
+            $this->auditLogsShort('Switch Theme');
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Switch Theme']);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with(['fail' => 'Failed Switch Theme']);
         }
     }
 }

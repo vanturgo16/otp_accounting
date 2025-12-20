@@ -104,16 +104,19 @@
                                 </div>
                             </div>
                             <div class="col-lg-4">
-                                <div class="alert alert-warning mb-0 small d-none d-lg-block" role="alert">
+                                <div class="alert alert-warning mb-0 d-none d-lg-block" style="font-size:0.5rem;" role="alert">
                                     <ul class="mb-0 ps-3">
                                         <li>
-                                            <b>Edit</b> & <b>Delete</b> actions are only available for <b>Super Admin</b> and only for transactions within the <b>current month.</b>
+                                            <b>Edit</b> & <b>Delete</b> actions are only for <b>Super Admin</b> and for transactions in the <b>current month</b>.
+                                        </li>
+                                        <li>
+                                            When editing, the <b>DN Number</b> cannot be changed. To change it, delete the transaction and create a new one.
                                         </li>
                                     </ul>
                                 </div>
                                 <div class="text-end d-block d-lg-none">
                                     <i class="mdi mdi-information-outline text-muted" data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Edit and Delete actions are only available for Super Admin and only for transactions within the current month.">
+                                        title="Edit and Delete actions are only available for Super Admin and only for transactions within the current month & When editing, the DN Number cannot be changed. To change it, delete the transaction and create a new one.">
                                     </i>
                                 </div>
                             </div>

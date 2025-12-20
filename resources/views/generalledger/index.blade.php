@@ -168,7 +168,8 @@
             searchable: true,
             className: 'align-top',
             render: function(data, type, row) {
-                return '<b>' + data + '</b><br><small>source: <b>' + row.source + '</b></small>';
+                let source = row.ref_source ? row.ref_source : 'Manual Entry';
+                return '<b>' + data + '</b><br><small>source: <b>' + source + '</b></small>';
             },
         },
         {
@@ -201,7 +202,7 @@
             orderable: true,
             className: 'align-top text-end',
             render: function(data, type, row) {
-                var formattedAmount = numberFormat(row.amount, 3, ',', '.'); 
+                var formattedAmount = numberFormat(row.amount, 2, ',', '.'); 
                 var parts = formattedAmount.split(',');
                 if (parts.length > 1) {
                     return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
@@ -303,6 +304,29 @@
             var requestData = Object.assign({}, data);
             requestData.flag = 1;
             handleExport(url, requestData, fileName);
+        });
+
+        // Filter Category
+        var filterCategory = `
+            <select class="form-select" id="filterCategory">
+                <option value="">-- All Kategory --</option>
+                <option disabled>──────────</option>
+                <option value="Sales (Local)">Sales (Local)</option>
+                <option value="Sales (Export)">Sales (Export)</option>
+                <option value="Purchase">Purchase</option>
+                <option value="Cash Book">Cash Book</option>
+            </select>
+        `;
+        $('.dataTables_wrapper .dataTables_length #lengthDT').after(filterCategory);
+        $('#filterCategory').on('change', function() {
+            var dt = $('#ssTable').DataTable();
+            var originalAjax = dt.ajax;
+            dt.settings()[0].ajax.data = function(d) {
+                return $.extend({}, d, data, {
+                    source: $('#filterCategory').val()
+                });
+            };
+            dt.ajax.reload();
         });
     });
 </script>

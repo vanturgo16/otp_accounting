@@ -29,6 +29,7 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
         Route::prefix('dashboard')->group(function () {
             Route::get('/', 'index')->name('dashboard');
             Route::get('/get-data-summary', 'getDataSummary')->name('getDataSummary');
+            Route::post('/', 'switchTheme')->name('switchTheme');
         });
     });
 
@@ -199,7 +200,7 @@ Route::middleware(['auth','clear.permission.cache','permission:Akunting_dashboar
 
     //GeneralLedger
     Route::controller(GeneralLedgersController::class)->group(function () {
-        Route::prefix('generalledger')->middleware('permission:Akunting_generalledger')->group(function () {
+        Route::prefix('general-ledger')->middleware('permission:Akunting_generalledger')->group(function () {
             Route::get('/', 'index')->name('generalledger.index');
             Route::prefix('modal')->group(function () {
                 Route::get('/info/{source}/{id}', 'modalInfo')->name('generalledger.modal.info');
