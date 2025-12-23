@@ -187,6 +187,7 @@ class TransPurchaseController extends Controller
                 'purchase_order_details.id_purchase_requisition_details'
             )
             ->where('good_receipt_note_details.id_good_receipt_notes', $idGRN)
+            ->whereNotNull('good_receipt_note_details.status')
             ->get();
 
         $totalPrice     = round((float) $datas->sum('total_price'), 2);
