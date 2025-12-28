@@ -32,6 +32,12 @@
                     <label class="form-label mb-0">GRN Number</label>
                     <br><span>{{ $detail->grn_number }}</span>
                 </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 mb-3">
+                    <label class="form-label mb-0">External Doc. Number</label>
+                    <br><span>{{ $detail->external_doc_number ?? '-' }}</span>
+                </div>
                 <div class="col-lg-3 mb-3">
                     <label class="form-label mb-0">GRN Date</label>
                     <br><span>{{ $detail->grn_date ? \Carbon\Carbon::parse($detail->grn_date)->format('d-m-Y') : '-' }}</span>

@@ -103,6 +103,7 @@ class TransPurchaseController extends Controller
             }
         }
         $response = [
+            'extDocNumber'=> $grn->external_doc_number,
             'prNumber'    => $prNumber,
             'poNumber'    => $poNumber,
             'supplierName'=> $supplierName,
@@ -341,6 +342,7 @@ class TransPurchaseController extends Controller
                 'id_good_receipt_notes'=> $idGRN,
                 'grn_number'           => $grnNumber,
                 'grn_date'             => $request->grn_date,
+                'external_doc_number'  => $request->external_doc_number,
                 'last_status_grn'      => $lastStatusGRN,
                 'ref_number'           => $request->ref_number,
                 'po_number'            => $request->po_number,

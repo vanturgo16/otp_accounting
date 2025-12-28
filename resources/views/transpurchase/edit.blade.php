@@ -67,6 +67,10 @@
                                                 value="{{ $detail->grn_number . ' || ' . \Carbon\Carbon::parse($detail->grn_date)->format('Y-m-d') }}" 
                                                 readonly>
                                         </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label">External Doc. Number</label>
+                                            <input class="form-control readonly-input" id="external_doc_number" type="text" value="{{ $detail->external_doc_number ?? '-' }}" readonly>
+                                        </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 mb-3">
