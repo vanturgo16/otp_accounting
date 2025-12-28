@@ -76,6 +76,7 @@
                                     </select>
                                     <input type="hidden" name="grn_number" value="">
                                     <input type="hidden" name="grn_date" value="">
+                                    <input type="hidden" name="external_doc_number" value="">
                                     
                                     <input type="hidden" name="ref_number" value="">
                                     <input type="hidden" name="po_number" value="">
@@ -83,6 +84,9 @@
                                     <input type="hidden" name="requester" value="">
                                 </div>
                                 <div class="col-lg-6 mb-3">
+                                    <label class="form-label">External Doc. Number</label>
+                                    <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari GRN yang dipilih"></i>
+                                    <input class="form-control readonly-input" id="external_doc_number" type="text" value="" placeholder="Select Good Receipt Notes.." readonly>
                                 </div>
                             </div>
 
@@ -621,19 +625,21 @@
             let initPPN = parseFloat('{{ $initPPN }}') || 0;
             resetPPNRate();
             resetPrice();
-            $('#ref_number,#po_number,#suppliers,#requester').val('🔃');
-            $('input[name="ref_number"], input[name="po_number"], input[name="suppliers"], input[name="requester"]').val('');
+            $('#external_doc_number,#ref_number,#po_number,#suppliers,#requester').val('🔃');
+            $('input[name="external_doc_number"], input[name="ref_number"], input[name="po_number"], input[name="suppliers"], input[name="requester"]').val('');
             $('input[name="discount"]').val(0);
 
             if(idGRN) {
                 let url = '{{ route("transpurchase.getDetailGRN", ":id") }}'.replace(':id', idGRN);
 
                 $.get(url, function(res) {
+                    $('#external_doc_number').val(res.extDocNumber ?? '-');
                     $('#ref_number').val(res.prNumber ?? '-');
                     $('#po_number').val(res.poNumber ?? '-');
                     $('#suppliers').val(res.supplierName ?? '-');
                     $('#requester').val(res.requester ?? '-');
                     
+                    $('input[name="external_doc_number"]').val(res.extDocNumber ?? '');
                     $('input[name="ref_number"]').val(res.prNumber ?? '');
                     $('input[name="po_number"]').val(res.poNumber ?? '');
                     $('input[name="suppliers"]').val(res.supplierName ?? '');
