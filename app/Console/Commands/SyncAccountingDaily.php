@@ -15,45 +15,31 @@ class SyncAccountingDaily extends Command
 
     public function handle()
     {
-        // --- 1. Check sync time from rule ---
-        $rule = MstRule::where('rule_name', 'Sync Time Accounting Daily')->first();
-
-        if (!$rule || empty($rule->rule_value)) {
-            return Command::SUCCESS;
-        }
-
-        $syncTime = Carbon::createFromFormat('H:i', $rule->rule_value)->format('H:i');
-        $now      = now()->format('H:i');
-
-        if ($now !== $syncTime) {
-            return Command::SUCCESS;
-        }
-        
         $this->log('--- Starting Sync Accounting Daily ---');
 
-        // --- 2. Scheduler logic starts here ---
+        // --- 1. Scheduler logic starts here ---
         $currentPeriod  = now()->format('Y-m');
         $previousPeriod = now()->subMonth()->format('Y-m');
 
-        // 2a. First run? (report_monthly empty)
+        // 1a. First run? (report_monthly empty)
         if (!ReportMonthly::exists()) {
             $this->firstInitialization($currentPeriod);
             $this->log('Monthly report initialized for first run.');
             return Command::SUCCESS;
         }
 
-        // 2b. First day of month? open current month by get amount close prev month
+        // 1b. First day of month? open current month by get amount close prev month
         $today = now();
         if ($today->day === 1) {
             $this->log("First day of month. Opening current month: {$currentPeriod}");
             $this->openCurrentMonth($currentPeriod, $previousPeriod);
         }
 
-        // 2c. Ensure new accounts mid-month
+        // 1c. Ensure new accounts mid-month
         $this->log("Checking for new accounts for current period: {$currentPeriod}");
         $this->ensureNewAccounts($currentPeriod);
 
-        // 2d. Update current month closing balance daily
+        // 1d. Update current month closing balance daily
         $this->log("Updating current month closing balance: {$currentPeriod}");
         $this->updateCurrentMonthClosing($currentPeriod);
 
