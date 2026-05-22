@@ -64,11 +64,12 @@
                                 {{ $item->account_code." - ".$item->account_name }}
                             </td>
                             <td class="text-end">
-                                @php
+                                {{-- @php
                                     $formatted = number_format($item->amount, 2, ',', '.');
                                     [$before, $after] = explode(',', $formatted);
                                 @endphp
-                                <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                <span class="fw-bold">{{ number_format(round($item->amount), 0, ',', '.') }}</span>
                             </td>
                             <td class="text-center">
                                 @if($item->transaction == 'D')

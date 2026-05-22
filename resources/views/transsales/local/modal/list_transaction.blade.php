@@ -27,11 +27,12 @@
                         {{ $item->account_name ?? '-' }}
                     </td>
                     <td class="align-top text-end">
-                        @php
+                        {{-- @php
                             $formatted = number_format($item->amount, 2, ',', '.');
                             [$before, $after] = explode(',', $formatted);
                         @endphp
-                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                        <span class="fw-bold">{{ number_format(round($item->amount), 0, ',', '.') }}</span>
                     </td>
                     <td class="align-top text-center">
                         @if($item->transaction == 'D')

@@ -120,7 +120,10 @@
                                 ">
                             {{ $item->note ?? '-' }}
                         </td>
-                        <td class="px-2 text-right" style="border-right: 0.75px solid black">{{ number_format($item->amount, 2, ',', '.') }}</td>
+                        <td class="px-2 text-right" style="border-right: 0.75px solid black">
+                            {{-- {{ number_format($item->amount, 2, ',', '.') }} --}}
+                            {{ number_format(round($item->amount), 0, ',', '.') }}
+                        </td>
                     </tr>
                 @endforeach
                 <tr>
@@ -134,7 +137,8 @@
                     <td class="text-right px-2">TERBILANG : </td>
                     <td class="px-2" style="text-decoration: underline;">{{ strtoupper($terbilangString ?? '-') }}</td>
                     <td class="px-2 text-right" style="border-bottom: 0.75px solid; border-left: 0.75px solid; border-right: 0.75px solid black">
-                        {{ number_format($detail->total, 2, ',', '.') }}
+                        {{-- {{ number_format($detail->total, 2, ',', '.') }} --}}
+                        {{ number_format(round($detail->total), 0, ',', '.') }}
                     </td>
                 </tr>
             </tfoot>

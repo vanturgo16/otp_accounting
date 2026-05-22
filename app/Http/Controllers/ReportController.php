@@ -47,8 +47,13 @@ class ReportController extends Controller
                 $datas = $datas->where('account_name', 'like', '%'.$account_name.'%');
             }
 
-            if($request->flag != null){
-                $datas = $datas->get()->makeHidden(['id', 'id_account_code', 'created_at', 'updated_at']);
+            if ($request->flag != null) {
+                $datas = $datas->get()->map(function ($item) {
+                    $data = $item->toArray();
+                    unset($data['id'], $data['id_account_code'], $data['created_at'], $data['updated_at']);
+                    $data['last_updated_at'] = $item->updated_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    return $data;
+                });
                 return $datas;
             }
                 
