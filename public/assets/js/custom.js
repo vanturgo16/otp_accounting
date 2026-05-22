@@ -34,6 +34,25 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+// Format Rupiah without comma/decimal
+function formatCurrencyInputNoComma(event) {
+    let value = event.target.value;
+
+    // remove all non-digit characters
+    value = value.replace(/\D/g, "");
+
+    // add thousand separator
+    value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    event.target.value = value;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".rupiah-input-no-comma").forEach((input) => {
+        input.addEventListener("input", formatCurrencyInputNoComma);
+    });
+});
+
 function numberFormat(number, decimals, decPoint, thousandsSep) {
     // Fix for NaN cases
     if (!isFinite(number)) {

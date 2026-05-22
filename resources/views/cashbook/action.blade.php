@@ -1,6 +1,6 @@
 @php
     use Carbon\Carbon;
-    $isCurrentMonth = Carbon::parse($data->date_invoice)->isSameMonth(now());
+    $canModify = Carbon::parse($data->date_invoice)->greaterThanOrEqualTo(Carbon::today()->subDays(20));
 @endphp
 
 <div class="btn-group">
@@ -16,7 +16,7 @@
         <span>Info</span>
     </a>
     @can('Akunting_master_data')
-        @if($isCurrentMonth)
+        @if($canModify)
             <hr class="m-0">
             <a href="{{ route('cashbook.edit', encrypt($data->id)) }}" class="dropdown-item-floating d-flex align-items-center gap-2">
                 <i class="mdi mdi-file-edit"></i>

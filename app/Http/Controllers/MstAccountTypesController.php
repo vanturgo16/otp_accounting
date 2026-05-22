@@ -46,8 +46,14 @@ class MstAccountTypesController extends Controller
                 $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
             }
             
-            if($request->flag != null){
-                $datas = $datas->orderBy('master_account_types.created_at','asc')->get()->makeHidden(['id']);
+            if ($request->flag != null) {
+                $datas = $datas->orderBy('master_account_types.created_at','asc')->get()->map(function ($item) {
+                    $data = $item->toArray();
+                    unset($data['id'], $data['created_at'], $data['updated_at']);
+                    $data['created_at'] = $item->created_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    $data['updated_at'] = $item->updated_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    return $data;
+                });
                 return $datas;
             }
 

@@ -107,16 +107,16 @@
                                 <div class="alert alert-warning mb-0 d-none d-lg-block" style="font-size:0.5rem;" role="alert">
                                     <ul class="mb-0 ps-3">
                                         <li>
-                                            <b>Edit</b> & <b>Delete</b> actions are only for <b>Super Admin</b> and for transactions in the <b>current month</b>.
+                                            <b>Super Admin</b> can <b>Edit</b> & <b>Delete</b> transactions within <b>20 days</b> only.
                                         </li>
                                         <li>
-                                            When editing, the <b>DN Number</b> cannot be changed. To change it, delete the transaction and create a new one.
+                                            <b>DN Number</b> cannot be edited. Delete and recreate the transaction to change it.
                                         </li>
                                     </ul>
                                 </div>
                                 <div class="text-end d-block d-lg-none">
                                     <i class="mdi mdi-information-outline text-muted" data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Edit and Delete actions are only available for Super Admin and only for transactions within the current month & When editing, the DN Number cannot be changed. To change it, delete the transaction and create a new one.">
+                                        title="Edit and Delete actions are only available for Super Admin. Transactions can only be edited or deleted within 20 days prior to the current date, the DN Number cannot be changed. To change it, delete the transaction and create a new one.">
                                     </i>
                                 </div>
                             </div>
@@ -214,22 +214,29 @@
         },
         {
             data: 'total',
-            name: 'total',
             orderable: true,
             searchable: true,
-            className: 'text-end',
-            render: function(data, type, row) {
-                if (data == null) {
-                    return '<span class="badge bg-secondary">Null</span>';
-                }
-                var formattedAmount = numberFormat(data, 2, ',', '.'); 
-                var parts = formattedAmount.split(',');
-                if (parts.length > 1) {
-                    return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
-                }
-                return '<span class="text-bold">' + parts[0] + '</span>';
-            },
+            className: 'align-top text-end',
+            render: (data, type, row) => formatAmountDTCoretax(data),
         },
+        // {
+        //     data: 'total',
+        //     name: 'total',
+        //     orderable: true,
+        //     searchable: true,
+        //     className: 'text-end',
+        //     render: function(data, type, row) {
+        //         if (data == null) {
+        //             return '<span class="badge bg-secondary">Null</span>';
+        //         }
+        //         var formattedAmount = numberFormat(data, 2, ',', '.'); 
+        //         var parts = formattedAmount.split(',');
+        //         if (parts.length > 1) {
+        //             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+        //         }
+        //         return '<span class="text-bold">' + parts[0] + '</span>';
+        //     },
+        // },
         {
             data: 'created_by',
             searchable: true,

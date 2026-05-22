@@ -115,6 +115,31 @@ class TransPurchaseController extends Controller
     {
         $idGRN      = $request->idGRN;
         $ppnRate    = $request->ppnRate;
+        $rule       = $request->rule;
+        
+        $isCoretax  = ($rule === "Coretax");
+
+        $coretax = function ($expression) use ($isCoretax) {
+            if (!$isCoretax) {
+                return "ROUND($expression, 3)";
+            }
+
+            return "
+                CASE 
+                    WHEN (($expression) - FLOOR(($expression))) >= 0.5 
+                        THEN CEIL(($expression))
+                    ELSE FLOOR(($expression))
+                END
+            ";
+        };
+
+        $basePrice = "
+            COALESCE(
+                purchase_requisition_details.price,
+                purchase_order_details.price
+            )
+        ";
+        $roundedPrice = $coretax($basePrice);
 
         $datas = GoodReceiptNoteDetail::select(
                 'good_receipt_note_details.id',
@@ -137,25 +162,32 @@ class TransPurchaseController extends Controller
                         purchase_order_details.currency
                     ) as currency
                 "),
+
+                // =========================
+                // PRICE ORIGIN
+                // =========================
                 DB::raw("
-                    COALESCE(
-                        purchase_requisition_details.price,
-                        purchase_order_details.price
-                    ) as price_origin
+                    {$roundedPrice} as price_origin
                 "),
+
+                // =========================
+                // PRICE
+                // =========================
                 DB::raw("
-                    COALESCE(
-                        purchase_requisition_details.price,
-                        purchase_order_details.price
-                    ) as price
+                    {$roundedPrice} as price
                 "),
+
+                // =========================
+                // TOTAL PRICE
+                // rounded price × qty → final rounded
+                // =========================
                 DB::raw("
-                    (
-                        COALESCE(
-                            purchase_requisition_details.price,
-                            purchase_order_details.price
-                        ) * good_receipt_note_details.receipt_qty
-                    ) as total_price
+                    {$coretax("
+                        (
+                            {$roundedPrice}
+                            * good_receipt_note_details.receipt_qty
+                        )
+                    ")} as total_price
                 ")
             )
             ->leftJoin('master_raw_materials', function ($join) {
@@ -191,9 +223,16 @@ class TransPurchaseController extends Controller
             ->whereNotNull('good_receipt_note_details.status')
             ->get();
 
-        $totalPrice     = round((float) $datas->sum('total_price'), 2);
-        $ppnValue       = round((float) ($ppnRate/100) * $totalPrice, 2);
-        $total          = round((float) $totalPrice + $ppnValue, 2);
+
+        if ($isCoretax) {
+            $totalPrice = round((float) $datas->sum('total_price'));
+            $ppnValue   = round(((float) $ppnRate / 100) * $totalPrice);
+            $total      = round($totalPrice + $ppnValue);
+        } else {
+            $totalPrice     = round((float) $datas->sum('total_price'), 2);
+            $ppnValue       = round((float) ($ppnRate/100) * $totalPrice, 2);
+            $total          = round((float) $totalPrice + $ppnValue, 2);
+        }
 
         if ($request->ajax()) {
             return DataTables::of($datas)
@@ -223,11 +262,11 @@ class TransPurchaseController extends Controller
             return DataTables::of($datas)
                 ->with([
                     'currency'  => $data->currency,
-                    'nj'        => round((float) $data->amount, 2),
+                    'nj'        => round((float) $data->amount),
                     'ppn_rate'  => $data->ppn_rate,
-                    'ppn'       => round((float) $data->ppn_value, 2),
-                    'discount'  => round((float) $data->total_discount, 2),
-                    'total'     => round((float) $data->total, 2),
+                    'ppn'       => round((float) $data->ppn_value),
+                    'discount'  => round((float) $data->total_discount),
+                    'total'     => round((float) $data->total),
                 ])
                 ->toJson();
         }
@@ -273,8 +312,14 @@ class TransPurchaseController extends Controller
                 $datas = $datas->whereDate('trans_purchase.created_at','>=',$startdate)->whereDate('trans_purchase.created_at','<=',$enddate);
             }
             
-            if($request->flag != null){
-                $datas = $datas->get()->makeHidden(['id']);
+            if ($request->flag != null) {
+                $datas = $datas->get()->map(function ($item) {
+                    $data = $item->toArray();
+                    unset($data['id'], $data['created_at'], $data['updated_at']);
+                    $data['created_at'] = $item->created_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    $data['updated_at'] = $item->updated_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    return $data;
+                });
                 return $datas;
             }
             
@@ -310,7 +355,7 @@ class TransPurchaseController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'date_invoice'              => 'required',
+            'date_invoice'              => 'required|date|after_or_equal:' . date('Y-m-d', strtotime('-20 days')) . '|before_or_equal:today',
             'id_good_receipt_notes'     => 'required',
             'grn_number'                => 'required',
             'grn_date'                  => 'required',
@@ -333,6 +378,7 @@ class TransPurchaseController extends Controller
         }
         $listProduct = json_decode($request->listProduct, true);
         $disc        = $this->normalizePrice($request->discount);
+        $disc        = $this->coretaxRound($disc);
 
         $lastStatusGRN = optional(GoodReceiptNote::where('id', $idGRN)->first())->status;
 
@@ -412,6 +458,12 @@ class TransPurchaseController extends Controller
     {
         $id = decrypt($id);
         $detail = TransPurchase::where('id', $id)->first();
+        if (\Carbon\Carbon::parse($detail->date_invoice)->lt(\Carbon\Carbon::today()->subDays(20))) {
+            return redirect()->route('transpurchase.index')->with([
+                'fail' => 'Transactions can only be edited within 20 days prior to the current date.'
+            ]);
+        }
+
         $detailTrans = TransPurchaseDetailPrice::where('id_trans_purchase', $id)->get();
         $generalLedgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
             ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
@@ -432,7 +484,7 @@ class TransPurchaseController extends Controller
     {
         // dd($request->all());
         $request->validate([
-            'date_invoice'              => 'required',
+            'date_invoice'              => 'required|date|after_or_equal:' . date('Y-m-d', strtotime('-20 days')) . '|before_or_equal:today',
             'invoice_number'            => 'required',
             'tax_invoice_number'        => 'required',
             'ppn_rate'                  => 'required',
@@ -445,6 +497,7 @@ class TransPurchaseController extends Controller
         $detail    = TransPurchase::where('id', $id)->lockForUpdate()->first();
         $requestLP = json_decode($request->listProduct, true);
         $disc      = $this->normalizePrice($request->discount);
+        $disc      = $this->coretaxRound($disc);
         $invNumber = $request->invoice_number;
 
         // Validation
@@ -588,11 +641,10 @@ class TransPurchaseController extends Controller
             $id = decrypt($id);
             $detail  = TransPurchase::findOrFail($id);
 
-            // Validation
-            $trxDate = Carbon::parse($detail->date_invoice);
-            $now     = Carbon::now();
-            if (!$trxDate->isSameMonth($now)) {
-                return back()->with('error', 'This transaction cannot be deleted because the transaction month has already passed.');
+            if (\Carbon\Carbon::parse($detail->date_invoice)->lt(\Carbon\Carbon::today()->subDays(20))) {
+                return redirect()->route('transpurchase.index')->with([
+                    'fail' => 'Transactions can only be deleted within 20 days prior to the current date.'
+                ]);
             }
 
             $lastStatusGRN = $detail->last_status_grn ?? 'Posted';

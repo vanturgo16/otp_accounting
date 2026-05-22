@@ -125,10 +125,10 @@
                                 </div>
                             </div>
                             <div class="col-lg-4">
-                                <div class="alert alert-warning mb-0 small d-none d-lg-block" role="alert">
+                                <div class="alert alert-warning mb-0 d-none d-lg-block" style="font-size:0.5rem;" role="alert">
                                     <ul class="mb-0 ps-3">
                                         <li>
-                                            <b>Edit</b> & <b>Delete</b> actions are only available for <b>Super Admin</b> and only for transactions within the <b>current month.</b>
+                                            <b>Super Admin</b> can <b>Edit</b> & <b>Delete</b> transactions within <b>20 days</b> only.
                                         </li>
                                     </ul>
                                 </div>
@@ -242,7 +242,7 @@
             data: 'amount',
             orderable: true,
             className: 'align-top text-end',
-            render: (data, type, row) => formatAmountDT(data),
+            render: (data, type, row) => formatAmountDTCoretax(data),
         },
         {
             data: 'transaction',

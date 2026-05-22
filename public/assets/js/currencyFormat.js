@@ -16,6 +16,23 @@ $(document).on("input", ".currency-input", function () {
     formatCurrencyInput({ target: this });
 });
 
+// Format Rupiah without comma/decimal
+function formatCurrencyInputNoComma(event) {
+    let value = event.target.value;
+
+    // remove all non-digit characters
+    value = value.replace(/\D/g, "");
+
+    // add thousand separator
+    value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    event.target.value = value;
+}
+$(document).on("input", ".currency-input-no-comma", function () {
+    formatCurrencyInputNoComma({ target: this });
+});
+
+
 
 function formatPrice(value) {
     if (!value) return '0';
@@ -39,4 +56,15 @@ function formatPriceWithStyle(value) {
     let before = parts[0]; // integer part with thousand separator
     let after = parts[1] ? ',' + parts[1] : '';
     return `<span class="fw-bold">${before}</span><span class="text-muted">${after}</span>`;
+}
+function formatPriceWithStyleCoretax(value) {
+    // Format with 3 decimals, comma as decimal sep, dot as thousand sep
+    let formatted = new Intl.NumberFormat('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value);
+    // Split integer and decimal part
+    let parts = formatted.split(',');
+    let before = parts[0]; // integer part with thousand separator
+    return `<span class="fw-bold">${before}</span>`;
 }

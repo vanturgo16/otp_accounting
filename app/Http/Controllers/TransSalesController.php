@@ -143,138 +143,192 @@ class TransSalesController extends Controller
     }
     public function getSOPriceFromDN(Request $request)
     {
-        $idDN       = $request->idDN;
-        $ppnRate    = $request->ppnRate;
+        $idDN    = $request->idDN;
+        $ppnRate = $request->ppnRate;
+        $rule    = $request->rule;
+
+        $isCoretax = ($rule === "Coretax");
+
+        // Coretax rounding helper (SQL)
+        $coretax = function ($expression) use ($isCoretax) {
+            if (!$isCoretax) {
+                return "ROUND($expression, 3)";
+            }
+
+            return "
+                CASE 
+                    WHEN (($expression) - FLOOR(($expression))) >= 0.5 
+                        THEN CEIL(($expression))
+                    ELSE FLOOR(($expression))
+                END
+            ";
+        };
 
         $datas = DeliveryNoteDetail::select(
-                'sales_orders.id as id_sales_orders',
-                'sales_orders.so_number',
-                'sales_orders.type_product',
-                DB::raw("
+            'sales_orders.id as id_sales_orders',
+            'sales_orders.so_number',
+            'sales_orders.type_product',
+            DB::raw("
+                CASE 
+                    WHEN sales_orders.type_product = 'RM' THEN master_raw_materials.description
+                    WHEN sales_orders.type_product = 'WIP' THEN master_wips.description
+                    WHEN sales_orders.type_product = 'FG' THEN master_product_fgs.description
+                    WHEN sales_orders.type_product IN ('TA', 'Other') THEN master_tool_auxiliaries.description
+                END as product
+            "),
+            'sales_orders.qty',
+            'master_units.unit as unit',
+            'sales_orders.ppn as ppn_type',
+
+            DB::raw("
+                {$coretax("sales_orders.price")}
+                as price_origin
+            "),
+            DB::raw("
+                {$coretax("sales_orders.total_price")}
+                as total_price_origin
+            "),
+
+            DB::raw("$ppnRate as ppn_rate"),
+
+            // =========================
+            // PPN VALUE
+            // =========================
+            DB::raw("
+                {$coretax("
                     CASE 
-                        WHEN sales_orders.type_product = 'RM' THEN master_raw_materials.description
-                        WHEN sales_orders.type_product = 'WIP' THEN master_wips.description
-                        WHEN sales_orders.type_product = 'FG' THEN master_product_fgs.description
-                        WHEN sales_orders.type_product IN ('TA', 'Other') THEN master_tool_auxiliaries.description
-                    END as product
-                "),
-                'sales_orders.qty',
-                'master_units.unit as unit',
-                'sales_orders.ppn as ppn_type',
-                'sales_orders.price as price_origin',
-                'sales_orders.total_price as total_price_origin',
-                DB::raw("$ppnRate as ppn_rate"),
+                        WHEN sales_orders.ppn = 'Exclude' 
+                            THEN ({$coretax("sales_orders.price")} * $ppnRate / 100)
+                        WHEN sales_orders.ppn = 'Include' 
+                            THEN ({$coretax("sales_orders.price")} - ({$coretax("sales_orders.price")} / (1 + ($ppnRate / 100))))
+                        ELSE 0
+                    END
+                ")} as ppn_value
+            "),
 
-                // PPN value
-                DB::raw("
-                    ROUND(
-                        CASE 
-                            WHEN sales_orders.ppn = 'Exclude' 
-                                THEN (sales_orders.price * $ppnRate / 100)
-                            WHEN sales_orders.ppn = 'Include' 
-                                THEN (sales_orders.price - (sales_orders.price / (1 + ($ppnRate / 100))))
-                            ELSE 0
-                        END
-                    , 3) as ppn_value
-                "),
-                // Price before PPN (for Include)
-                DB::raw("
-                    ROUND(
-                        CASE 
-                            WHEN sales_orders.ppn = 'Include' 
-                                THEN (sales_orders.price / (1 + ($ppnRate / 100)))
-                            ELSE sales_orders.price
-                        END
-                    , 3) as price_before_ppn
-                "),
-                // Total price before PPN (for Include)
-                DB::raw("
-                    ROUND(
-                        CASE 
-                            WHEN sales_orders.ppn = 'Include' 
-                                THEN (sales_orders.total_price / (1 + ($ppnRate / 100)))
-                            ELSE sales_orders.total_price
-                        END
-                    , 3) as total_price_before_ppn
-                "),
-                // Price after PPN (for Exclude)
-                DB::raw("
-                    ROUND(
-                        CASE 
-                            WHEN sales_orders.ppn = 'Exclude' 
-                                THEN (sales_orders.price * (1 + ($ppnRate / 100)))
-                            ELSE sales_orders.price
-                        END
-                    , 3) as price_after_ppn
-                "),
-                // Total price after PPN (for Exclude)
-                DB::raw("
-                    ROUND(
-                        CASE 
-                            WHEN sales_orders.ppn = 'Exclude' 
-                                THEN (sales_orders.total_price * (1 + ($ppnRate / 100)))
-                            ELSE sales_orders.total_price
-                        END
-                    , 3) as total_price_after_ppn
-                ")
-            )
-            ->leftJoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
-            ->leftJoin('master_raw_materials', function ($join) {
-                $join->on('sales_orders.id_master_products', '=', 'master_raw_materials.id')
-                    ->where('sales_orders.type_product', '=', 'RM');
-            })
-            ->leftJoin('master_wips', function ($join) {
-                $join->on('sales_orders.id_master_products', '=', 'master_wips.id')
-                    ->where('sales_orders.type_product', '=', 'WIP');
-            })
-            ->leftJoin('master_product_fgs', function ($join) {
-                $join->on('sales_orders.id_master_products', '=', 'master_product_fgs.id')
-                    ->where('sales_orders.type_product', '=', 'FG');
-            })
-            ->leftJoin('master_tool_auxiliaries', function ($join) {
-                $join->on('sales_orders.id_master_products', '=', 'master_tool_auxiliaries.id')
-                    ->whereIn('sales_orders.type_product', ['TA', 'Other']);
-            })
-            ->leftJoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
-            ->where('delivery_note_details.id_delivery_notes', $idDN)
-            ->get();
+            // =========================
+            // PRICE BEFORE PPN
+            // =========================
+            DB::raw("
+                {$coretax("
+                    CASE 
+                        WHEN sales_orders.ppn = 'Include' 
+                            THEN ({$coretax("sales_orders.price")} / (1 + ($ppnRate / 100)))
+                        ELSE {$coretax("sales_orders.price")}
+                    END
+                ")} as price_before_ppn
+            "),
 
-        $ppnType       = $datas->first() ? $datas->first()->ppn_type : null;
-        $totalPrice     = (float) $datas->sum('total_price_before_ppn');
-        $dppFactor      = (float) 11/12;
-        $dppValue       = (float) ($totalPrice) * $dppFactor;
-        $ppnValue       = (float) ($ppnRate/100) * $totalPrice;
-        $total          = (float) $totalPrice + $ppnValue;
-        
+            // =========================
+            // TOTAL PRICE BEFORE PPN
+            // =========================
+            DB::raw("
+                {$coretax("
+                    CASE 
+                        WHEN sales_orders.ppn = 'Include' 
+                            THEN ({$coretax("sales_orders.total_price")} / (1 + ($ppnRate / 100)))
+                        ELSE {$coretax("sales_orders.total_price")}
+                    END
+                ")} as total_price_before_ppn
+            "),
+
+            // =========================
+            // PRICE AFTER PPN
+            // =========================
+            DB::raw("
+                {$coretax("
+                    CASE 
+                        WHEN sales_orders.ppn = 'Exclude' 
+                            THEN ({$coretax("sales_orders.price")} * (1 + ($ppnRate / 100)))
+                        ELSE {$coretax("sales_orders.price")}
+                    END
+                ")} as price_after_ppn
+            "),
+
+            // =========================
+            // TOTAL AFTER PPN
+            // =========================
+            DB::raw("
+                {$coretax("
+                    CASE 
+                        WHEN sales_orders.ppn = 'Exclude' 
+                            THEN ({$coretax("sales_orders.total_price")} * (1 + ($ppnRate / 100)))
+                        ELSE {$coretax("sales_orders.total_price")}
+                    END
+                ")} as total_price_after_ppn
+            ")
+        )
+
+        ->leftJoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
+        ->leftJoin('master_raw_materials', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_raw_materials.id')
+                ->where('sales_orders.type_product', '=', 'RM');
+        })
+        ->leftJoin('master_wips', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_wips.id')
+                ->where('sales_orders.type_product', '=', 'WIP');
+        })
+        ->leftJoin('master_product_fgs', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_product_fgs.id')
+                ->where('sales_orders.type_product', '=', 'FG');
+        })
+        ->leftJoin('master_tool_auxiliaries', function ($join) {
+            $join->on('sales_orders.id_master_products', '=', 'master_tool_auxiliaries.id')
+                ->whereIn('sales_orders.type_product', ['TA', 'Other']);
+        })
+        ->leftJoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
+        ->where('delivery_note_details.id_delivery_notes', $idDN)
+        ->get();
+
+        // =========================
+        // SUMMARY CALCULATION
+        // =========================
+        $ppnType    = $datas->first() ? $datas->first()->ppn_type : null;
+        $totalPrice = (float) $datas->sum('total_price_before_ppn');
+        $dppFactor  = 11 / 12;
+        $dppValue   = $totalPrice * $dppFactor;
+        $ppnValue   = ($ppnRate / 100) * $totalPrice;
+        $total      = $totalPrice + $ppnValue;
+
+        // Coretax rounding for summary
+        if ($isCoretax) {
+            $totalPrice = $this->coretaxRound($totalPrice);
+            $dppValue = $this->coretaxRound($dppValue);
+            $ppnValue = $this->coretaxRound($ppnValue);
+            $total    = $this->coretaxRound($total);
+        }
+
         if ($request->ajax()) {
             return DataTables::of($datas)
                 ->with([
-                    'nj'        => $totalPrice,
-                    'dpp'       => $dppValue,
-                    'ppn_rate'  => $ppnRate,
-                    'ppn'       => $ppnValue,
-                    'total'     => $total,
+                    'nj'       => $totalPrice,
+                    'dpp'      => $dppValue,
+                    'ppn_rate' => $ppnRate,
+                    'ppn'      => $ppnValue,
+                    'total'    => $total,
                 ])
                 ->toJson();
         }
-        
-        $response = [
-            'datas'     => $datas,
-            'ppnType'   => $ppnType,
-            'nj'        => $totalPrice,
-            'dpp'       => $dppValue,
-            'ppn_rate'  => $ppnRate,
-            'ppn'       => $ppnValue,
-            'total'     => $total,
+
+        return [
+            'datas'    => $datas,
+            'ppnType'  => $ppnType,
+            'nj'       => $totalPrice,
+            'dpp'      => $dppValue,
+            'ppn_rate' => $ppnRate,
+            'ppn'      => $ppnValue,
+            'total'    => $total,
         ];
-        return $response;
     }
 
-    function generateRefNumber($noUrutDN)
+    function generateRefNumber($noUrutDN, $dateInvoice = null)
     {
-        // Get current year and month
-        $year = date('y');
-        $month = date('m');
+        // Use invoice date if provided, otherwise use current date
+        $date = $dateInvoice ? strtotime($dateInvoice) : time();
+
+        $year = date('y', $date);
+        $month = date('m', $date);
+
         // Convert the numeric month to a Roman numeral
         $romanMonths = [
             '01' => 'I',
@@ -381,8 +435,14 @@ class TransSalesController extends Controller
                 $datas = $datas->whereDate('trans_sales.created_at','>=',$startdate)->whereDate('trans_sales.created_at','<=',$enddate);
             }
             
-            if($request->flag){
-                $datas = $datas->get()->makeHidden(['id']);
+            if ($request->flag != null) {
+                $datas = $datas->get()->map(function ($item) {
+                    $data = $item->toArray();
+                    unset($data['id'], $data['created_at'], $data['updated_at']);
+                    $data['created_at'] = $item->created_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    $data['updated_at'] = $item->updated_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    return $data;
+                });
                 return $datas;
             }
             $datas = $datas->get();
@@ -452,8 +512,14 @@ class TransSalesController extends Controller
                 $datas = $datas->whereDate('trans_sales_export.created_at','>=',$startdate)->whereDate('trans_sales_export.created_at','<=',$enddate);
             }
             
-            if($request->flag){
-                $datas = $datas->get()->makeHidden(['id']);
+            if ($request->flag != null) {
+                $datas = $datas->get()->map(function ($item) {
+                    $data = $item->toArray();
+                    unset($data['id'], $data['created_at'], $data['updated_at']);
+                    $data['created_at'] = $item->created_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    $data['updated_at'] = $item->updated_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    return $data;
+                });
                 return $datas;
             }
             $datas = $datas->get();
@@ -513,8 +579,8 @@ class TransSalesController extends Controller
     {
         // dd($request->all());
         $request->validate([
-            'date_invoice'              => 'required',
-            'due_date'                  => 'required|date|after_or_equal:today',
+            'date_invoice'              => 'required|date|after_or_equal:' . date('Y-m-d', strtotime('-20 days')) . '|before_or_equal:today',
+            'due_date'                  => 'required|date|after_or_equal:date_invoice',
             'id_delivery_notes'         => 'required',
             'dn_number'                 => 'required',
             'dn_date'                   => 'required',
@@ -540,10 +606,14 @@ class TransSalesController extends Controller
         $detailSOnPrice = $this->getSOPriceFromDN(new Request([
             'idDN'    => $idDN,
             'ppnRate' => $ppnRate,
+            'rule'    => "Coretax",
         ]));
         $detailSO = $detailSOnPrice ? $detailSOnPrice['datas'] : collect();
         // Generate Ref Number
-        $refNumber = $this->generateRefNumber(substr($request->dn_number ?? '000000', -6));
+        $refNumber = $this->generateRefNumber(
+            substr($request->dn_number ?? '000000', -6),
+            $request->date_invoice ?? null
+        );
     
         DB::beginTransaction();
         try{
@@ -760,6 +830,12 @@ class TransSalesController extends Controller
     {
         $idTS = decrypt($id);
         $detail = TransSales::where('id', $idTS)->first();
+        if (\Carbon\Carbon::parse($detail->date_invoice)->lt(\Carbon\Carbon::today()->subDays(20))) {
+            return redirect()->route('transsales.local.index')->with([
+                'fail' => 'Transactions can only be edited within 20 days prior to the current date.'
+            ]);
+        }
+
         $detailCust = $this->getCustomerFromDN($detail->id_delivery_notes);
         $detailTransSales = TransSalesDetailPrice::where('id_trans_sales_parent', $idTS)->where('type_sales', 'Local')->get();
         $generalLedgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
@@ -818,8 +894,8 @@ class TransSalesController extends Controller
     public function updateLocal(Request $request, $id)
     {
         $request->validate([
-            'date_invoice'              => 'required',
-            'due_date'                  => 'required|date',
+            'date_invoice'              => 'required|date|after_or_equal:' . date('Y-m-d', strtotime('-20 days')) . '|before_or_equal:today',
+            'due_date'                  => 'required|date|after_or_equal:date_invoice',
             'id_master_bank_account'    => 'required',
             'ppn_rate'                  => 'required',
             'addmore.*.account_code'    => 'required',
@@ -829,13 +905,6 @@ class TransSalesController extends Controller
         
         $idTS = decrypt($id);
         $detail = TransSales::where('id', $idTS)->lockForUpdate()->first();
-
-        // Validation
-        $trxDate = Carbon::parse($detail->date_invoice);
-        $now     = Carbon::now();
-        if (!$trxDate->isSameMonth($now)) {
-            return back()->with('error', 'This transaction cannot be updated because the transaction month has already passed.');
-        }
         
         $detail->date_invoice = $request->date_invoice . ' 00:00:00';
         $detail->due_date     = $request->due_date . ' 00:00:00';
@@ -866,9 +935,25 @@ class TransSalesController extends Controller
         if($isChangedDetail || $isChangedPPNRate || $isChangedTransaction) {
             DB::beginTransaction();
             try{
+                // Init Default refNumber
+                $refNumber = $detail->ref_number;
+
                 if($isChangedDetail) {
+                    // Re-Generate Ref Number
+                    $refNumber = $this->generateRefNumber(
+                        substr($detail->dn_number ?? '000000', -6),
+                        $request->date_invoice ?? null
+                    );
+
+                    if ($detail->ref_number != $refNumber) {
+                        GeneralLedger::where('id_ref', $idTS)->where('ref_number', $detail->ref_number)->where('source', 'Sales (Local)')->update([
+                            'ref_number' => $refNumber
+                        ]);
+                    }
+                    
                     $bankAccount = MstBankAccount::where('id', $request->id_master_bank_account)->first();
                     TransSales::where('id', $idTS)->update([
+                        'ref_number'   => $refNumber,
                         'date_invoice' => $request->date_invoice,
                         'due_date'     => $request->due_date,
                         'id_master_bank_account' => $request->id_master_bank_account,
@@ -887,6 +972,7 @@ class TransSalesController extends Controller
                     $detailSOnPrice = $this->getSOPriceFromDN(new Request([
                         'idDN'    => $detail->id_delivery_notes,
                         'ppnRate' => $request->ppn_rate,
+                        'rule'    => "Coretax",
                     ]));
                     $detailSO = $detailSOnPrice ? $detailSOnPrice['datas'] : collect();
                     // Update Total Price
@@ -934,7 +1020,7 @@ class TransSalesController extends Controller
                         $this->updateBalanceAccount($item['account_code'], $nominal, $reverseType);
                     }
                     // Delete General Ledger
-                    GeneralLedger::where('id_ref', $idTS)->where('ref_number', $detail->ref_number)->where('source', 'Sales (Local)')->delete();
+                    GeneralLedger::where('id_ref', $idTS)->where('ref_number', $refNumber)->where('source', 'Sales (Local)')->delete();
 
                     // Insert New
                     foreach($request->addmore as $item){
@@ -942,7 +1028,7 @@ class TransSalesController extends Controller
                             $nominal = $this->normalizeOpeningBalance($item['nominal']);
                             // Create General Ledger
                             $this->storeGeneralLedger(
-                                $idTS, $detail->ref_number, $request->date_invoice, 
+                                $idTS, $refNumber, $request->date_invoice, 
                                 $item['account_code'], $item['type'], $nominal, $item['note'], 
                                 'Sales (Local)', $request->dn_number);
                             // Update & Calculate Balance Account Code
@@ -982,7 +1068,7 @@ class TransSalesController extends Controller
         $trxDate = Carbon::parse($detail->date_invoice);
         $now     = Carbon::now();
         if (!$trxDate->isSameMonth($now)) {
-            return back()->with('error', 'This transaction cannot be updated because the transaction month has already passed.');
+            return back()->with('fail', 'This transaction cannot be updated because the transaction month has already passed.');
         }
         
         $requestApp = json_encode([
@@ -1129,12 +1215,11 @@ class TransSalesController extends Controller
             $idTS = decrypt($id);
 
             $detail  = TransSales::findOrFail($idTS);
-
-            // Validation
-            $trxDate = Carbon::parse($detail->date_invoice);
-            $now     = Carbon::now();
-            if (!$trxDate->isSameMonth($now)) {
-                return back()->with('error', 'This transaction cannot be deleted because the transaction month has already passed.');
+            
+            if (\Carbon\Carbon::parse($detail->date_invoice)->lt(\Carbon\Carbon::today()->subDays(20))) {
+                return redirect()->route('transsales.local.index')->with([
+                    'fail' => 'Transactions can only be deleted within 20 days prior to the current date.'
+                ]);
             }
 
             DeliveryNote::where('id', $detail->id_delivery_notes)->update(['status' => 'Posted']);

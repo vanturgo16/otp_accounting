@@ -42,9 +42,14 @@
                                     <label class="form-label required-label">Invoice Date</label>
                                     <i class="mdi mdi-information-outline"
                                         data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Tanggal hanya dapat dipilih dari awal bulan ini hingga hari ini.">
+                                        title="Tanggal hanya dapat dipilih maksimal 20 hari ke belakang dari hari ini dan tidak boleh melebihi tanggal hari ini.">
                                     </i>
-                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-01') }}" max="{{ date('Y-m-d') }}" required>
+                                    <input type="date" class="form-control" name="date_invoice"
+                                        value="{{ date('Y-m-d') }}"
+                                        min="{{ date('Y-m-d', strtotime('-20 days')) }}"
+                                        max="{{ date('Y-m-d') }}"
+                                        required
+                                    >
                                 </div>
                             </div>
                             <div class="row">
@@ -120,6 +125,22 @@
                                     <div class="row">
                                         <div class="col-12">
                                             <label class="form-label">List Product</label>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="alert alert-warning mb-0 d-none d-lg-block" style="font-size:0.5rem;" role="alert">
+                                                <ul class="mb-0 ps-3">
+                                                    <li>
+                                                        <b>Coretax rule:</b> Jika desimal ≥ 0,5 dibulatkan ke atas, jika < 0,5 dibulatkan ke bawah.
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="text-end d-block d-lg-none">
+                                                <i class="mdi mdi-information-outline text-muted" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                    title="Coretax: ≥0,5 naik, <0,5 turun.">
+                                                </i>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
                                             <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
                                                 <thead class="table-light">
                                                     <tr>
@@ -178,7 +199,7 @@
                                                         </td>
                                                         <td class="text-end">
                                                             <label class="form-label"> 
-                                                                <input type="text" name="discount" class="form-control form-control-sm text-end currency-input" value="0">
+                                                                <input type="text" name="discount" class="form-control form-control-sm text-end currency-input-no-comma" value="0">
                                                             </label>
                                                         </td>
                                                     </tr>
@@ -235,7 +256,7 @@
                                                                 </select>
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="" required>
+                                                                <input type="text" class="form-control rupiah-input-no-comma addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="" required>
                                                             </td>
                                                             <td>
                                                                 <select class="form-select select2 addpayment" style="width: 100%" name="addmore[0][type]" required>
@@ -440,7 +461,7 @@
                     </select>
                 </td>
                 <td>
-                    <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
+                    <input type="text" class="form-control rupiah-input-no-comma addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
                 </td>
                 <td>
                     <select class="form-select select2 addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
@@ -459,8 +480,8 @@
 
         $(".select2").select2();
 
-        document.querySelectorAll(".rupiah-input").forEach((input) => {
-            input.addEventListener("input", formatCurrencyInput);
+        document.querySelectorAll(".rupiah-input-no-comma").forEach((input) => {
+            input.addEventListener("input", formatCurrencyInputNoComma);
         });
     });
     $(document).on('click', '.remove-tr', function() {
@@ -501,6 +522,7 @@
                 data: function(d) {
                     d.idGRN   = data.idGRN;
                     d.ppnRate = data.ppnRate;
+                    d.rule    = 'Coretax';
                 }
             },
             columns: [
@@ -544,8 +566,8 @@
                         let price = data ?? 0;
                         return `
                             <input type="text"
-                                class="form-control form-control-sm text-end editable-price currency-input"
-                                value="${numberFormat(price,2,',','.')}"
+                                class="form-control form-control-sm text-end editable-price currency-input-no-comma"
+                                value="${numberFormat(price,0,',','.')}"
                                 data-row="${meta.row}"
                                 data-qty="${row.receipt_qty}">
                         `;
@@ -558,7 +580,7 @@
                         let total = data ?? 0;
                         return `
                             <span class="row-total-price" data-row="${meta.row}">
-                                ${formatPriceWithStyle(total)}
+                                ${formatPriceWithStyleCoretax(total)}
                             </span>
                         `;
                     }
@@ -572,9 +594,9 @@
         dataTable.on('xhr.dt', function(e, settings, json) {
             if (!json) return;
 
-            $('#njPrice').html(formatPriceWithStyle(json.nj ?? 0));
-            $('#ppnPrice').html(formatPriceWithStyle(json.ppn ?? 0));
-            $('#totalPrice').html(formatPriceWithStyle(json.total ?? 0));
+            $('#njPrice').html(formatPriceWithStyleCoretax(json.nj ?? 0));
+            $('#ppnPrice').html(formatPriceWithStyleCoretax(json.ppn ?? 0));
+            $('#totalPrice').html(formatPriceWithStyleCoretax(json.total ?? 0));
             $('#labelPPNRate').html(json.ppn_rate ?? 0);
             $('.currency').html(json.currency ?? 'IDR');
             $('input[name="currency').val(json.currency ?? 'IDR');
@@ -599,7 +621,7 @@
             rowData.price       = priceEdit;
             rowData.total_price = totalRow;
 
-            $('.row-total-price[data-row="'+rowIndex+'"]').html(formatPriceWithStyle(totalRow));
+            $('.row-total-price[data-row="'+rowIndex+'"]').html(formatPriceWithStyleCoretax(totalRow));
             recalculateSummary();
         });
 
@@ -703,9 +725,9 @@
                 $('input[name="discount"]').val() || 0
             );
             let total   = totalNJ + ppn - discount;
-            $('#njPrice').html(formatPriceWithStyle(totalNJ));
-            $('#ppnPrice').html(formatPriceWithStyle(ppn));
-            $('#totalPrice').html(formatPriceWithStyle(total));
+            $('#njPrice').html(formatPriceWithStyleCoretax(totalNJ));
+            $('#ppnPrice').html(formatPriceWithStyleCoretax(ppn));
+            $('#totalPrice').html(formatPriceWithStyleCoretax(total));
             totalPriceGlobal = total ?? 0;
         }
         function formatPrice(value){

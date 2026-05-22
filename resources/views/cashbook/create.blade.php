@@ -40,9 +40,14 @@
                                     <label class="form-label required-label">Invoice Date</label>
                                     <i class="mdi mdi-information-outline"
                                         data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Tanggal hanya dapat dipilih dari awal bulan ini hingga hari ini.">
+                                        title="Pilih tanggal invoice. Tanggal hanya dapat dipilih maksimal 20 hari ke belakang dari hari ini dan tidak boleh melebihi tanggal hari ini.">
                                     </i>
-                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-01') }}" max="{{ date('Y-m-d') }}" required>
+                                    <input type="date" class="form-control" name="date_invoice"
+                                        value="{{ date('Y-m-d') }}"
+                                        min="{{ date('Y-m-d', strtotime('-20 days')) }}"
+                                        max="{{ date('Y-m-d') }}"
+                                        required
+                                    >
                                 </div>
                             </div>
                             <div class="row">
@@ -98,7 +103,7 @@
                                         </div>
                                         <div class="card-body">
                                             <!-- Transaction Note -->
-                                            <div class="alert alert-info small mb-3">
+                                            <div class="alert alert-info small mb-2">
                                                 <strong>Note:</strong><br>
                                                 Pada bagian <b>Index</b> dan <b>Print Invoice</b>, akun yang ditampilkan adalah:
                                                 <ul class="mb-0 ps-3">
@@ -106,6 +111,15 @@
                                                     <li><b>Bukti Kas Keluar & Bank Keluar</b> → List akun <b>Debit</b> saja</li>
                                                 </ul>
                                             </div>
+
+                                            <div class="alert alert-warning mb-0 d-none d-lg-block mb-3" style="font-size:0.5rem;" role="alert">
+                                                <ul class="mb-0 ps-3">
+                                                    <li>
+                                                        <b>Coretax rule:</b> Jika desimal ≥ 0,5 dibulatkan ke atas, jika < 0,5 dibulatkan ke bawah.
+                                                    </li>
+                                                </ul>
+                                            </div>
+
                                             <div class="table-repsonsive">
                                                 <table class="table table-bordered" id="dynamicTable">
                                                     <thead>
@@ -128,7 +142,7 @@
                                                                 </select>
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="" required>
+                                                                <input type="text" class="form-control rupiah-input-no-comma addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="" required>
                                                             </td>
                                                             <td>
                                                                 <select class="form-select select2 addpayment" style="width: 100%" name="addmore[0][type]" required>
@@ -310,7 +324,7 @@
                     </select>
                 </td>
                 <td>
-                    <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
+                    <input type="text" class="form-control rupiah-input-no-comma addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
                 </td>
                 <td>
                     <select class="form-select select2 addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
@@ -329,8 +343,8 @@
 
         $(".select2").select2();
 
-        document.querySelectorAll(".rupiah-input").forEach((input) => {
-            input.addEventListener("input", formatCurrencyInput);
+        document.querySelectorAll(".rupiah-input-no-comma").forEach((input) => {
+            input.addEventListener("input", formatCurrencyInputNoComma);
         });
     });
     $(document).on('click', '.remove-tr', function() {

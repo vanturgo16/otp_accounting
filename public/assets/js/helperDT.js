@@ -6,6 +6,15 @@ function formatAmountDT(amount) {
         ? `<span class="text-bold">${whole}</span><span class="text-muted">,${decimal}</span>`
         : `<span class="text-bold">${whole}</span>`;
 }
+// Helper: format number using Coretax rule (rounded to whole Rupiah)
+function formatAmountDTCoretax(amount) {
+    // Coretax rounding
+    const rounded = Math.round(parseFloat(amount) || 0);
+    // Format: 1.234.567
+    const formatted = numberFormat(rounded, 0, ',', '.');
+    return `<span class="text-bold">${formatted}</span>`;
+}
+
 // Helper: badge builder
 function badgeDT(color, text, icon = '') {
     return `<span class="badge bg-${color} text-white">${icon ? `<span class="mdi ${icon}"></span> | ` : ''}${text}</span>`;

@@ -42,13 +42,18 @@
                                     <label class="form-label required-label">Invoice Date</label>
                                     <i class="mdi mdi-information-outline"
                                         data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Pilih tanggal yang akan ditampilkan pada invoice. Tanggal hanya dapat dipilih dari awal bulan ini hingga hari ini.">
+                                        title="Pilih tanggal invoice. Tanggal hanya dapat dipilih maksimal 20 hari ke belakang dari hari ini dan tidak boleh melebihi tanggal hari ini.">
                                     </i>
-                                    <input type="date" class="form-control" name="date_invoice" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-01') }}" max="{{ date('Y-m-d') }}" required>
+                                    <input type="date" class="form-control" name="date_invoice"
+                                        value="{{ date('Y-m-d') }}"
+                                        min="{{ date('Y-m-d', strtotime('-20 days')) }}"
+                                        max="{{ date('Y-m-d') }}"
+                                        required
+                                    >
                                 </div>
                                 <div class="col-lg-3 mb-3">
                                     <label class="form-label required-label">Due Date</label>
-                                    <input type="date" class="form-control" name="due_date" value="" required min="{{ date('Y-m-01') }}">
+                                    <input type="date" class="form-control" name="due_date" value="" required min="{{ date('Y-m-d', strtotime('-20 days')) }}">
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label required-label">Bank Account</label>
@@ -107,7 +112,20 @@
                                             <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Otomatis terisi dari DN yang dipilih (diambil dari pengisian sales order)"></i>
                                             <input class="form-control readonly-input" id="sales_name" type="text" value="" placeholder="Select Delivery Notes.." readonly>
                                         </div>
-                                        
+                                        <div class="col-12">
+                                            <div class="alert alert-warning mb-0 d-none d-lg-block" style="font-size:0.5rem;" role="alert">
+                                                <ul class="mb-0 ps-3">
+                                                    <li>
+                                                        <b>Coretax rule:</b> Jika desimal ≥ 0,5 dibulatkan ke atas, jika < 0,5 dibulatkan ke bawah.
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="text-end d-block d-lg-none">
+                                                <i class="mdi mdi-information-outline text-muted" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                    title="Coretax: ≥0,5 naik, <0,5 turun.">
+                                                </i>
+                                            </div>
+                                        </div>
                                         <div class="col-12">
                                             <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
                                                 <thead class="table-light">
@@ -230,7 +248,7 @@
                                                                 </select>
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="" required>
+                                                                <input type="text" class="form-control rupiah-input-no-comma addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[0][nominal]" value="" required>
                                                             </td>
                                                             <td>
                                                                 <select class="form-select select2 addpayment" style="width: 100%" name="addmore[0][type]" required>
@@ -413,7 +431,7 @@
                     </select>
                 </td>
                 <td>
-                    <input type="text" class="form-control rupiah-input addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
+                    <input type="text" class="form-control rupiah-input-no-comma addpayment" style="width: 100%" placeholder="Input Amount.." name="addmore[`+i+`][nominal]" value="" required>
                 </td>
                 <td>
                     <select class="form-select select2 addpayment" style="width: 100%" name="addmore[`+i+`][type]" required>
@@ -432,8 +450,8 @@
 
         $(".select2").select2();
 
-        document.querySelectorAll(".rupiah-input").forEach((input) => {
-            input.addEventListener("input", formatCurrencyInput);
+        document.querySelectorAll(".rupiah-input-no-comma").forEach((input) => {
+            input.addEventListener("input", formatCurrencyInputNoComma);
         });
     });
     $(document).on('click', '.remove-tr', function() {
@@ -469,6 +487,7 @@
                 data: function(d) {
                     d.idDN      = data.idDN;
                     d.ppnRate   = data.ppnRate;
+                    d.rule      = 'Coretax';
                 }
             },
             "columns": [
@@ -539,9 +558,9 @@
                         }
                         var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
-                        if (parts.length > 1) {
-                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
-                        }
+                        // if (parts.length > 1) {
+                        //     return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        // }
                         return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
@@ -557,9 +576,9 @@
                         }
                         var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
-                        if (parts.length > 1) {
-                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span><br>(' + row.ppn_rate + '%)';
-                        }
+                        // if (parts.length > 1) {
+                        //     return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span><br>(' + row.ppn_rate + '%)';
+                        // }
                         return '<span class="text-bold">' + parts[0] + '</span><br>(' + row.ppn_rate + '%)';
                     },
                 },
@@ -575,9 +594,9 @@
                         }
                         var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
-                        if (parts.length > 1) {
-                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
-                        }
+                        // if (parts.length > 1) {
+                        //     return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        // }
                         return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
@@ -593,9 +612,9 @@
                         }
                         var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
-                        if (parts.length > 1) {
-                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
-                        }
+                        // if (parts.length > 1) {
+                        //     return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        // }
                         return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
@@ -611,9 +630,9 @@
                         }
                         var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
-                        if (parts.length > 1) {
-                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
-                        }
+                        // if (parts.length > 1) {
+                        //     return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        // }
                         return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
@@ -622,10 +641,10 @@
 
         dataTable.on('xhr.dt', function(e, settings, json, xhr) {
             if (json) {
-                $('#njPrice').html(json.nj ? formatPriceWithStyle(json.nj) : 0);
-                $('#dppPrice').html(json.dpp ? formatPriceWithStyle(json.dpp) : 0);
-                $('#ppnPrice').html(json.ppn ? formatPriceWithStyle(json.ppn) : 0);
-                $('#totalPrice').html(json.total ? formatPriceWithStyle(json.total) : 0);
+                $('#njPrice').html(json.nj ? formatPriceWithStyleCoretax(json.nj) : 0);
+                $('#dppPrice').html(json.dpp ? formatPriceWithStyleCoretax(json.dpp) : 0);
+                $('#ppnPrice').html(json.ppn ? formatPriceWithStyleCoretax(json.ppn) : 0);
+                $('#totalPrice').html(json.total ? formatPriceWithStyleCoretax(json.total) : 0);
                 $('#labelPPNRate').html(json.ppn_rate ?? 0);
                 totalPriceGlobal = formatPrice(json.total) || 0;
             }

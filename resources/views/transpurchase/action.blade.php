@@ -1,10 +1,10 @@
 @php
     use Carbon\Carbon;
-    $isCurrentMonth = Carbon::parse($data->date_invoice)->isSameMonth(now());
+    $canModify = Carbon::parse($data->date_invoice)->greaterThanOrEqualTo(Carbon::today()->subDays(20));
 @endphp
 
 @can('Akunting_master_data')
-    @if($isCurrentMonth)
+    @if($canModify)
         <div class="btn-group">
             <button class="btn btn-sm btn-primary action-btn mb-2" data-id="{{ $data->id }}">
                 Action <i class="mdi mdi-chevron-down"></i>

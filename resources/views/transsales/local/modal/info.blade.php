@@ -111,40 +111,45 @@
                                     </td>
                                     <td class="text-center">{{ $item->ppn_type }}</td>
                                     <td class="text-end">
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($item->price_before_ppn, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($item->price_before_ppn), 0, ',', '.') }}</span>
                                     </td>
                                     <td class="text-end">
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($item->ppn_value, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($item->ppn_value), 0, ',', '.') }}</span>
                                         <br>({{ $item->ppn_rate }}%)
                                     </td>
                                     <td class="text-end">
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($item->price_after_ppn, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($item->price_after_ppn), 0, ',', '.') }}</span>
                                     </td>
                                     <td class="text-end">
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($item->total_price_before_ppn, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($item->total_price_before_ppn), 0, ',', '.') }}</span>
                                     </td>
                                     <td class="text-end">
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($item->total_price_after_ppn, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($item->total_price_after_ppn), 0, ',', '.') }}</span>
                                     </td>
                                 </tr>
                             @endforeach
@@ -172,11 +177,12 @@
                                 </td>
                                 <td class="text-end">
                                     <label class="form-label"> Rp. 
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($detail->sales_value, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($detail->sales_value), 0, ',', '.') }}</span>
                                     </label>
                                 </td>
                             </tr>
@@ -186,11 +192,12 @@
                                 </td>
                                 <td class="text-end">
                                     <label class="form-label"> Rp. 
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($detail->dpp, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($detail->dpp), 0, ',', '.') }}</span>
                                     </label>
                                 </td>
                             </tr>
@@ -200,11 +207,12 @@
                                 </td>
                                 <td class="text-end">
                                     <label class="form-label"> Rp. 
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($detail->ppn_value, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($detail->ppn_value), 0, ',', '.') }}</span>
                                     </label>
                                 </td>
                             </tr>
@@ -214,11 +222,12 @@
                                 </td>
                                 <td class="text-end">
                                     <label class="form-label"> Rp. 
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($detail->total, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($detail->total), 0, ',', '.') }}</span>
                                     </label>
                                 </td>
                             </tr>
@@ -251,11 +260,12 @@
                                 {{ $item->account_code." - ".$item->account_name }}
                             </td>
                             <td class="text-end">
-                                @php
+                                {{-- @php
                                     $formatted = number_format($item->amount, 2, ',', '.');
                                     [$before, $after] = explode(',', $formatted);
                                 @endphp
-                                <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                <span class="fw-bold">{{ number_format(round($item->amount), 0, ',', '.') }}</span>
                             </td>
                             <td class="text-center">
                                 @if($item->transaction == 'D')
