@@ -114,8 +114,14 @@ class TransCashBookController extends Controller
                 $datas = $datas->whereDate('trans_cash_book.created_at','>=',$startdate)->whereDate('trans_cash_book.created_at','<=',$enddate);
             }
             
-            if($request->flag != null){
-                $datas = $datas->get()->makeHidden(['id', 'id_master_bank_account', 'total_transaction']);
+            if ($request->flag != null) {
+                $datas = $datas->get()->map(function ($item) {
+                    $data = $item->toArray();
+                    unset($data['id'], $data['id_master_bank_account'], $data['total_transaction'], $data['created_at'], $data['updated_at']);
+                    $data['created_at'] = $item->created_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    $data['updated_at'] = $item->updated_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    return $data;
+                });
                 return $datas;
             }
             
@@ -133,25 +139,36 @@ class TransCashBookController extends Controller
         return view('cashbook.index',compact('typeManuals', 'trans_number', 'invoice_number', 'tax_invoice_number', 'type', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
-    public function generateCBNumber($type, $codeBank = null, $currency = null)
+    public function generateCBNumber($type, $codeBank = null, $currency = null, $dateInvoice = null)
     {
-        $year  = date('y');
-        $month = now()->format('n');
+        $date  = $dateInvoice ? strtotime($dateInvoice) : time();
+        $Year  = date('Y', $date);
+        $year  = date('y', $date);
+        $month = date('m', $date);
+
         $romanMonths = [
-            1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV',
-            5 => 'V', 6 => 'VI', 7 => 'VII', 8 => 'VIII',
-            9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII',
+            '01' => 'I',
+            '02' => 'II',
+            '03' => 'III',
+            '04' => 'IV',
+            '05' => 'V',
+            '06' => 'VI',
+            '07' => 'VII',
+            '08' => 'VIII',
+            '09' => 'IX',
+            '10' => 'X',
+            '11' => 'XI',
+            '12' => 'XII'
         ];
 
-        // Get last sequence for current month & year
-        $lastData = TransCashBook::where('type', $type)
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->latest('created_at')
-            ->first();
-        $seq = $lastData ? $lastData->seq + 1 : 1;
+        // Get max sequence from dateInvoice
+        $maxSeq = TransCashBook::where('type', $type)
+            ->whereMonth('date_invoice', $month)
+            ->whereYear('date_invoice', $Year)
+            ->max('seq');
+        $seq = ($maxSeq ?? 0) + 1;
         $seqFormatted = str_pad($seq, 4, '0', STR_PAD_LEFT);
-
+        
         // Determine transaction code
         switch ($type) {
             case 'Bukti Kas Keluar':
@@ -198,7 +215,7 @@ class TransCashBookController extends Controller
     {
         // dd(($request->all()));
         $request->validate([
-            'date_invoice'           => 'required',
+            'date_invoice'           => 'required|date|after_or_equal:' . date('Y-m-d', strtotime('-20 days')) . '|before_or_equal:today',
             'invoice_number'         => 'required',
             'tax_invoice_number'     => 'required',
             'type'                   => 'required',
@@ -220,7 +237,7 @@ class TransCashBookController extends Controller
             $category    = "KAS";
         }
 
-        $genNumber   = $this->generateCBNumber($type, $codeBank, $currency);
+        $genNumber   = $this->generateCBNumber($type, $codeBank, $currency, $request->date_invoice ?? null);
         $transNumber = $genNumber['trans_number'];
         $seqNumber   = $genNumber['seq_number'];
 
@@ -302,6 +319,11 @@ class TransCashBookController extends Controller
     {
         $id = decrypt($id);
         $detail = TransCashBook::where('id', $id)->first();
+        if (\Carbon\Carbon::parse($detail->date_invoice)->lt(\Carbon\Carbon::today()->subDays(20))) {
+            return redirect()->route('cashbook.index')->with([
+                'fail' => 'Transactions can only be edited within 20 days prior to the current date.'
+            ]);
+        }
         $bankAccountsUsed = MstBankAccount::where('id', $detail->id_master_bank_account)->first();
         $generalLedgers = GeneralLedger::select('general_ledgers.*', 'master_account_codes.account_code', 'master_account_codes.account_name')
             ->leftjoin('master_account_codes', 'general_ledgers.id_account_code', 'master_account_codes.id')
@@ -321,7 +343,7 @@ class TransCashBookController extends Controller
     {
         // dd($request->all());
         $request->validate([
-            'date_invoice'              => 'required',
+            'date_invoice'              => 'required|date|after_or_equal:' . date('Y-m-d', strtotime('-20 days')) . '|before_or_equal:today',
             'invoice_number'            => 'required',
             'tax_invoice_number'        => 'required',
             'addmore.*.account_code'    => 'required',
@@ -331,15 +353,11 @@ class TransCashBookController extends Controller
         
         $id          = decrypt($id);
         $detail      = TransCashBook::where('id', $id)->lockForUpdate()->first();
+        $seqNumber   = $detail->seq;
         $transNumber = $detail->transaction_number;
         $invNumber   = $request->invoice_number;
         
         // Validation
-        $trxDate = Carbon::parse($detail->date_invoice);
-        $now     = Carbon::now();
-        if (!$trxDate->isSameMonth($now)) {
-            return back()->with('error', 'This transaction cannot be updated because the transaction month has already passed.');
-        }
         $isDuplicate = TransCashBook::where('invoice_number', $invNumber)->where('id', '!=', $id)->exists();
         if ($isDuplicate) {
             return back()->withInput()->with(['error' => 'Invoice number already in use, please use another invoice number']);
@@ -364,6 +382,9 @@ class TransCashBookController extends Controller
             $transactionType = 'K';
             $totalAmount = abs($total);
         }
+
+        $monthDetail  = \Carbon\Carbon::parse($detail->date_invoice)->month;
+        $monthRequest = \Carbon\Carbon::parse($request->date_invoice)->month;
         
         $detail->date_invoice       = $request->date_invoice . ' 00:00:00';
         $detail->invoice_number     = $invNumber;
@@ -397,7 +418,22 @@ class TransCashBookController extends Controller
             DB::beginTransaction();
             try{
                 if($isChangedDetail) {
+
+                    if ($monthDetail != $monthRequest) {
+                        $genNumber      = $this->generateCBNumber($detail->type, $detail->codeBank, $detail->currency, $request->date_invoice);
+                        $transNumberNew = $genNumber['trans_number'];
+                        $seqNumber      = $genNumber['seq_number'];
+
+                        GeneralLedger::where('id_ref', $id)->where('ref_number', $transNumber)->where('source', 'Cash Book')->update([
+                            'ref_number' => $transNumberNew
+                        ]);
+
+                        $transNumber = $transNumberNew;
+                    }
+
                     TransCashBook::where('id', $id)->update([
+                        'seq'                => $seqNumber,
+                        'transaction_number' => $transNumber,
                         'invoice_number'     => $invNumber,
                         'tax_invoice_number' => $request->tax_invoice_number,
                         'date_invoice'       => $request->date_invoice,
@@ -453,11 +489,10 @@ class TransCashBookController extends Controller
             $id = decrypt($id);
             $detail  = TransCashBook::findOrFail($id);
 
-            // Validation
-            $trxDate = Carbon::parse($detail->date_invoice);
-            $now     = Carbon::now();
-            if (!$trxDate->isSameMonth($now)) {
-                return back()->with('error', 'This transaction cannot be deleted because the transaction month has already passed.');
+            if (\Carbon\Carbon::parse($detail->date_invoice)->lt(\Carbon\Carbon::today()->subDays(20))) {
+                return redirect()->route('cashbook.index')->with([
+                    'fail' => 'Transactions can only be deleted within 20 days prior to the current date.'
+                ]);
             }
 
             $generalLedgers = GeneralLedger::where('id_ref', $id)

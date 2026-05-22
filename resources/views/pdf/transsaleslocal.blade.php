@@ -145,19 +145,8 @@
                                 : number_format(floor($item->qty), 0, ',', '.') . ',' . rtrim(str_replace('.', '', explode('.', (string)$item->qty)[1]), '0') }}
                             {{ ' '. $item->unit }}
                         </td>
-                        <td class="px-2 text-right" style="border-bottom: none; border-top: none;">{{ number_format($item->price_before_ppn, 2, ',', '.') }}</td>
-                        <td class="px-2 text-right" style="border-right: none; border-bottom: none; border-top: none;">{{ number_format($item->total_price_before_ppn, 2, ',', '.') }}</td>
-                    </tr>
-                    <tr>
-                        <td class="px-2" style="border-left: none; border-bottom: none; border-top: none;">{{ $item->product }}</td>
-                        <td class="px-2 text-center" style="border-bottom: none; border-top: none;">
-                            {{ fmod($item->qty, 1) == 0 
-                                ? number_format($item->qty, 0, ',', '.') 
-                                : number_format(floor($item->qty), 0, ',', '.') . ',' . rtrim(str_replace('.', '', explode('.', (string)$item->qty)[1]), '0') }}
-                            {{ ' '. $item->unit }}
-                        </td>
-                        <td class="px-2 text-right" style="border-bottom: none; border-top: none;">{{ number_format($item->price_before_ppn, 2, ',', '.') }}</td>
-                        <td class="px-2 text-right" style="border-right: none; border-bottom: none; border-top: none;">{{ number_format($item->total_price_before_ppn, 2, ',', '.') }}</td>
+                        <td class="px-2 text-right" style="border-bottom: none; border-top: none;">{{ number_format(round($item->price_before_ppn), 0, ',', '.') }}</td>
+                        <td class="px-2 text-right" style="border-right: none; border-bottom: none; border-top: none;">{{ number_format(round($item->total_price_before_ppn), 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
                 <tr>
@@ -221,25 +210,25 @@
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:50%;">Nilai Jual</td>
                             <td class="text-right align-top" style="width:50%;">
-                                <b>{{ number_format($detail->sales_value, 2, ',', '.') }}</b>
+                                <b>{{ number_format(round($detail->sales_value), 0, ',', '.') }}</b>
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:50%;">DPP Lain-lain</td>
                             <td class="text-right align-top" style="width:50%;">
-                                <b>{{ number_format($detail->dpp, 2, ',', '.') }}</b>
+                                <b>{{ number_format(round($detail->dpp), 0, ',', '.') }}</b>
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:50%;">PPN</td>
                             <td class="text-right align-top" style="width:50%;">
-                                <b>{{ number_format($detail->ppn_value, 2, ',', '.') }}</b>
+                                <b>{{ number_format(round($detail->ppn_value), 0, ',', '.') }}</b>
                             </td>
                         </tr>
                         <tr style="font-size: 10px;">
                             <td class="align-top" style="width:50%;">Total Nilai Jual + PPN</td>
                             <td class="text-right align-top" style="width:50%;">
-                                <b>{{ number_format($detail->total, 2, ',', '.') }}</b>
+                                <b>{{ number_format(round($detail->total), 0, ',', '.') }}</b>
                             </td>
                         </tr>
                     </table>

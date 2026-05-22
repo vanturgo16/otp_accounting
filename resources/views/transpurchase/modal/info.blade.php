@@ -92,18 +92,20 @@
                                         ({{ $item->unit }})
                                     </td>
                                     <td class="text-end">
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($item->price_edit, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($item->price_edit), 0, ',', '.') }}</span>
                                     </td>
                                     <td class="text-end">
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($item->total_price, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($item->total_price), 0, ',', '.') }}</span>
                                     </td>
                                 </tr>
                             @endforeach
@@ -131,11 +133,12 @@
                                 </td>
                                 <td class="text-end">
                                     <label class="form-label"> <span class="text-muted">{{ $detail->currency }} </span>
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($detail->amount, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($detail->amount), 0, ',', '.') }}</span>
                                     </label>
                                 </td>
                             </tr>
@@ -145,11 +148,12 @@
                                 </td>
                                 <td class="text-end">
                                     <label class="form-label"> <span class="text-muted">{{ $detail->currency }} </span>
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($detail->ppn_value, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($detail->ppn_value), 0, ',', '.') }}</span>
                                     </label>
                                 </td>
                             </tr>
@@ -159,11 +163,12 @@
                                 </td>
                                 <td class="text-end">
                                     <label class="form-label"> <span class="text-muted">{{ $detail->currency }} </span>
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($detail->total_discount, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($detail->total_discount), 0, ',', '.') }}</span>
                                     </label>
                                 </td>
                             </tr>
@@ -173,11 +178,12 @@
                                 </td>
                                 <td class="text-end">
                                     <label class="form-label"> <span class="text-muted">{{ $detail->currency }} </span>
-                                        @php
+                                        {{-- @php
                                             $formatted = number_format($detail->total, 2, ',', '.');
                                             [$before, $after] = explode(',', $formatted);
                                         @endphp
-                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                        <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                        <span class="fw-bold">{{ number_format(round($detail->total), 0, ',', '.') }}</span>
                                     </label>
                                 </td>
                             </tr>
@@ -219,11 +225,12 @@
                                 {{ $item->account_code." - ".$item->account_name }}
                             </td>
                             <td class="text-end">
-                                @php
+                                {{-- @php
                                     $formatted = number_format($item->amount, 2, ',', '.');
                                     [$before, $after] = explode(',', $formatted);
                                 @endphp
-                                <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span>
+                                <span class="fw-bold">{{ $before }}</span><span class="text-muted">,{{ $after }}</span> --}}
+                                <span class="fw-bold">{{ number_format(round($item->amount), 0, ',', '.') }}</span>
                             </td>
                             <td class="text-center">
                                 @if($item->transaction == 'D')

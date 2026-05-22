@@ -76,7 +76,7 @@
                                 <div class="alert alert-warning mb-0 d-none d-lg-block" style="font-size:0.6rem;" role="alert">
                                     <ul class="mb-0 ps-3">
                                         <li>
-                                            Transactions made after the sync time on month-end will be included in the next month’s report.
+                                            Sync report will recalculate transactions for the last two months.
                                         </li>
                                     </ul>
                                 </div>
@@ -202,7 +202,7 @@
     $(document).on('click', '#btnExport', function () {
         var currentDate = new Date();
         var formattedDate = currentDate.toISOString().split('T')[0];
-        var fileName = "Monthly Report - " + formattedDate + ".xlsx";
+        var fileName = "Monthly Report - Export At (" + formattedDate + ").xlsx";
         var requestData = Object.assign({}, data);
         requestData.flag = 1;
         handleExport(url, requestData, fileName);

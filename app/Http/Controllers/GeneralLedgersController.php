@@ -70,8 +70,14 @@ class GeneralLedgersController extends Controller
                 $datas = $datas->whereDate('general_ledgers.created_at','>=',$startdate)->whereDate('general_ledgers.created_at','<=',$enddate);
             }
             
-            if($request->flag != null){
-                $datas = $datas->get()->makeHidden(['id']);
+            if ($request->flag != null) {
+                $datas = $datas->get()->map(function ($item) {
+                    $data = $item->toArray();
+                    unset($data['id'], $data['created_at'], $data['updated_at']);
+                    $data['created_at'] = $item->created_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    $data['updated_at'] = $item->updated_at->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+                    return $data;
+                });
                 return $datas;
             }
             

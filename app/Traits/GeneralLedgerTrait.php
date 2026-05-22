@@ -185,4 +185,12 @@ trait GeneralLedgerTrait {
             'Bukti Bank Masuk',
         ];
     }
+
+    public function coretaxRound($value)
+    {
+        $int = floor($value);
+        $decimal = $value - $int;
+
+        return ($decimal >= 0.5) ? ceil($value) : floor($value);
+    }
 }

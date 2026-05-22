@@ -42,13 +42,18 @@
                                     <label class="form-label required-label">Invoice Date</label>
                                     <i class="mdi mdi-information-outline"
                                         data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Pilih tanggal yang akan ditampilkan pada invoice. Tanggal hanya dapat dipilih dari awal bulan ini hingga hari ini.">
+                                        title="Pilih tanggal invoice. Tanggal hanya dapat dipilih maksimal 20 hari ke belakang dari hari ini dan tidak boleh melebihi tanggal hari ini.">
                                     </i>
-                                    <input type="date" class="form-control" name="date_invoice" value="{{ \Carbon\Carbon::parse($detail->date_invoice)->format('Y-m-d') }}" min="{{ date('Y-m-01') }}" max="{{ date('Y-m-d') }}" required>
+                                    <input type="date" class="form-control" name="date_invoice"
+                                        value="{{ \Carbon\Carbon::parse($detail->date_invoice)->format('Y-m-d') }}"
+                                        min="{{ date('Y-m-d', strtotime('-20 days')) }}"
+                                        max="{{ date('Y-m-d') }}"
+                                        required
+                                    >
                                 </div>
                                 <div class="col-lg-3 mb-3">
                                     <label class="form-label required-label">Due Date</label>
-                                    <input type="date" class="form-control" name="due_date" value="{{ \Carbon\Carbon::parse($detail->due_date)->format('Y-m-d') }}" required min="{{ date('Y-m-01') }}">
+                                    <input type="date" class="form-control" name="due_date" value="{{ \Carbon\Carbon::parse($detail->due_date)->format('Y-m-d') }}" required min="{{ date('Y-m-d', strtotime('-20 days')) }}">
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label required-label">Bank Account</label>
@@ -90,6 +95,20 @@
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Sales Name</label>
                                             <input class="form-control readonly-input" id="sales_name" type="text" value="{{ $detailCust->salesman_name ?? '-' }}" placeholder="Select Delivery Notes.." readonly>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="alert alert-warning mb-0 d-none d-lg-block" style="font-size:0.5rem;" role="alert">
+                                                <ul class="mb-0 ps-3">
+                                                    <li>
+                                                        <b>Coretax rule:</b> Jika desimal ≥ 0,5 dibulatkan ke atas, jika < 0,5 dibulatkan ke bawah.
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="text-end d-block d-lg-none">
+                                                <i class="mdi mdi-information-outline text-muted" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                    title="Coretax: ≥0,5 naik, <0,5 turun.">
+                                                </i>
+                                            </div>
                                         </div>
                                         
                                         <div class="col-12">
@@ -219,9 +238,10 @@
                                                             </td>
                                                             <td>
                                                                 <input type="text"
-                                                                    class="form-control rupiah-input addpayment"
+                                                                    class="form-control rupiah-input-no-comma addpayment"
                                                                     name="addmore[{{ $index }}][nominal]"
-                                                                    value="{{ number_format($ledger->amount, 2, ',', '.') }}"
+                                                                    {{-- value="{{ number_format($ledger->amount, 2, ',', '.') }}" --}}
+                                                                    value="{{ number_format($ledger->amount, 0, ',', '.') }}"
                                                                     required>
                                                             </td>
                                                             <td>
@@ -406,9 +426,9 @@
 
     function initPlugins() {
         $('.select2').select2({ width: '100%' });
-        document.querySelectorAll(".rupiah-input").forEach((input) => {
-            input.removeEventListener("input", formatCurrencyInput);
-            input.addEventListener("input", formatCurrencyInput);
+        document.querySelectorAll(".rupiah-input-no-comma").forEach((input) => {
+            input.removeEventListener("input", formatCurrencyInputNoComma);
+            input.addEventListener("input", formatCurrencyInputNoComma);
         });
     }
 
@@ -435,7 +455,7 @@
             </td>
             <td>
                 <input type="text"
-                    class="form-control rupiah-input addpayment"
+                    class="form-control rupiah-input-no-comma addpayment"
                     name="addmore[${i}][nominal]"
                     placeholder="Input Amount.." required>
             </td>
@@ -469,12 +489,6 @@
     $(document).on('click', '.remove-tr', function () {
         $(this).closest('tr').remove();
     });
-
-    // RUPIAH FORMATTER
-    function formatCurrencyInput(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        e.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    }
 </script>
 
 
@@ -506,6 +520,7 @@
                 data: function(d) {
                     d.idDN      = data.idDN;
                     d.ppnRate   = data.ppnRate;
+                    d.rule      = 'Coretax';
                 }
             },
             "columns": [
@@ -576,9 +591,9 @@
                         }
                         var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
-                        if (parts.length > 1) {
-                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
-                        }
+                        // if (parts.length > 1) {
+                        //     return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        // }
                         return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
@@ -594,9 +609,9 @@
                         }
                         var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
-                        if (parts.length > 1) {
-                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span><br>(' + row.ppn_rate + '%)';
-                        }
+                        // if (parts.length > 1) {
+                        //     return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span><br>(' + row.ppn_rate + '%)';
+                        // }
                         return '<span class="text-bold">' + parts[0] + '</span><br>(' + row.ppn_rate + '%)';
                     },
                 },
@@ -612,9 +627,9 @@
                         }
                         var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
-                        if (parts.length > 1) {
-                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
-                        }
+                        // if (parts.length > 1) {
+                        //     return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        // }
                         return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
@@ -630,9 +645,9 @@
                         }
                         var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
-                        if (parts.length > 1) {
-                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
-                        }
+                        // if (parts.length > 1) {
+                        //     return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        // }
                         return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
@@ -648,9 +663,9 @@
                         }
                         var formattedAmount = numberFormat(data, 2, ',', '.'); 
                         var parts = formattedAmount.split(',');
-                        if (parts.length > 1) {
-                            return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
-                        }
+                        // if (parts.length > 1) {
+                        //     return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        // }
                         return '<span class="text-bold">' + parts[0] + '</span>';
                     },
                 },
@@ -659,10 +674,10 @@
 
         dataTable.on('xhr.dt', function(e, settings, json, xhr) {
             if (json) {
-                $('#njPrice').html(json.nj ? formatPriceWithStyle(json.nj) : 0);
-                $('#dppPrice').html(json.dpp ? formatPriceWithStyle(json.dpp) : 0);
-                $('#ppnPrice').html(json.ppn ? formatPriceWithStyle(json.ppn) : 0);
-                $('#totalPrice').html(json.total ? formatPriceWithStyle(json.total) : 0);
+                $('#njPrice').html(json.nj ? formatPriceWithStyleCoretax(json.nj) : 0);
+                $('#dppPrice').html(json.dpp ? formatPriceWithStyleCoretax(json.dpp) : 0);
+                $('#ppnPrice').html(json.ppn ? formatPriceWithStyleCoretax(json.ppn) : 0);
+                $('#totalPrice').html(json.total ? formatPriceWithStyleCoretax(json.total) : 0);
                 $('#labelPPNRate').html(json.ppn_rate ?? 0);
                 totalPriceGlobal = formatPrice(json.total) || 0;
             }
