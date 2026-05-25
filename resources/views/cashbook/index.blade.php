@@ -128,13 +128,13 @@
                                 <div class="alert alert-warning mb-0 d-none d-lg-block" style="font-size:0.5rem;" role="alert">
                                     <ul class="mb-0 ps-3">
                                         <li>
-                                            <b>Super Admin</b> can <b>Edit</b> & <b>Delete</b> transactions within <b>20 days</b> only.
+                                            <b>Super Admin</b> can <b>Edit</b> & <b>Delete</b> transactions within <b>20 days</b> before the end of the previous month up to today.
                                         </li>
                                     </ul>
                                 </div>
                                 <div class="text-end d-block d-lg-none">
                                     <i class="mdi mdi-information-outline text-muted" data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Edit and Delete actions are only available for Super Admin and only for transactions within the current month.">
+                                        title="Edit and Delete actions are only available for Super Admin. Transactions can only be edited or deleted from 20 days before the end of the previous month up to today.">
                                     </i>
                                 </div>
                             </div>

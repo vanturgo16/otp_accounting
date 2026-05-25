@@ -217,13 +217,15 @@
             data: 'opening_balance',
             orderable: true,
             className: 'align-top text-end',
-            render: (data, type, row) => formatAmountDT(data),
+            // render: (data, type, row) => formatAmountDT(data),
+            render: (data, type, row) => formatAmountDTCoretax(data),
         },
         {
             data: 'balance',
             orderable: true,
             className: 'align-top text-end',
-            render: (data, type, row) => formatAmountDT(data),
+            // render: (data, type, row) => formatAmountDT(data),
+            render: (data, type, row) => formatAmountDTCoretax(data),
         },
         {
             data: 'balance_type',

@@ -25,7 +25,7 @@
             </div>
             <div class="col-lg-8 mb-3">
                 <label class="form-label required-label">Opening Balance</label>
-                <input class="form-control currency-input" name="opening_balance" type="text" value="" placeholder="Input Opening Balance.." required>
+                <input class="form-control currency-input-no-comma" name="opening_balance" type="text" value="" placeholder="Input Opening Balance.." required>
             </div>
             <div class="col-lg-4 mb-3">
                 <label class="form-label required-label">Type</label>
