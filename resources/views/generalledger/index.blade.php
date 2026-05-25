@@ -200,16 +200,23 @@
         {
             data: 'amount',
             orderable: true,
+            searchable: true,
             className: 'align-top text-end',
-            render: function(data, type, row) {
-                var formattedAmount = numberFormat(row.amount, 2, ',', '.'); 
-                var parts = formattedAmount.split(',');
-                if (parts.length > 1) {
-                    return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
-                }
-                return '<span class="text-bold">' + parts[0] + '</span>';
-            },
+            render: (data, type, row) => formatAmountDTCoretax(data),
         },
+        // {
+        //     data: 'amount',
+        //     orderable: true,
+        //     className: 'align-top text-end',
+        //     render: function(data, type, row) {
+        //         var formattedAmount = numberFormat(row.amount, 2, ',', '.'); 
+        //         var parts = formattedAmount.split(',');
+        //         if (parts.length > 1) {
+        //             return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+        //         }
+        //         return '<span class="text-bold">' + parts[0] + '</span>';
+        //     },
+        // },
         {
             data: 'transaction',
             orderable: true,

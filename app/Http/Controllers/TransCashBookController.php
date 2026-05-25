@@ -214,8 +214,10 @@ class TransCashBookController extends Controller
     public function store(Request $request)
     {
         // dd(($request->all()));
+
+        $minDate = Carbon::today()->subMonthNoOverflow()->endOfMonth()->subDays(20)->format('Y-m-d');
         $request->validate([
-            'date_invoice'           => 'required|date|after_or_equal:' . date('Y-m-d', strtotime('-20 days')) . '|before_or_equal:today',
+            'date_invoice'           => 'required|date|after_or_equal:' . $minDate . '|before_or_equal:today',
             'invoice_number'         => 'required',
             'tax_invoice_number'     => 'required',
             'type'                   => 'required',
@@ -319,7 +321,9 @@ class TransCashBookController extends Controller
     {
         $id = decrypt($id);
         $detail = TransCashBook::where('id', $id)->first();
-        if (\Carbon\Carbon::parse($detail->date_invoice)->lt(\Carbon\Carbon::today()->subDays(20))) {
+
+        $limitDate = \Carbon\Carbon::today()->subMonthNoOverflow()->endOfMonth()->subDays(21);
+        if (\Carbon\Carbon::parse($detail->date_invoice)->lt($limitDate)) {
             return redirect()->route('cashbook.index')->with([
                 'fail' => 'Transactions can only be edited within 20 days prior to the current date.'
             ]);
@@ -342,8 +346,10 @@ class TransCashBookController extends Controller
     public function update(Request $request, $id)
     {
         // dd($request->all());
+
+        $minDate = Carbon::today()->subMonthNoOverflow()->endOfMonth()->subDays(20)->format('Y-m-d');
         $request->validate([
-            'date_invoice'              => 'required|date|after_or_equal:' . date('Y-m-d', strtotime('-20 days')) . '|before_or_equal:today',
+            'date_invoice'              => 'required|date|after_or_equal:' . $minDate . '|before_or_equal:today',
             'invoice_number'            => 'required',
             'tax_invoice_number'        => 'required',
             'addmore.*.account_code'    => 'required',
@@ -489,7 +495,8 @@ class TransCashBookController extends Controller
             $id = decrypt($id);
             $detail  = TransCashBook::findOrFail($id);
 
-            if (\Carbon\Carbon::parse($detail->date_invoice)->lt(\Carbon\Carbon::today()->subDays(20))) {
+            $limitDate = \Carbon\Carbon::today()->subMonthNoOverflow()->endOfMonth()->subDays(21);
+            if (\Carbon\Carbon::parse($detail->date_invoice)->lt($limitDate)) {
                 return redirect()->route('cashbook.index')->with([
                     'fail' => 'Transactions can only be deleted within 20 days prior to the current date.'
                 ]);

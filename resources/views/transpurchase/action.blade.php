@@ -1,6 +1,8 @@
 @php
     use Carbon\Carbon;
-    $canModify = Carbon::parse($data->date_invoice)->greaterThanOrEqualTo(Carbon::today()->subDays(20));
+
+    $limitDate = Carbon::today()->subMonthNoOverflow()->endOfMonth()->subDays(21);
+    $canModify = Carbon::parse($data->date_invoice)->greaterThanOrEqualTo($limitDate);
 @endphp
 
 @can('Akunting_master_data')

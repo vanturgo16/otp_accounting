@@ -578,8 +578,10 @@ class TransSalesController extends Controller
     public function storeLocal(Request $request)
     {
         // dd($request->all());
+        $minDate = Carbon::today()->subMonthNoOverflow()->endOfMonth()->subDays(20)->format('Y-m-d');
+
         $request->validate([
-            'date_invoice'              => 'required|date|after_or_equal:' . date('Y-m-d', strtotime('-20 days')) . '|before_or_equal:today',
+            'date_invoice'              => 'required|date|after_or_equal:' . $minDate . '|before_or_equal:today',
             'due_date'                  => 'required|date|after_or_equal:date_invoice',
             'id_delivery_notes'         => 'required',
             'dn_number'                 => 'required',
@@ -830,7 +832,9 @@ class TransSalesController extends Controller
     {
         $idTS = decrypt($id);
         $detail = TransSales::where('id', $idTS)->first();
-        if (\Carbon\Carbon::parse($detail->date_invoice)->lt(\Carbon\Carbon::today()->subDays(20))) {
+        
+        $limitDate = \Carbon\Carbon::today()->subMonthNoOverflow()->endOfMonth()->subDays(21);
+        if (\Carbon\Carbon::parse($detail->date_invoice)->lt($limitDate)) {
             return redirect()->route('transsales.local.index')->with([
                 'fail' => 'Transactions can only be edited within 20 days prior to the current date.'
             ]);
@@ -893,8 +897,10 @@ class TransSalesController extends Controller
 
     public function updateLocal(Request $request, $id)
     {
+        $minDate = Carbon::today()->subMonthNoOverflow()->endOfMonth()->subDays(20)->format('Y-m-d');
+
         $request->validate([
-            'date_invoice'              => 'required|date|after_or_equal:' . date('Y-m-d', strtotime('-20 days')) . '|before_or_equal:today',
+            'date_invoice'              => 'required|date|after_or_equal:' . $minDate . '|before_or_equal:today',
             'due_date'                  => 'required|date|after_or_equal:date_invoice',
             'id_master_bank_account'    => 'required',
             'ppn_rate'                  => 'required',
@@ -1216,7 +1222,8 @@ class TransSalesController extends Controller
 
             $detail  = TransSales::findOrFail($idTS);
             
-            if (\Carbon\Carbon::parse($detail->date_invoice)->lt(\Carbon\Carbon::today()->subDays(20))) {
+            $limitDate = \Carbon\Carbon::today()->subMonthNoOverflow()->endOfMonth()->subDays(21);
+            if (\Carbon\Carbon::parse($detail->date_invoice)->lt($limitDate)) {
                 return redirect()->route('transsales.local.index')->with([
                     'fail' => 'Transactions can only be deleted within 20 days prior to the current date.'
                 ]);

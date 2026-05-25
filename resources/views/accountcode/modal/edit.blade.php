@@ -47,9 +47,9 @@
                 <div class="mb-3">
                     <label class="form-label required-label">Opening Balance</label>
                     @if($data->is_used)
-                        <input type="text" class="form-control rupiah-input readonly-input" name="opening_balance" value="{{ number_format($data->opening_balance, 2, ',', '.') }}" readonly>
+                        <input type="text" class="form-control rupiah-input readonly-input" name="opening_balance" value="{{ number_format(round($data->opening_balance), 0, ',', '.') }}" readonly>
                     @else
-                        <input class="form-control currency-input" name="opening_balance" value="{{ number_format($data->opening_balance, 2, ',', '.') }}" type="text" placeholder="Input Opening Balance.." required>
+                        <input class="form-control currency-input-no-comma" name="opening_balance" value="{{ number_format(round($data->opening_balance), 0, ',', '.') }}" type="text" placeholder="Input Opening Balance.." required>
                     @endif
                 </div>
             </div>
@@ -73,7 +73,7 @@
                 <div class="col-lg-8">
                     <div class="mb-3">
                         <label class="form-label">Balance</label>
-                        <input type="text" class="form-control readonly-input" value="{{ number_format($data->balance, 2, ',', '.') }}" readonly>
+                        <input type="text" class="form-control readonly-input" value="{{ number_format(round($data->balance), 0, ',', '.') }}" readonly>
                     </div>
                 </div>
                 <div class="col-lg-4">

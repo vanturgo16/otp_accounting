@@ -38,22 +38,31 @@
                                 </div>
                             </div>
                             <div class="row">
+                                @php
+                                    use Carbon\Carbon;
+                                    // Example:
+                                    // Today = 2026-05-25
+                                    // Previous month last day = 2026-04-30
+                                    // Minus 20 days = 2026-04-10
+                                    $minDate = Carbon::today()->subMonthNoOverflow()->endOfMonth()->subDays(20)->format('Y-m-d');
+                                    $maxDate = Carbon::today()->format('Y-m-d');
+                                @endphp
                                 <div class="col-lg-3 mb-3">
                                     <label class="form-label required-label">Invoice Date</label>
                                     <i class="mdi mdi-information-outline"
                                         data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Pilih tanggal invoice. Tanggal hanya dapat dipilih maksimal 20 hari ke belakang dari hari ini dan tidak boleh melebihi tanggal hari ini.">
+                                        title="Pilih tanggal invoice. Tanggal invoice hanya dapat dipilih mulai 20 hari sebelum akhir bulan sebelumnya hingga tanggal hari ini.">
                                     </i>
                                     <input type="date" class="form-control" name="date_invoice"
                                         value="{{ date('Y-m-d') }}"
-                                        min="{{ date('Y-m-d', strtotime('-20 days')) }}"
-                                        max="{{ date('Y-m-d') }}"
+                                        min="{{ $minDate }}"
+                                        max="{{ $maxDate }}"
                                         required
                                     >
                                 </div>
                                 <div class="col-lg-3 mb-3">
                                     <label class="form-label required-label">Due Date</label>
-                                    <input type="date" class="form-control" name="due_date" value="" required min="{{ date('Y-m-d', strtotime('-20 days')) }}">
+                                    <input type="date" class="form-control" name="due_date" value="" required min="{{ $minDate }}">
                                 </div>
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label required-label">Bank Account</label>
