@@ -55,7 +55,8 @@
                 <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>
             @endif
             <span>
-                {{ number_format($data->opening_balance, 2, ',', '.') }}
+                {{ number_format(round($data->opening_balance), 0, ',', '.') }}
+                {{-- {{ number_format($data->opening_balance, 2, ',', '.') }} --}}
             </span>
         </div>
         <div class="col-lg-6 mb-2">
@@ -66,7 +67,8 @@
                 <span class="badge bg-danger text-white"><span class="mdi mdi-minus-circle"></span> | Kredit</span>
             @endif
             <span>
-                {{ number_format($data->balance, 2, ',', '.') }}
+                {{ number_format(round($data->balance), 0, ',', '.') }}
+                {{-- {{ number_format($data->balance, 2, ',', '.') }} --}}
             </span>
         </div>
     </div>
