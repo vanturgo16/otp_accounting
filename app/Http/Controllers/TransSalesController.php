@@ -321,6 +321,201 @@ class TransSalesController extends Controller
     //     ];
     // }
 
+    // public function getSOPriceFromDN(Request $request)
+    // {
+    //     $idDN    = $request->idDN;
+    //     $ppnRate = $request->ppnRate;
+    //     $rule    = $request->rule;
+
+    //     $isCoretax = ($rule === "Coretax");
+
+    //     // Coretax rounding helper (SQL)
+    //     $coretax = function ($expression) use ($isCoretax) {
+    //         if (!$isCoretax) {
+    //             return "ROUND($expression, 3)";
+    //         }
+
+    //         return "
+    //             CASE
+    //                 WHEN (($expression) - FLOOR(($expression))) >= 0.5
+    //                     THEN CEIL(($expression))
+    //                 ELSE FLOOR(($expression))
+    //             END
+    //         ";
+    //     };
+
+    //     // DN Line Total
+    //     $lineTotal = "(sales_orders.price * delivery_note_details.qty)";
+
+    //     $datas = DeliveryNoteDetail::select(
+    //         'sales_orders.id as id_sales_orders',
+    //         'sales_orders.so_number',
+    //         'sales_orders.type_product',
+    //         DB::raw("
+    //             CASE
+    //                 WHEN sales_orders.type_product = 'RM' THEN master_raw_materials.description
+    //                 WHEN sales_orders.type_product = 'WIP' THEN master_wips.description
+    //                 WHEN sales_orders.type_product = 'FG' THEN master_product_fgs.description
+    //                 WHEN sales_orders.type_product IN ('TA', 'Other') THEN master_tool_auxiliaries.description
+    //             END as product
+    //         "),
+    //         'delivery_note_details.qty',
+    //         'master_units.unit as unit',
+    //         'sales_orders.ppn as ppn_type',
+
+    //         // =========================
+    //         // PRICE ORIGIN (UNIT PRICE)
+    //         // =========================
+    //         DB::raw("
+    //             {$coretax("sales_orders.price")}
+    //             as price_origin
+    //         "),
+
+    //         // =========================
+    //         // TOTAL PRICE ORIGIN
+    //         // PRICE * DN QTY
+    //         // =========================
+    //         DB::raw("
+    //             {$coretax($lineTotal)}
+    //             as total_price_origin
+    //         "),
+
+    //         DB::raw("$ppnRate as ppn_rate"),
+
+    //         // =========================
+    //         // PPN VALUE (PER UNIT)
+    //         // =========================
+    //         DB::raw("
+    //             {$coretax("
+    //                 CASE
+    //                     WHEN sales_orders.ppn = 'Exclude'
+    //                         THEN ({$coretax("sales_orders.price")} * $ppnRate / 100)
+    //                     WHEN sales_orders.ppn = 'Include'
+    //                         THEN (
+    //                             {$coretax("sales_orders.price")}
+    //                             - ({$coretax("sales_orders.price")} / (1 + ($ppnRate / 100)))
+    //                         )
+    //                     ELSE 0
+    //                 END
+    //             ")} as ppn_value
+    //         "),
+
+    //         // =========================
+    //         // PRICE BEFORE PPN (PER UNIT)
+    //         // =========================
+    //         DB::raw("
+    //             {$coretax("
+    //                 CASE
+    //                     WHEN sales_orders.ppn = 'Include'
+    //                         THEN ({$coretax("sales_orders.price")} / (1 + ($ppnRate / 100)))
+    //                     ELSE {$coretax("sales_orders.price")}
+    //                 END
+    //             ")} as price_before_ppn
+    //         "),
+
+    //         // =========================
+    //         // TOTAL BEFORE PPN
+    //         // (PRICE * DN QTY)
+    //         // =========================
+    //         DB::raw("
+    //             {$coretax("
+    //                 CASE
+    //                     WHEN sales_orders.ppn = 'Include'
+    //                         THEN ({$coretax($lineTotal)} / (1 + ($ppnRate / 100)))
+    //                     ELSE {$coretax($lineTotal)}
+    //                 END
+    //             ")} as total_price_before_ppn
+    //         "),
+
+    //         // =========================
+    //         // PRICE AFTER PPN (PER UNIT)
+    //         // =========================
+    //         DB::raw("
+    //             {$coretax("
+    //                 CASE
+    //                     WHEN sales_orders.ppn = 'Exclude'
+    //                         THEN ({$coretax("sales_orders.price")} * (1 + ($ppnRate / 100)))
+    //                     ELSE {$coretax("sales_orders.price")}
+    //                 END
+    //             ")} as price_after_ppn
+    //         "),
+
+    //         // =========================
+    //         // TOTAL AFTER PPN
+    //         // (PRICE * DN QTY)
+    //         // =========================
+    //         DB::raw("
+    //             {$coretax("
+    //                 CASE
+    //                     WHEN sales_orders.ppn = 'Exclude'
+    //                         THEN ({$coretax($lineTotal)} * (1 + ($ppnRate / 100)))
+    //                     ELSE {$coretax($lineTotal)}
+    //                 END
+    //             ")} as total_price_after_ppn
+    //         ")
+    //     )
+    //     ->leftJoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
+    //     ->leftJoin('master_raw_materials', function ($join) {
+    //         $join->on('sales_orders.id_master_products', '=', 'master_raw_materials.id')
+    //             ->where('sales_orders.type_product', '=', 'RM');
+    //     })
+    //     ->leftJoin('master_wips', function ($join) {
+    //         $join->on('sales_orders.id_master_products', '=', 'master_wips.id')
+    //             ->where('sales_orders.type_product', '=', 'WIP');
+    //     })
+    //     ->leftJoin('master_product_fgs', function ($join) {
+    //         $join->on('sales_orders.id_master_products', '=', 'master_product_fgs.id')
+    //             ->where('sales_orders.type_product', '=', 'FG');
+    //     })
+    //     ->leftJoin('master_tool_auxiliaries', function ($join) {
+    //         $join->on('sales_orders.id_master_products', '=', 'master_tool_auxiliaries.id')
+    //             ->whereIn('sales_orders.type_product', ['TA', 'Other']);
+    //     })
+    //     ->leftJoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
+    //     ->where('delivery_note_details.id_delivery_notes', $idDN)
+    //     ->get();
+
+    //     // =========================
+    //     // SUMMARY CALCULATION
+    //     // =========================
+    //     $ppnType    = $datas->first() ? $datas->first()->ppn_type : null;
+    //     $totalPrice = (float) $datas->sum('total_price_before_ppn');
+    //     $dppFactor  = 11 / 12;
+    //     $dppValue   = $totalPrice * $dppFactor;
+    //     $ppnValue   = ($ppnRate / 100) * $totalPrice;
+    //     $total      = $totalPrice + $ppnValue;
+
+    //     // Coretax rounding for summary
+    //     if ($isCoretax) {
+    //         $totalPrice = $this->coretaxRound($totalPrice);
+    //         $dppValue = $this->coretaxRound($dppValue);
+    //         $ppnValue = $this->coretaxRound($ppnValue);
+    //         $total    = $this->coretaxRound($total);
+    //     }
+
+    //     if ($request->ajax()) {
+    //         return DataTables::of($datas)
+    //             ->with([
+    //                 'nj'       => $totalPrice,
+    //                 'dpp'      => $dppValue,
+    //                 'ppn_rate' => $ppnRate,
+    //                 'ppn'      => $ppnValue,
+    //                 'total'    => $total,
+    //             ])
+    //             ->toJson();
+    //     }
+
+    //     return [
+    //         'datas'    => $datas,
+    //         'ppnType'  => $ppnType,
+    //         'nj'       => $totalPrice,
+    //         'dpp'      => $dppValue,
+    //         'ppn_rate' => $ppnRate,
+    //         'ppn'      => $ppnValue,
+    //         'total'    => $total,
+    //     ];
+    // }
+
     public function getSOPriceFromDN(Request $request)
     {
         $idDN    = $request->idDN;
@@ -344,13 +539,17 @@ class TransSalesController extends Controller
             ";
         };
 
+        // Qty berdasarkan Packing List Detail
+        $qtyExpression = "COALESCE(SUM(packing_list_details.pcs),0)";
+
         // DN Line Total
-        $lineTotal = "(sales_orders.price * delivery_note_details.qty)";
+        $lineTotal = "(sales_orders.price * {$qtyExpression})";
 
         $datas = DeliveryNoteDetail::select(
             'sales_orders.id as id_sales_orders',
             'sales_orders.so_number',
             'sales_orders.type_product',
+
             DB::raw("
                 CASE
                     WHEN sales_orders.type_product = 'RM' THEN master_raw_materials.description
@@ -359,7 +558,9 @@ class TransSalesController extends Controller
                     WHEN sales_orders.type_product IN ('TA', 'Other') THEN master_tool_auxiliaries.description
                 END as product
             "),
-            'delivery_note_details.qty',
+
+            DB::raw("{$qtyExpression} as qty"),
+
             'master_units.unit as unit',
             'sales_orders.ppn as ppn_type',
 
@@ -373,7 +574,7 @@ class TransSalesController extends Controller
 
             // =========================
             // TOTAL PRICE ORIGIN
-            // PRICE * DN QTY
+            // PRICE * QTY
             // =========================
             DB::raw("
                 {$coretax($lineTotal)}
@@ -415,7 +616,6 @@ class TransSalesController extends Controller
 
             // =========================
             // TOTAL BEFORE PPN
-            // (PRICE * DN QTY)
             // =========================
             DB::raw("
                 {$coretax("
@@ -442,7 +642,6 @@ class TransSalesController extends Controller
 
             // =========================
             // TOTAL AFTER PPN
-            // (PRICE * DN QTY)
             // =========================
             DB::raw("
                 {$coretax("
@@ -454,25 +653,48 @@ class TransSalesController extends Controller
                 ")} as total_price_after_ppn
             ")
         )
-        ->leftJoin('sales_orders', 'delivery_note_details.id_sales_orders', 'sales_orders.id')
+        ->leftJoin('sales_orders', 'delivery_note_details.id_sales_orders', '=', 'sales_orders.id')
+
+        ->leftJoin('packing_lists', 'delivery_note_details.id_packing_lists', '=', 'packing_lists.id')
+        ->leftJoin('packing_list_details', 'packing_lists.id', '=', 'packing_list_details.id_packing_lists')
+
         ->leftJoin('master_raw_materials', function ($join) {
             $join->on('sales_orders.id_master_products', '=', 'master_raw_materials.id')
                 ->where('sales_orders.type_product', '=', 'RM');
         })
+
         ->leftJoin('master_wips', function ($join) {
             $join->on('sales_orders.id_master_products', '=', 'master_wips.id')
                 ->where('sales_orders.type_product', '=', 'WIP');
         })
+
         ->leftJoin('master_product_fgs', function ($join) {
             $join->on('sales_orders.id_master_products', '=', 'master_product_fgs.id')
                 ->where('sales_orders.type_product', '=', 'FG');
         })
+
         ->leftJoin('master_tool_auxiliaries', function ($join) {
             $join->on('sales_orders.id_master_products', '=', 'master_tool_auxiliaries.id')
                 ->whereIn('sales_orders.type_product', ['TA', 'Other']);
         })
-        ->leftJoin('master_units', 'sales_orders.id_master_units', 'master_units.id')
+
+        ->leftJoin('master_units', 'sales_orders.id_master_units', '=', 'master_units.id')
+
         ->where('delivery_note_details.id_delivery_notes', $idDN)
+
+        ->groupBy(
+            'sales_orders.id',
+            'sales_orders.so_number',
+            'sales_orders.type_product',
+            'sales_orders.ppn',
+            'sales_orders.price',
+            'master_raw_materials.description',
+            'master_wips.description',
+            'master_product_fgs.description',
+            'master_tool_auxiliaries.description',
+            'master_units.unit'
+        )
+
         ->get();
 
         // =========================
@@ -488,9 +710,9 @@ class TransSalesController extends Controller
         // Coretax rounding for summary
         if ($isCoretax) {
             $totalPrice = $this->coretaxRound($totalPrice);
-            $dppValue = $this->coretaxRound($dppValue);
-            $ppnValue = $this->coretaxRound($ppnValue);
-            $total    = $this->coretaxRound($total);
+            $dppValue   = $this->coretaxRound($dppValue);
+            $ppnValue   = $this->coretaxRound($ppnValue);
+            $total      = $this->coretaxRound($total);
         }
 
         if ($request->ajax()) {
